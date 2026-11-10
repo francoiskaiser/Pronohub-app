@@ -1,0 +1,4 @@
+node_modules/
+_source/tools/build/
+_source/tests/shots/
+_source/pwa/

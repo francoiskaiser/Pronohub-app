@@ -1,0 +1,3329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pronohub</title>
+<meta name="description" content="Paris entre amis avec des jetons fictifs : sport, élections et paris maison.">
+<meta name="theme-color" content="#f3f5fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pronohub">
+<script>(function(){try{var k=(window.__PH_NS||'ph')+'.lang',l=JSON.parse(localStorage.getItem(k)||'null');if(!l)l=/^fr/i.test(navigator.language||'fr')?'fr':'en';if(l==='en')location.replace('en/'+location.search);}catch(e){}})();</script>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
+<style>
+/* Pronohub — styles */
+:root {
+  --bg: #f3f5fb;
+  --paper: #ffffff;
+  --paper-2: #eef1f9;
+  --ink: #141b34;
+  --ink-2: #4c5576;
+  --ink-3: #8a91ad;
+  --line: #dde2ef;
+  --brand: #3b32e0;
+  --brand-2: #ebe9ff;
+  --brand-ink: #ffffff;
+  --gold: #ffc531;
+  --gold-ink: #7a4b00;
+  --win: #11865a;
+  --win-2: #e2f5ec;
+  --lose: #d13450;
+  --lose-2: #fde8ec;
+  --shadow: 0 1px 0 rgba(20, 27, 52, .05), 0 8px 24px -10px rgba(20, 27, 52, .18);
+  --r: 14px;
+  --r-lg: 22px;
+  --font: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --tabbar: 64px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #121a33;
+  --paper: #1b2446;
+  --paper-2: #232d55;
+  --ink: #eef1fb;
+  --ink-2: #b3bad6;
+  --ink-3: #7d86aa;
+  --line: #2f3a66;
+  --brand: #8079ff;
+  --brand-2: #2a2b6b;
+  --brand-ink: #ffffff;
+  --gold-ink: #6b4100;
+  --win: #3ccf8e;
+  --win-2: #173d36;
+  --lose: #ff6f86;
+  --lose-2: #45213a;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 10px 28px -12px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.45 var(--font);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  padding-bottom: calc(var(--tabbar) + var(--safe-b));
+}
+body[data-view="home"], body[data-view="settings"], body[data-view="state"] { padding-bottom: var(--safe-b); }
+body.modal-open { overflow: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+img { max-width: 100%; }
+h1, h2, h3 { line-height: 1.15; margin: 0 0 .5em; font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; margin-top: 1.4em; }
+h3 small { color: var(--ink-3); font-weight: 500; margin-left: .25em; }
+p { margin: 0 0 .75em; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+[hidden] { display: none !important; }
+.muted { color: var(--ink-2); }
+.small { font-size: .875rem; }
+.center { text-align: center; }
+.grow { flex: 1; min-width: 0; }
+.pos { color: var(--win); font-weight: 700; }
+.neg { color: var(--lose); font-weight: 700; }
+.err { color: var(--lose); background: var(--lose-2); padding: .6em .8em; border-radius: 10px; font-weight: 500; }
+.hint { color: var(--ink-3); font-size: .875rem; }
+.note { color: var(--ink-2); font-size: .9rem; text-align: center; max-width: 34em; margin: 1.5em auto 0; }
+.source { color: var(--ink-3); font-size: .78rem; margin-top: 1.2em; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 600; padding: .05em .5em; border-radius: 99px; background: var(--paper-2); color: var(--ink-2); vertical-align: middle; }
+
+.row { display: flex; gap: .6rem; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.row.end { justify-content: flex-end; margin-top: 1rem; }
+.row.between { justify-content: space-between; }
+.row.center { justify-content: center; }
+.stack { display: flex; flex-direction: column; gap: .9rem; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+/* ---------- Boutons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45em;
+  min-height: 44px; padding: .55em 1.05em; border-radius: 12px;
+  border: 1.5px solid var(--line); background: var(--paper); color: var(--ink);
+  font-weight: 600; text-decoration: none; transition: transform .12s, background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover { border-color: var(--ink-3); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; pointer-events: none; }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover { background: var(--paper-2); }
+.btn.danger { color: var(--lose); }
+.btn.danger:not(.ghost) { border-color: var(--lose); }
+.btn.big { min-height: 54px; font-size: 1.05rem; padding: .7em 1.4em; border-radius: 16px; }
+.btn.small { min-height: 38px; padding: .35em .85em; font-size: .9rem; }
+.btn.tiny { min-height: 32px; padding: .2em .6em; font-size: .8rem; }
+.btn.wide { width: 100%; }
+.btn.icon { padding: 0; width: 44px; }
+.btn .g { font-weight: 800; width: 1.4em; height: 1.4em; border-radius: 50%; background: #fff; color: #3b32e0; display: inline-grid; place-items: center; font-size: .85em; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px;
+  background: transparent; border: 0; color: var(--ink-2);
+}
+.icon-btn:hover { background: var(--paper-2); color: var(--ink); }
+.icon-btn.tiny { width: 32px; height: 32px; }
+.link { background: none; border: 0; padding: 0; color: var(--brand); font-weight: 600; text-align: left; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+
+.segs { display: flex; gap: .3rem; padding: .25rem; background: var(--paper-2); border-radius: 14px; overflow-x: auto; scrollbar-width: none; }
+.seg {
+  flex: 1; min-height: 40px; border: 0; background: transparent; border-radius: 10px; padding: .3em .9em;
+  font-weight: 600; color: var(--ink-2); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: .4em;
+}
+.seg.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 27, 52, .12); }
+:root[data-theme="dark"] .seg.on, :root[data-theme="dark"] .seg.radio:has(input:checked) { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--line); }
+.seg .count { font-size: .75rem; background: var(--line); color: var(--ink-2); border-radius: 99px; padding: 0 .5em; min-width: 1.6em; }
+.seg.on .count { background: var(--brand); color: var(--brand-ink); }
+.seg.radio input { position: absolute; opacity: 0; pointer-events: none; }
+.seg.radio:has(input:checked) { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(20, 27, 52, .12); }
+.seg.radio:has(input:focus-visible) { outline: 3px solid var(--brand); }
+
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { min-height: 40px; padding: .3em .9em; border-radius: 99px; border: 1.5px solid var(--line); background: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip:hover { border-color: var(--brand); }
+.chip.hot { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 22%, var(--paper)); }
+
+/* ---------- Champs ---------- */
+.fld { display: flex; flex-direction: column; gap: .35rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.fld > span, .fld > legend { font-weight: 600; font-size: .9rem; color: var(--ink-2); padding: 0; }
+input:not([type=radio]):not([type=checkbox]):not([type=file]), select, textarea {
+  width: 100%; min-height: 46px; padding: .6em .8em; border-radius: 12px; border: 1.5px solid var(--line);
+  background: var(--paper); color: var(--ink); outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-2); }
+textarea { resize: vertical; }
+.check { display: flex; align-items: center; gap: .6rem; min-height: 44px; font-weight: 500; }
+.check input { width: 20px; height: 20px; accent-color: var(--brand); }
+.code-input { font-size: 1.6rem !important; font-weight: 700; text-align: center; letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+details.adv summary { cursor: pointer; font-weight: 600; color: var(--brand); min-height: 44px; display: flex; align-items: center; }
+details.adv[open] summary { margin-bottom: .6rem; }
+
+.emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: .35rem; }
+.emoji-grid.small { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); }
+.emo { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: var(--paper-2); font-size: 1.5rem; cursor: pointer; border: 2px solid transparent; transition: transform .12s; }
+.emo input { position: absolute; opacity: 0; pointer-events: none; }
+.emo.on, .emo:has(input:checked) { border-color: var(--brand); background: var(--brand-2); transform: scale(1.06); }
+.emo:has(input:focus-visible) { outline: 3px solid var(--brand); }
+
+.choice-list { display: flex; flex-direction: column; gap: .45rem; }
+.choice {
+  display: flex; align-items: center; gap: .75rem; padding: .7rem .9rem; border-radius: 14px; border: 1.5px solid var(--line);
+  background: var(--paper); cursor: pointer; text-align: left; min-height: 52px; width: 100%;
+}
+.choice input { accent-color: var(--brand); width: 20px; height: 20px; flex: none; }
+.choice span { display: flex; flex-direction: column; }
+.choice small { color: var(--ink-2); font-size: .85rem; }
+.choice.on, .choice:has(input:checked) { border-color: var(--brand); background: var(--brand-2); }
+.choice.disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- Avatars et jetons ---------- */
+.av {
+  --h: 230; flex: none; width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center;
+  background: hsl(var(--h) 85% 90%); color: hsl(var(--h) 60% 28%); font-weight: 700; font-size: 1.1rem; line-height: 1;
+}
+:root[data-theme="dark"] .av { background: hsl(var(--h) 40% 30%); color: hsl(var(--h) 90% 88%); }
+.av.sm { width: 28px; height: 28px; font-size: .9rem; }
+.av.lg { width: 56px; height: 56px; font-size: 1.7rem; }
+.av.xl { width: 72px; height: 72px; font-size: 2.2rem; }
+.coin {
+  display: inline-block; width: 1em; height: 1em; border-radius: 50%; flex: none; vertical-align: -.12em;
+  background: radial-gradient(circle at 35% 30%, #ffe28a 0 25%, var(--gold) 26%);
+  box-shadow: inset 0 0 0 2px #e9a400;
+}
+
+/* ---------- En-tête et onglets ---------- */
+.top {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: .5rem;
+  padding: calc(.5rem + var(--safe-t)) max(.75rem, env(safe-area-inset-right)) .5rem max(.75rem, env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+.circle-btn {
+  display: flex; align-items: center; gap: .45rem; min-height: 44px; min-width: 0; padding: .2rem .6rem .2rem .3rem;
+  border: 0; border-radius: 14px; background: transparent; font-weight: 700; font-size: 1.05rem;
+}
+.circle-btn:hover { background: var(--paper-2); }
+.cb-emo { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; background: var(--paper); box-shadow: var(--shadow); font-size: 1.25rem; }
+.cb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+.circle-btn svg { flex: none; color: var(--ink-3); }
+.top-right { margin-left: auto; display: flex; align-items: center; gap: .3rem; }
+.coin-chip {
+  display: inline-flex; align-items: center; gap: .4rem; min-height: 40px; padding: .2rem .8rem .2rem .55rem; border-radius: 99px;
+  border: 0; background: var(--ink); color: var(--bg); font-weight: 700; font-variant-numeric: tabular-nums; font-size: .98rem;
+}
+.actor-chip { display: inline-flex; align-items: center; gap: .35rem; min-height: 40px; padding: .2rem .65rem .2rem .25rem; border-radius: 99px; border: 1.5px dashed var(--ink-3); background: transparent; font-weight: 600; font-size: .85rem; max-width: 34vw; }
+.actor-chip span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 639px) {
+  .actor-chip { padding: .2rem; }
+  .actor-chip span:last-child { display: none; }
+}
+.top-tabs { display: none; }
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr);
+  height: calc(var(--tabbar) + var(--safe-b)); padding-bottom: var(--safe-b);
+  background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+}
+.tabbar button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .74rem; font-weight: 600; color: var(--ink-3); min-height: 44px; }
+.tabbar button svg { width: 24px; height: 24px; }
+.tabbar button.on { color: var(--brand); }
+.tabbar button.on svg { stroke-width: 2.4; }
+
+.fab {
+  position: fixed; right: max(1rem, env(safe-area-inset-right)); bottom: calc(var(--tabbar) + var(--safe-b) + 1rem); z-index: 25;
+  display: inline-flex; align-items: center; gap: .5rem; height: 56px; padding: 0 1.3rem 0 1.05rem; border-radius: 18px; border: 0;
+  background: var(--brand); color: var(--brand-ink); font-weight: 700; font-size: 1rem;
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--brand) 70%, transparent);
+}
+.fab svg { width: 22px; height: 22px; stroke-width: 2.6; }
+.fab:active { transform: scale(.96); }
+
+/* ---------- Mise en page ---------- */
+.shell { max-width: 760px; margin: 0 auto; padding: 0 max(1rem, env(safe-area-inset-left)) 2rem max(1rem, env(safe-area-inset-right)); }
+.page { padding-top: 1rem; padding-bottom: 5.5rem; }
+body[data-view="home"] .page, body[data-view="settings"] .page { padding-bottom: 2rem; }
+.page.narrow { max-width: 640px; margin: 0 auto; }
+.pagehead { display: flex; align-items: center; gap: .5rem; margin: 0 0 .6rem -.5rem; }
+.pagehead h1 { margin: 0; font-size: 1.5rem; }
+.side { display: none; }
+.section-title { font-size: 1.5rem; margin: .2rem 0 .8rem; }
+.panel { background: var(--paper); border-radius: var(--r-lg); padding: 1.1rem 1.15rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+.panel h3:first-child { margin-top: 0; }
+.panel .segs { margin-bottom: .4rem; }
+
+/* ---------- Accueil ---------- */
+.welcome { max-width: 520px; margin: 0 auto; padding-top: calc(1.5rem + var(--safe-t)); }
+.welcome-hero { text-align: center; padding: 1rem 0 1.5rem; }
+.logo-mark { display: inline-block; transform: rotate(-8deg); }
+.logo-mark svg { width: 84px; height: 84px; }
+.brand { font-size: clamp(3rem, 14vw, 4.6rem); font-weight: 800; letter-spacing: -.045em; margin: .1em 0 .15em; font-variation-settings: "opsz" 96; }
+.lead { font-size: 1.1rem; color: var(--ink-2); max-width: 26em; margin: 0 auto; }
+.welcome-form .btn.big { margin-top: .4rem; }
+
+.home { max-width: 640px; margin: 0 auto; padding-top: calc(1.5rem + var(--safe-t)); }
+.hello { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem; }
+.kicker { color: var(--ink-2); font-weight: 600; margin: 0 0 .1rem; }
+.display { font-size: clamp(1.9rem, 7vw, 2.6rem); font-weight: 800; letter-spacing: -.035em; margin: 0; font-variation-settings: "opsz" 72; }
+.display.small { font-size: 1.8rem; }
+.circle-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.4rem; }
+.circle-list.compact { margin-bottom: 1rem; }
+.circle-card {
+  display: flex; align-items: center; gap: .9rem; width: 100%; text-align: left; padding: .85rem 1rem; min-height: 68px;
+  border-radius: 18px; border: 1.5px solid transparent; background: var(--paper); box-shadow: var(--shadow);
+}
+.circle-card:hover { border-color: var(--line); }
+.circle-card.on { border-color: var(--brand); }
+.cc-emoji { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 1.6rem; background: var(--paper-2); flex: none; }
+.cc-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cc-body b { font-size: 1.08rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-body small { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cc-go { color: var(--ink-3); }
+.empty-hero { background: var(--paper); border-radius: var(--r-lg); padding: 1.2rem 1.3rem; box-shadow: var(--shadow); margin-bottom: 1.4rem; font-size: 1.05rem; color: var(--ink-2); }
+.empty-hero p { margin: 0; }
+.home-actions { display: grid; grid-template-columns: 1fr; gap: .6rem; }
+
+.state { min-height: 70dvh; display: grid; place-items: center; }
+.state-box { text-align: center; max-width: 30em; }
+.state-box p { color: var(--ink-2); }
+
+/* ---------- Bonus du jour ---------- */
+.gift {
+  display: flex; align-items: center; gap: .8rem; padding: .8rem .9rem; border-radius: 18px; margin-bottom: .8rem;
+  background: color-mix(in srgb, var(--gold) 26%, var(--paper)); border: 1.5px solid color-mix(in srgb, var(--gold) 70%, transparent);
+}
+.gift.broke { background: var(--paper); border-color: var(--line); border-style: dashed; }
+.gift-coin { font-size: 1.8rem; line-height: 1; }
+.gift .grow { display: flex; flex-direction: column; }
+.gift small { color: var(--ink-2); }
+
+.tabs-filter { margin-bottom: 1rem; }
+
+/* ---------- Tickets ---------- */
+.tickets { display: grid; gap: 1rem; }
+.ticket {
+  --notch: 52px;
+  position: relative; isolation: isolate; padding: 1rem 1.05rem 0;
+  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--line) 90%, transparent)) drop-shadow(0 8px 14px rgba(20, 27, 52, .08));
+}
+:root[data-theme="dark"] .ticket { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .35)); }
+.ticket::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--paper); border-radius: 18px;
+  -webkit-mask: radial-gradient(circle 10px at 0 calc(100% - var(--notch)), #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 10px at 100% calc(100% - var(--notch)), #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 10px at 0 calc(100% - var(--notch)), #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 10px at 100% calc(100% - var(--notch)), #0000 97%, #000) right / 51% 100% no-repeat;
+}
+.ticket.has-mine::after { content: ""; position: absolute; left: 0; top: 18px; bottom: calc(var(--notch) + 16px); width: 4px; border-radius: 0 4px 4px 0; background: var(--brand); }
+.t-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .84rem; color: var(--ink-2); font-weight: 600; }
+.t-cat { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-time { display: inline-flex; align-items: center; gap: .3em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.t-time svg { width: 15px; height: 15px; }
+.t-time.live { color: var(--brand); }
+.t-title { font-size: 1.22rem; font-weight: 700; margin: .45rem 0 .2rem; letter-spacing: -.015em; }
+.t-sub { color: var(--ink-2); font-size: .9rem; margin: 0 0 .4rem; }
+.t-opts { display: grid; gap: .4rem; margin: .7rem 0 .9rem; }
+.t-opts.n2 { grid-template-columns: 1fr 1fr; }
+.t-opts.n3 { grid-template-columns: 1fr 1fr 1fr; }
+.t-opts.n4 { grid-template-columns: 1fr 1fr; }
+.t-opt {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: .05rem; padding: .5rem .65rem .6rem; border-radius: 12px;
+  background: var(--paper-2); min-width: 0;
+}
+.t-lbl { font-size: .84rem; color: var(--ink-2); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-odd { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.t-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--w); background: var(--ink-3); border-radius: 0 3px 3px 0; opacity: .5; }
+.t-opt.mine { background: var(--brand-2); box-shadow: inset 0 0 0 2px var(--brand); }
+.t-opt.mine .t-bar { background: var(--brand); opacity: 1; }
+.t-opt.win { background: var(--win-2); box-shadow: inset 0 0 0 2px var(--win); }
+.t-opt.win .t-odd { color: var(--win); }
+.t-more { display: grid; place-items: center; font-size: .84rem; color: var(--ink-2); font-weight: 600; border: 1.5px dashed var(--line); border-radius: 12px; }
+.t-foot {
+  height: var(--notch); display: flex; align-items: center; gap: 1rem; font-size: .86rem; color: var(--ink-2); font-weight: 600;
+  border-top: 2px dashed var(--line); margin: 0 .2rem; font-variant-numeric: tabular-nums;
+}
+.t-foot > span:first-child { display: inline-flex; align-items: center; gap: .35em; color: var(--ink); }
+.t-mine, .t-cta { margin-left: auto; }
+.t-mine { color: var(--brand); }
+.t-cta { color: var(--brand); }
+.t-link { position: absolute; inset: 0; z-index: 2; border: 0; background: transparent; border-radius: 18px; }
+.t-link:focus-visible { outline-offset: -3px; }
+.ticket.st-void, .ticket.st-settled:not(.has-mine) { opacity: .82; }
+.stamp {
+  position: absolute; bottom: calc(var(--notch) / 2 - 17px); right: .9rem; z-index: 1; transform: rotate(-7deg);
+  padding: .15rem .6rem; border: 3px solid currentColor; border-radius: 8px; font-weight: 800; font-size: .95rem; letter-spacing: .02em;
+  background: color-mix(in srgb, var(--paper) 80%, transparent); font-variant-numeric: tabular-nums;
+}
+.stamp.win { color: var(--win); }
+.stamp.lose { color: var(--lose); }
+.stamp.void { color: var(--ink-3); }
+.ticket:has(.stamp) .t-mine, .ticket:has(.stamp) .t-cta { display: none; }
+
+.match { display: flex; align-items: center; gap: .5rem; flex-wrap: nowrap; }
+.team { display: inline-flex; align-items: center; gap: .45rem; min-width: 0; flex: 1; }
+.team.away { justify-content: flex-end; text-align: right; }
+.team img, .crest { width: 22px; height: 22px; flex: none; object-fit: contain; }
+.crest { display: inline-grid; place-items: center; border-radius: 6px; background: var(--paper-2); font-size: .75rem; color: var(--ink-2); }
+.vs { color: var(--ink-3); font-weight: 800; padding: 0 .2rem; font-variant-numeric: tabular-nums; }
+
+.empty { text-align: center; padding: 2rem 1rem; color: var(--ink-2); }
+.empty-big { font-size: 1.35rem; font-weight: 700; color: var(--ink); margin-bottom: .3rem; }
+
+/* ---------- Détail d'un pari ---------- */
+.bet-hero { margin-bottom: 1rem; }
+.bet-title { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; letter-spacing: -.03em; margin: .2rem 0 .4rem; }
+.bet-title .match { flex-wrap: wrap; }
+.bet-title .team img, .bet-title .crest { width: 34px; height: 34px; }
+.bet-desc { font-size: 1.05rem; }
+.bet-meta { color: var(--ink-2); font-size: .92rem; margin: 0 0 .15rem; }
+.banner { border-radius: 16px; padding: .8rem 1rem; background: var(--paper-2); margin-bottom: 1rem; display: flex; flex-direction: column; gap: .1rem; }
+.banner small { color: var(--ink-2); }
+.banner.good { background: var(--win-2); }
+.banner.good b { color: var(--win); }
+.banner.bad { background: var(--lose-2); }
+.banner.bad b { color: var(--lose); }
+.opts { display: flex; flex-direction: column; gap: .55rem; }
+.opt {
+  position: relative; overflow: hidden; display: flex; align-items: center; gap: .8rem; width: 100%; text-align: left;
+  padding: .85rem 1rem; min-height: 64px; border-radius: 16px; border: 2px solid transparent; background: var(--paper); box-shadow: var(--shadow);
+}
+.opt.can:hover { border-color: var(--brand); }
+.opt.can:active { transform: scale(.99); }
+.opt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.opt-main b { font-size: 1.08rem; }
+.opt-main small { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.opt-odd { font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.opt-bar { position: absolute; left: 0; bottom: 0; height: 4px; width: var(--w); background: var(--ink-3); opacity: .45; }
+.opt.mine { border-color: var(--brand); background: var(--brand-2); }
+.opt.mine .opt-bar { background: var(--brand); opacity: 1; }
+.opt.win { border-color: var(--win); background: var(--win-2); }
+.opt.win .opt-odd { color: var(--win); }
+.opt-check { color: var(--win); display: grid; place-items: center; }
+.pool-line { display: flex; align-items: baseline; gap: .45rem; margin: .9rem 0 1rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pool-line b { color: var(--ink); }
+.mine-panel .row { padding: .25rem 0; }
+.mine-panel .btn { margin-top: .5rem; }
+.panel.duel { background: color-mix(in srgb, var(--gold) 20%, var(--paper)); }
+.contest { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; padding: .7rem .9rem; border-radius: 14px; border: 1.5px dashed var(--line); margin-bottom: 1rem; }
+.contest small { color: var(--ink-3); display: block; }
+.acts { margin: .2rem 0 1rem; }
+.bettors, .member-list, .ranking, .mini-rank, .history, .honours, .clist, .feed { list-style: none; margin: 0; padding: 0; }
+.bettors li, .member-list li { display: flex; align-items: center; gap: .7rem; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+.bettors li span.grow, .member-list li span.grow { display: flex; flex-direction: column; }
+.bettors small { color: var(--ink-2); }
+.bettors .amt { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; }
+.member-list li span.grow { flex-direction: row; align-items: center; gap: .4rem; flex-wrap: wrap; }
+
+.reacts { display: flex; gap: .4rem; margin: 1rem 0; flex-wrap: wrap; }
+.react { min-width: 52px; min-height: 44px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--paper); font-size: 1.15rem; display: inline-flex; align-items: center; justify-content: center; gap: .25rem; padding: 0 .7rem; }
+.react small { font-size: .82rem; font-weight: 700; color: var(--ink-2); }
+.react.on { border-color: var(--brand); background: var(--brand-2); }
+
+.comments h3 small { color: var(--ink-3); }
+.cmt { display: flex; gap: .6rem; align-items: flex-start; margin-bottom: .7rem; }
+.bubble { background: var(--paper); border-radius: 4px 16px 16px 16px; padding: .5rem .8rem; box-shadow: var(--shadow); min-width: 0; flex: 1; }
+.bubble p { margin: 0; overflow-wrap: anywhere; }
+.who { font-weight: 700; font-size: .85rem; }
+.who time { color: var(--ink-3); font-weight: 500; margin-left: .3em; }
+.composer { display: flex; gap: .5rem; margin: .8rem 0 1rem; }
+.composer input { border-radius: 99px !important; padding-left: 1.1em !important; }
+.composer .btn { border-radius: 50%; flex: none; }
+
+/* ---------- Fil ---------- */
+.feed .ev { display: flex; gap: .75rem; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.ev-ico { flex: none; width: 32px; display: grid; justify-items: center; }
+.ev-emo { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; background: var(--paper-2); font-size: 1rem; }
+.ev-body { flex: 1; min-width: 0; }
+.ev-body p { margin: 0; overflow-wrap: anywhere; }
+.ev-text { background: var(--paper); border-radius: 4px 14px 14px 14px; padding: .4rem .75rem; margin-top: .3rem !important; box-shadow: var(--shadow); display: inline-block; }
+.ev-body time { display: block; font-size: .78rem; color: var(--ink-3); margin-top: .15rem; }
+.feed .link, .history .link { text-decoration: none; }
+.feed .link:hover, .history .link:hover { text-decoration: underline; }
+.feed.mini .ev { padding: .5rem 0; font-size: .9rem; }
+
+/* ---------- Classement ---------- */
+.podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: .5rem; margin: .4rem 0 1.4rem; }
+.pod { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: 0; min-width: 0; }
+.pod b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pod-bal { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.pod-step { width: 100%; display: grid; place-items: start center; padding-top: .4rem; border-radius: 14px 14px 4px 4px; font-weight: 800; font-size: 1.6rem; color: var(--gold-ink); }
+.p1 .pod-step { height: 96px; background: linear-gradient(var(--gold), color-mix(in srgb, var(--gold) 55%, var(--paper))); }
+.p2 .pod-step { height: 70px; background: linear-gradient(#d9deea, color-mix(in srgb, #d9deea 50%, var(--paper))); color: #4c5576; }
+.p3 .pod-step { height: 54px; background: linear-gradient(#f0b98a, color-mix(in srgb, #f0b98a 50%, var(--paper))); color: #6b3a12; }
+.ranking li button {
+  width: 100%; display: flex; align-items: center; gap: .7rem; padding: .65rem .8rem; border: 0; background: var(--paper);
+  text-align: left; min-height: 60px; border-radius: 14px; margin-bottom: .4rem; box-shadow: var(--shadow);
+}
+.ranking li.me button { box-shadow: inset 0 0 0 2px var(--brand), var(--shadow); }
+.ranking .grow { display: flex; flex-direction: column; }
+.ranking small { color: var(--ink-2); }
+.rk { width: 1.6em; text-align: center; font-weight: 800; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.bal { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 1.08rem; }
+.mini-rank li { display: flex; align-items: center; gap: .55rem; padding: .35rem 0; font-variant-numeric: tabular-nums; }
+.mini-rank li.me { color: var(--brand); font-weight: 700; }
+.honours li { display: flex; flex-wrap: wrap; gap: .3rem .9rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.h-season { font-weight: 700; width: 100%; }
+.h-place small { color: var(--ink-3); }
+
+/* ---------- Profil ---------- */
+.profile-head { display: flex; align-items: center; gap: 1rem; margin: .4rem 0 1rem; }
+.profile-head .display { margin-bottom: .1rem; }
+.profile-head p { margin: 0; }
+.balance-card {
+  display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; padding: 1rem 1.2rem; border-radius: var(--r-lg); margin-bottom: 1rem;
+  background: var(--ink); color: var(--bg);
+}
+.balance-card span { font-weight: 600; opacity: .75; }
+.balance-card b { font-size: 2.4rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.balance-card small { opacity: .75; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.stat { background: var(--paper); border-radius: 14px; padding: .7rem .75rem; box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0; }
+.stat b { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .78rem; color: var(--ink-2); line-height: 1.25; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .5rem; }
+.badge { display: flex; flex-direction: column; padding: .7rem .75rem; border-radius: 14px; border: 1.5px dashed var(--line); color: var(--ink-3); }
+.badge .b-emo { font-size: 1.6rem; filter: grayscale(1); opacity: .45; }
+.badge b { font-size: .92rem; }
+.badge small { font-size: .78rem; line-height: 1.25; }
+.badge.got { border: 0; background: var(--paper); box-shadow: var(--shadow); color: var(--ink); }
+.badge.got .b-emo { filter: none; opacity: 1; }
+.badge.got small { color: var(--ink-2); }
+.trophies { display: flex; flex-wrap: wrap; gap: .4rem; }
+.trophy { padding: .35rem .8rem; border-radius: 99px; background: color-mix(in srgb, var(--gold) 25%, var(--paper)); font-weight: 600; }
+.history li { display: flex; justify-content: space-between; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.me-actions { margin-top: 1.5rem; }
+
+/* ---------- Fenêtres ---------- */
+#overlay {
+  position: fixed; inset: 0; z-index: 50; background: rgba(12, 16, 34, .5); display: flex; align-items: flex-end; justify-content: center;
+  animation: fade .18s ease-out;
+}
+.sheet {
+  position: relative; width: 100%; max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain; background: var(--bg);
+  border-radius: 24px 24px 0 0; padding: 1.4rem 1.15rem calc(1.2rem + var(--safe-b)); outline: none;
+  animation: up .24s cubic-bezier(.2, .9, .3, 1.1);
+}
+.sheet > h2 { padding-right: 2.5rem; }
+.sheet-x { position: absolute; top: .7rem; right: .7rem; }
+.sheet h3 { margin-top: 1.4rem; }
+.modal-foot { margin-top: 1.4rem; }
+.code-big { font-size: 2.6rem; font-weight: 800; letter-spacing: .12em; text-align: center; padding: 1rem; margin: .8rem 0 1rem; border-radius: 18px; background: var(--paper); border: 2px dashed var(--brand); font-variant-numeric: tabular-nums; }
+.code-big.small { font-size: 1.4rem; }
+.prose p { color: var(--ink-2); }
+.prose b { color: var(--ink); }
+
+.kind-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .5rem; }
+.kind-card {
+  display: flex; gap: .7rem; align-items: flex-start; text-align: left; padding: .85rem .9rem; border-radius: 16px; border: 1.5px solid var(--line);
+  background: var(--paper); min-height: 64px; width: 100%;
+}
+.kind-card:hover { border-color: var(--brand); }
+.kind-card span:last-child { display: flex; flex-direction: column; }
+.kind-card small { color: var(--ink-2); font-size: .82rem; line-height: 1.3; }
+.kind-card.feature { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.kind-card.feature small { color: color-mix(in srgb, var(--brand-ink) 80%, transparent); }
+.k-emo { font-size: 1.5rem; line-height: 1.1; }
+.opt-inputs { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .3rem; }
+
+.fixtures { max-height: 46dvh; overflow-y: auto; border-radius: 14px; background: var(--paper); padding: .2rem .7rem; box-shadow: var(--shadow); }
+.fx-day { position: sticky; top: 0; background: var(--paper); margin: 0; padding: .6rem 0 .3rem; font-weight: 700; font-size: .85rem; color: var(--ink-2); }
+.fx-day::first-letter { text-transform: uppercase; }
+.fx { display: flex; align-items: center; gap: .7rem; min-height: 54px; border-top: 1px solid var(--line); cursor: pointer; }
+.fx input { width: 20px; height: 20px; accent-color: var(--brand); flex: none; }
+.fx-time { font-weight: 700; font-variant-numeric: tabular-nums; width: 3em; }
+.fx-teams { flex: 1; display: flex; flex-direction: column; font-weight: 600; min-width: 0; }
+.fx-teams small { font-weight: 600; font-size: 1rem; }
+.fx.dup { opacity: .5; }
+
+.wager-on { font-size: 1.05rem; }
+.amount { display: grid; grid-template-columns: 52px 1fr 52px; gap: .5rem; align-items: center; }
+.amount input::-webkit-outer-spin-button, .amount input::-webkit-inner-spin-button, .score input::-webkit-inner-spin-button, .score input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.amount input, .score input { -moz-appearance: textfield; appearance: textfield; }
+.amount input { font-size: 2rem !important; font-weight: 800; text-align: center; min-height: 64px !important; font-variant-numeric: tabular-nums; }
+.amount .icon-btn { width: 52px; height: 52px; font-size: 1.6rem; background: var(--paper); border: 1.5px solid var(--line); color: var(--ink); }
+.potential { margin: 0; }
+.potential b { font-size: 1.3rem; color: var(--win); font-variant-numeric: tabular-nums; }
+.potential small { display: block; color: var(--ink-3); }
+.score { display: grid; grid-template-columns: 1fr 64px auto 64px 1fr; gap: .5rem; align-items: center; font-weight: 600; font-size: .92rem; }
+.score span:first-child { text-align: right; }
+.score input { text-align: center; font-size: 1.3rem !important; font-weight: 800; padding: .3em !important; }
+.score .dash { color: var(--ink-3); }
+.score.big input { font-size: 1.8rem !important; min-height: 64px !important; }
+.score-fld legend { margin-bottom: .4rem; }
+
+.ask { padding-top: .4rem; }
+.ask-msg { font-size: 1.12rem; font-weight: 600; padding-right: 2.5rem; }
+.btn.danger:not(.ghost) { background: var(--lose); color: #fff; }
+.tour { text-align: center; padding-top: .5rem; }
+.tour-emo { font-size: 3.4rem; margin-bottom: .4rem; }
+.tour p { color: var(--ink-2); font-size: 1.05rem; max-width: 26em; margin: 0 auto 1rem; }
+.dots { display: flex; justify-content: center; gap: .4rem; margin-bottom: 1rem; }
+.dots i { width: 8px; height: 8px; border-radius: 99px; background: var(--line); transition: width .2s; }
+.dots i.on { width: 24px; background: var(--brand); }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--tabbar) + var(--safe-b) + 5rem); z-index: 60; transform: translate(-50%, 20px);
+  max-width: min(92vw, 30em); padding: .75rem 1.1rem; border-radius: 14px; background: var(--ink); color: var(--bg);
+  font-weight: 600; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .4); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.good { background: var(--win); color: #fff; }
+.toast.bad { background: var(--lose); color: #fff; }
+body[data-view="home"] .toast, body[data-view="settings"] .toast { bottom: calc(var(--safe-b) + 1.5rem); }
+
+#update {
+  position: fixed; top: calc(var(--safe-t) + .6rem); left: 50%; transform: translateX(-50%); z-index: 70;
+  display: flex; align-items: center; gap: .7rem; padding: .4rem .5rem .4rem 1rem; border-radius: 99px; background: var(--ink); color: var(--bg); font-weight: 600; box-shadow: var(--shadow);
+}
+#update .btn { min-height: 36px; }
+#splash { display: grid; place-items: center; min-height: 100dvh; }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes up { from { transform: translateY(40px); opacity: .4; } }
+
+/* ---------- Tablette ---------- */
+@media (min-width: 640px) {
+  #overlay { align-items: center; padding: 1.5rem; }
+  .sheet { max-width: 560px; border-radius: 24px; max-height: 88dvh; padding: 1.6rem 1.5rem 1.4rem; }
+  .home-actions { grid-template-columns: 1fr 1fr; }
+  .tickets { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: repeat(6, 1fr); }
+  .cb-name { max-width: 30vw; }
+  .kind-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ---------- PC et tablette paysage : deux colonnes ---------- */
+@media (min-width: 1024px) {
+  body { padding-bottom: 0; }
+  .tabbar { display: none; }
+  .top { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .top-tabs { display: flex; gap: .2rem; margin-left: 1rem; }
+  .top-tabs button { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: 0 1rem; border: 0; border-radius: 12px; background: transparent; color: var(--ink-2); font-weight: 600; }
+  .top-tabs button:hover { background: var(--paper-2); color: var(--ink); }
+  .top-tabs button.on { background: var(--paper); color: var(--brand); box-shadow: var(--shadow); }
+  .cb-name { max-width: 220px; }
+  .shell { max-width: 1240px; padding: 0 1.5rem; }
+  .shell.has-side { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 2rem; align-items: start; }
+  .side { display: block; position: sticky; top: 84px; padding-top: 1rem; }
+  .side .panel h3 { margin: 0; }
+  .side .mini-rank { margin: .6rem 0 .8rem; }
+  .fab { bottom: 1.6rem; right: 1.6rem; }
+  .page { padding-bottom: 6rem; }
+  .page.narrow { margin: 0; max-width: 760px; }
+  .toast { bottom: 2rem; }
+  .tickets { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1280px) {
+  .tickets { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+</style>
+</head>
+<body data-view="home">
+<div id="app"><div id="splash" aria-live="polite">Chargement…</div></div>
+<div id="overlay" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="update" hidden><span>Nouvelle version disponible</span><button class="btn primary small" data-a="reload">Recharger</button></div>
+<noscript>Pronohub a besoin de JavaScript pour fonctionner.</noscript>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="./firebase-config.js"></script>
+<script>
+"use strict";
+const LANG = "fr";
+const BASE = "./";
+/* ===== util.js ===== */
+/* Pronohub — utilitaires communs */
+
+const LOCALE = LANG === "en" ? "en-GB" : "fr-BE";
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+function esc(s) {
+  // Espace insécable avant la ponctuation haute française, pour éviter un « ? » seul en début de ligne
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]))
+    .replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+}
+
+function now() { return Date.now(); }
+function dayNum(t = Date.now()) { return Math.floor(t / 86400000); }
+
+function nf(n) { return new Intl.NumberFormat(LOCALE).format(Math.round(n || 0)); }
+function pct(x) { return Math.round((x || 0) * 100) + " %"; }
+function oddsFmt(x) { return "×" + (Math.round(x * 100) / 100).toFixed(2); }
+function pl(n, one, many) { return Math.abs(n) > 1 ? many : one; }
+
+function fmtDate(t, withTime = true) {
+  if (!t) return "";
+  const d = new Date(t);
+  const o = { weekday: "short", day: "numeric", month: "short" };
+  if (withTime) { o.hour = "2-digit"; o.minute = "2-digit"; }
+  return d.toLocaleString(LOCALE, o);
+}
+
+function fmtTime(t) { return new Date(t).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); }
+
+/* Durée relative courte : « dans 2 h », « il y a 5 min » */
+function rel(t) {
+  const d = t - Date.now(), a = Math.abs(d);
+  const m = Math.round(a / 60000), h = Math.round(a / 3600000), j = Math.round(a / 86400000);
+  let s;
+  if (m < 1) return "à l'instant";
+  if (m < 60) s = m + " min";
+  else if (h < 24) s = h + " h";
+  else s = j + " j";
+  if (d > 0) return "dans " + s;
+  return LANG === "en" ? s + " ago" : "il y a " + s;
+}
+
+/* Compte à rebours pour la clôture d'un pari */
+function countdown(t) {
+  const d = t - Date.now();
+  if (d <= 0) return "";
+  const m = Math.floor(d / 60000), h = Math.floor(m / 60), j = Math.floor(h / 24);
+  if (j >= 2) return j + " j";
+  if (h >= 1) return h + " h " + String(m % 60).padStart(2, "0");
+  return m + " min";
+}
+
+/* Date locale pour <input type="datetime-local"> */
+function toLocalInput(t) {
+  const d = new Date(t), p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function rid(n = 12) {
+  const a = "abcdefghijkmnpqrstuvwxyz23456789";
+  let s = "";
+  const r = crypto.getRandomValues(new Uint8Array(n));
+  for (const x of r) s += a[x % a.length];
+  return s;
+}
+
+/* Code de cercle lisible : ABC-123, sans caractères ambigus */
+function newCode() {
+  const L = "ABCDEFGHJKLMNPQRSTUVWXYZ", D = "23456789";
+  const r = crypto.getRandomValues(new Uint8Array(6));
+  return L[r[0] % L.length] + L[r[1] % L.length] + L[r[2] % L.length] + "-" + D[r[3] % D.length] + D[r[4] % D.length] + D[r[5] % D.length];
+}
+
+function normCode(s) {
+  const c = String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return c.length === 6 ? c.slice(0, 3) + "-" + c.slice(3) : "";
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+let toastTimer;
+function toast(msg, kind = "") {
+  const el = $("#toast");
+  if (!el) return;
+  el.textContent = String(msg).replace(/ ([?!:;»])/g, "\u00a0$1");
+  el.className = "toast show " + kind;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = "toast " + kind; }, 2800);
+}
+
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+/* Couleur stable par joueur, pour les avatars */
+const HUES = [12, 38, 152, 196, 226, 262, 290, 330];
+function hueOf(id) { return HUES[hashStr(String(id)) % HUES.length]; }
+
+function avatar(m, size = "") {
+  const name = m?.name || "?";
+  const em = m?.avatar || "";
+  return `<span class="av ${size}" style="--h:${hueOf(m?.uid || name)}" aria-hidden="true">${em ? esc(em) : esc(name.trim().charAt(0).toUpperCase())}</span>`;
+}
+
+function download(name, text, type = "application/json") {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+async function copyText(s) {
+  try { await navigator.clipboard.writeText(s); toast("Copié"); }
+  catch (e) { prompt("Copie ce texte :", s); }
+}
+
+function loadScript(src) {
+  return new Promise((ok, ko) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = ok; s.onerror = ko;
+    document.head.appendChild(s);
+  });
+}
+
+/* ===== data.js ===== */
+/* Pronohub — données statiques */
+
+const CATS = [
+  { id: "foot", e: "⚽", label: "Football" },
+  { id: "basket", e: "🏀", label: "Basket" },
+  { id: "tennis", e: "🎾", label: "Tennis" },
+  { id: "f1", e: "🏎️", label: "Formule 1" },
+  { id: "velo", e: "🚴", label: "Cyclisme" },
+  { id: "rugby", e: "🏉", label: "Rugby" },
+  { id: "hockey", e: "🏒", label: "Hockey" },
+  { id: "usfoot", e: "🏈", label: "Football américain" },
+  { id: "vote", e: "🗳️", label: "Élections" },
+  { id: "tv", e: "📺", label: "Télé et culture" },
+  { id: "boulot", e: "💼", label: "Boulot" },
+  { id: "potes", e: "🍻", label: "Entre potes" },
+  { id: "meteo", e: "🌦️", label: "Météo" },
+  { id: "autre", e: "✨", label: "Autre" },
+];
+const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
+
+/* Compétitions importables automatiquement (source : ESPN, non officielle) */
+const LEAGUES = [
+  { id: "bel.1", sport: "soccer", cat: "foot", name: "Pro League", country: "Belgique", draw: true },
+  { id: "fra.1", sport: "soccer", cat: "foot", name: "Ligue 1", country: "France", draw: true },
+  { id: "eng.1", sport: "soccer", cat: "foot", name: "Premier League", country: "Angleterre", draw: true },
+  { id: "esp.1", sport: "soccer", cat: "foot", name: "LaLiga", country: "Espagne", draw: true },
+  { id: "ita.1", sport: "soccer", cat: "foot", name: "Serie A", country: "Italie", draw: true },
+  { id: "ger.1", sport: "soccer", cat: "foot", name: "Bundesliga", country: "Allemagne", draw: true },
+  { id: "ned.1", sport: "soccer", cat: "foot", name: "Eredivisie", country: "Pays-Bas", draw: true },
+  { id: "uefa.champions", sport: "soccer", cat: "foot", name: "Ligue des champions", country: "Europe", draw: true },
+  { id: "uefa.europa", sport: "soccer", cat: "foot", name: "Ligue Europa", country: "Europe", draw: true },
+  { id: "uefa.europa.conf", sport: "soccer", cat: "foot", name: "Ligue Conférence", country: "Europe", draw: true },
+  { id: "nba", sport: "basketball", cat: "basket", name: "NBA", country: "États-Unis", draw: false },
+  { id: "nhl", sport: "hockey", cat: "hockey", name: "NHL", country: "États-Unis", draw: false },
+  { id: "nfl", sport: "football", cat: "usfoot", name: "NFL", country: "États-Unis", draw: false },
+];
+const LEAGUE = Object.fromEntries(LEAGUES.map(l => [l.id, l]));
+
+const AVATARS = ["🦊", "🐻", "🐼", "🐯", "🦁", "🐸", "🐙", "🦄", "🐧", "🦉", "🐺", "🐲", "🦖", "🐝", "🦈", "🐨", "🤠", "🥷", "🧙", "🤖", "👽", "🎩", "🍀", "🔥"];
+
+const CIRCLE_EMOJIS = ["🎯", "🍻", "⚽", "🏆", "🎲", "💼", "🏠", "🎉", "🦁", "🔥"];
+
+/* Réglages par défaut d'un cercle */
+const CIRCLE_DEFAULTS = { start: 1000, daily: 50, rescue: 300, seed: 50, bonus: 100 };
+
+const KINDS = [
+  { id: "yesno", e: "👍", label: "Oui ou non", hint: "« Thomas arrivera-t-il à l'heure ? »" },
+  { id: "multi", e: "🔢", label: "Plusieurs choix", hint: "« Qui sera l'employé du mois ? »" },
+  { id: "match", e: "🏟️", label: "Match", hint: "Domicile, nul ou extérieur, avec score exact en bonus" },
+  { id: "vote", e: "🗳️", label: "Élection", hint: "Un choix par candidat ou par parti" },
+  { id: "duel", e: "🤝", label: "Duel", hint: "Toi contre un ami, même mise des deux côtés" },
+];
+
+const BADGES = [
+  { id: "first", e: "🎟️", name: "Premier ticket", desc: "Placer sa première mise" },
+  { id: "creator", e: "🧪", name: "Bookmaker", desc: "Créer 5 paris" },
+  { id: "nostra", e: "🔮", name: "Nostradamus", desc: "Gagner avec une cote de 3 ou plus" },
+  { id: "streak", e: "🔥", name: "En feu", desc: "Gagner 3 paris d'affilée" },
+  { id: "sniper", e: "🎯", name: "Score exact", desc: "Trouver le score exact d'un match" },
+  { id: "whale", e: "🐋", name: "Gros poisson", desc: "Miser 500 jetons d'un coup" },
+  { id: "duelist", e: "🤺", name: "Duelliste", desc: "Gagner un duel" },
+  { id: "talk", e: "💬", name: "Chambreur", desc: "Écrire 10 commentaires" },
+  { id: "broke", e: "💸", name: "Fauché", desc: "Se faire renflouer par la banque" },
+  { id: "unlucky", e: "🙃", name: "Toujours à côté", desc: "Perdre 5 paris d'affilée" },
+  { id: "champ", e: "🏆", name: "Champion", desc: "Finir une saison en tête" },
+];
+const BADGE = Object.fromEntries(BADGES.map(b => [b.id, b]));
+
+const REACTIONS = ["🔥", "😂", "😱", "👏", "🤡"];
+
+/* ===== store.js ===== */
+/* Pronohub — stockage local (localStorage) */
+
+const Store = {
+  ns: (window.__PH_NS || "ph") + ".",
+  get(k, def = null) {
+    try {
+      const v = localStorage.getItem(this.ns + k);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) { return def; }
+  },
+  set(k, v) {
+    try { localStorage.setItem(this.ns + k, JSON.stringify(v)); return true; }
+    catch (e) { toast("Stockage plein ou indisponible", "bad"); return false; }
+  },
+  del(k) { try { localStorage.removeItem(this.ns + k); } catch (e) { } },
+  keys() {
+    const out = [];
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(this.ns)) out.push(k.slice(this.ns.length)); } } catch (e) { }
+    return out;
+  },
+  _pending: {},
+  _timer: null,
+  saveSoon(k, v) {
+    this._pending[k] = v;
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => this.flush(), 300);
+  },
+  flush() {
+    for (const [k, v] of Object.entries(this._pending)) this.set(k, v);
+    this._pending = {};
+  },
+};
+window.addEventListener("pagehide", () => Store.flush());
+
+/* Profil de l'utilisateur sur cet appareil */
+const Profile = {
+  get() {
+    let p = Store.get("profile");
+    if (!p) { p = { id: "me_" + rid(8), name: "", avatar: "" }; Store.set("profile", p); }
+    return p;
+  },
+  set(patch) {
+    const p = Object.assign(this.get(), patch);
+    Store.set("profile", p);
+    return p;
+  },
+};
+
+/* Liste des cercles de l'utilisateur : [{code, name, emoji, local}] */
+const MyCircles = {
+  list() { return Store.get("circles", []); },
+  save(l) { Store.set("circles", l); },
+  add(c) {
+    const l = this.list().filter(x => x.code !== c.code);
+    l.unshift({ code: c.code, name: c.name, emoji: c.emoji || "🎯", local: !!c.local });
+    this.save(l);
+  },
+  update(code, patch) {
+    const l = this.list();
+    const x = l.find(c => c.code === code);
+    if (x) { Object.assign(x, patch); this.save(l); }
+  },
+  remove(code) { this.save(this.list().filter(c => c.code !== code)); },
+  has(code) { return this.list().some(c => c.code === code); },
+};
+
+/* ===== fb.js ===== */
+/* Pronohub — Firebase (facultatif) */
+
+const FB = {
+  ok: false,        // Firebase configuré et initialisé
+  ready: false,     // première réponse d'authentification reçue
+  uid: null,
+  user: null,
+  db: null,
+  auth: null,
+  error: "",
+  _hooks: [],
+  onAuth(fn) { this._hooks.push(fn); },
+
+  init() {
+    const cfg = window.FIREBASE_CONFIG;
+    if (!window.firebase || !cfg || !cfg.apiKey) { this.ready = true; return; }
+    try {
+      firebase.initializeApp(cfg);
+      this.auth = firebase.auth();
+      this.db = firebase.firestore();
+      this.ok = true;
+    } catch (e) {
+      this.error = String(e.message || e);
+      this.ready = true;
+      return;
+    }
+    this.auth.onAuthStateChanged(async u => {
+      if (!u) {
+        try { await this.auth.signInAnonymously(); }
+        catch (e) { this.error = e.code || String(e); this.ready = true; liveRender(); }
+        return;
+      }
+      this.user = u;
+      this.uid = u.uid;
+      this.ready = true;
+      for (const f of this._hooks) { try { await f(u); } catch (e) { console.warn(e); } }
+      liveRender();
+    });
+    // Ne jamais rester bloqué : au bout de 8 s, on affiche l'état réel
+    setTimeout(() => { if (!this.ready) { this.ready = true; this.error = this.error || "timeout"; liveRender(); } }, 8000);
+  },
+
+  /* Raccourcis */
+  circle(code) { return this.db.collection("circles").doc(code); },
+  sub(code, coll) { return this.circle(code).collection(coll); },
+  userDoc(uid = this.uid) { return this.db.collection("users").doc(uid); },
+
+  /* Type de connexion lisible */
+  provider() {
+    const u = this.user;
+    if (!u) return "";
+    if (u.isAnonymous) return "anon";
+    const p = (u.providerData || []).map(x => x.providerId);
+    if (p.includes("google.com")) return "google";
+    if (p.includes("password")) return "password";
+    return "other";
+  },
+};
+
+/* Message d'erreur Firebase compréhensible */
+function fbErr(e) {
+  const c = e && (e.code || "");
+  if (/permission-denied/.test(c)) return "Accès refusé : vérifie que les règles Firestore sont publiées (voir FIREBASE.md).";
+  if (/unavailable|network/.test(c)) return "Pas de connexion. Réessaie quand tu es en ligne.";
+  if (/wrong-password|invalid-credential|invalid-login/.test(c)) return "E-mail ou mot de passe incorrect.";
+  if (/user-not-found/.test(c)) return "Aucun compte avec cet e-mail.";
+  if (/email-already-in-use/.test(c)) return "Cet e-mail a déjà un compte : connecte-toi plutôt.";
+  if (/weak-password/.test(c)) return "Mot de passe trop court (6 caractères minimum).";
+  if (/invalid-email/.test(c)) return "Adresse e-mail invalide.";
+  if (/popup-blocked/.test(c)) return "Fenêtre bloquée par le navigateur : autorise les pop-ups et réessaie.";
+  if (/popup-closed|cancelled-popup/.test(c)) return "Connexion annulée.";
+  if (/requires-recent-login/.test(c)) return "Par sécurité, déconnecte-toi puis reconnecte-toi avant de supprimer le compte.";
+  if (/operation-not-allowed/.test(c)) return "Ce mode de connexion n'est pas activé dans la console Firebase.";
+  return "Erreur : " + (c || (e && e.message) || e);
+}
+
+/* ===== db.js ===== */
+/* Pronohub — couche de données : un même cache pour les cercles locaux et en ligne */
+
+const COLLS = ["members", "bets", "wagers", "ledger", "flags", "comments", "reacts"];
+
+function blankCircle(code, local) {
+  const cc = { code, local, status: "loading", err: "", circle: null, seasons: {}, seasonsLoaded: false };
+  for (const c of COLLS) cc[c] = {};
+  return cc;
+}
+
+const DB = {
+  c: {},          // cache par code
+  code: null,     // cercle ouvert
+  unsub: [],
+  _season: null,
+
+  cur() { return this.code ? this.c[this.code] : null; },
+
+  /* ---------- Ouverture ---------- */
+  open(code) {
+    if (this.code === code && this.cur() && this.cur().status === "ok") return;
+    this.close();
+    this.code = code;
+    const meta = MyCircles.list().find(c => c.code === code);
+    if (meta && meta.local) return this.openLocal(code);
+    return this.openOnline(code);
+  },
+
+  close() {
+    this.unsub.forEach(u => { try { u(); } catch (e) { } });
+    this.unsub = [];
+    this.code = null;
+  },
+
+  openLocal(code) {
+    const cc = blankCircle(code, true);
+    const d = Store.get("local." + code);
+    if (!d) { cc.status = "missing"; this.c[code] = cc; return; }
+    Object.assign(cc, d, { status: "ok" });
+    for (const c of COLLS) cc[c] = cc[c] || {};
+    cc.seasons = cc.seasons || {};
+    cc.seasonsLoaded = true;
+    this.c[code] = cc;
+  },
+
+  saveLocal(cc) {
+    const d = { circle: cc.circle, seasons: cc.seasons };
+    for (const c of COLLS) d[c] = cc[c];
+    Store.saveSoon("local." + cc.code, d);
+  },
+
+  async openOnline(code) {
+    const cc = blankCircle(code, false);
+    this.c[code] = cc;
+    if (!FB.ok) { cc.status = "nofb"; return; }
+    if (!FB.uid) { cc.status = FB.ready ? "auth" : "loading"; return; }
+    try {
+      const snap = await FB.circle(code).get();
+      if (this.code !== code) return;
+      if (!snap.exists) { cc.status = "missing"; liveRender(); return; }
+      cc.circle = snap.data();
+      const me = await FB.sub(code, "members").doc(FB.uid).get();
+      if (this.code !== code) return;
+      if (!me.exists) { cc.status = "notmember"; liveRender(); return; }
+    } catch (e) {
+      cc.status = /permission/.test(e.code || "") ? "denied" : "offline";
+      cc.err = fbErr(e);
+      liveRender();
+      return;
+    }
+    cc.status = "ok";
+    this.listen(cc);
+    liveRender();
+  },
+
+  listen(cc) {
+    const code = cc.code;
+    const onErr = e => {
+      cc.status = /permission/.test(e.code || "") ? "denied" : "offline";
+      cc.err = fbErr(e);
+      liveRender();
+    };
+    const apply = (coll) => snap => {
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed") delete cc[coll][ch.doc.id];
+        else cc[coll][ch.doc.id] = ch.doc.data();
+      });
+      queueRender();
+    };
+    this.unsub.push(FB.circle(code).onSnapshot(s => {
+      if (!s.exists) { cc.status = "missing"; liveRender(); return; }
+      cc.circle = s.data();
+      MyCircles.update(code, { name: cc.circle.name, emoji: cc.circle.emoji });
+      if (cc._season !== cc.circle.season) { cc._season = cc.circle.season; this.listenSeason(cc); }
+      queueRender();
+    }, onErr));
+    this.unsub.push(FB.sub(code, "members").onSnapshot(s => {
+      apply("members")(s);
+      if (FB.uid && !cc.members[FB.uid] && cc.status === "ok") { cc.status = "notmember"; liveRender(); }
+    }, onErr));
+    for (const coll of ["flags", "reacts"]) this.unsub.push(FB.sub(code, coll).onSnapshot(apply(coll), onErr));
+    this.unsub.push(FB.sub(code, "comments").orderBy("at", "desc").limit(200).onSnapshot(apply("comments"), onErr));
+  },
+
+  _seasonUnsub: [],
+  listenSeason(cc) {
+    this._seasonUnsub.forEach(u => u());
+    this._seasonUnsub = [];
+    for (const coll of ["bets", "wagers", "ledger"]) {
+      cc[coll] = {};
+      const u = FB.sub(cc.code, coll).where("season", "==", cc.circle.season).onSnapshot(snap => {
+        snap.docChanges().forEach(ch => {
+          if (ch.type === "removed") delete cc[coll][ch.doc.id];
+          else cc[coll][ch.doc.id] = ch.doc.data();
+        });
+        queueRender();
+      }, e => { cc.err = fbErr(e); cc.status = "denied"; liveRender(); });
+      this._seasonUnsub.push(u);
+      this.unsub.push(u);
+    }
+  },
+
+  async loadSeasons(cc = this.cur()) {
+    if (!cc || cc.local || cc.seasonsLoaded) return;
+    try {
+      const s = await FB.sub(cc.code, "seasons").get();
+      s.forEach(d => { cc.seasons[d.id] = d.data(); });
+      cc.seasonsLoaded = true;
+      liveRender();
+    } catch (e) { cc.seasonsLoaded = true; }
+  },
+
+  /* ---------- Écritures ---------- */
+  async put(coll, id, data, merge = false) {
+    const cc = this.cur();
+    if (!cc) return false;
+    if (cc.local) {
+      cc[coll] = cc[coll] || {};
+      cc[coll][id] = merge ? Object.assign({}, cc[coll][id], data) : data;
+      this.saveLocal(cc);
+      queueRender();
+      return true;
+    }
+    try { await FB.sub(cc.code, coll).doc(id).set(data, { merge }); return true; }
+    catch (e) { toast(fbErr(e), "bad"); return false; }
+  },
+
+  async del(coll, id) {
+    const cc = this.cur();
+    if (!cc) return false;
+    if (cc.local) { delete cc[coll][id]; this.saveLocal(cc); queueRender(); return true; }
+    try { await FB.sub(cc.code, coll).doc(id).delete(); return true; }
+    catch (e) { toast(fbErr(e), "bad"); return false; }
+  },
+
+  async setCircle(patch) {
+    const cc = this.cur();
+    if (!cc) return false;
+    if (cc.local) {
+      Object.assign(cc.circle, patch);
+      this.saveLocal(cc);
+      MyCircles.update(cc.code, { name: cc.circle.name, emoji: cc.circle.emoji });
+      queueRender();
+      return true;
+    }
+    try { await FB.circle(cc.code).set(patch, { merge: true }); return true; }
+    catch (e) { toast(fbErr(e), "bad"); return false; }
+  },
+
+  async putSeason(n, data) {
+    const cc = this.cur();
+    cc.seasons[n] = data;
+    if (cc.local) { this.saveLocal(cc); return true; }
+    try { await FB.sub(cc.code, "seasons").doc(String(n)).set(data); return true; }
+    catch (e) { toast(fbErr(e), "bad"); return false; }
+  },
+
+  /* ---------- Création et adhésion ---------- */
+  async createLocal(name, emoji, settings) {
+    const code = "LOC-" + rid(4).toUpperCase();
+    const p = Profile.get();
+    const circle = Object.assign({ name, emoji, owner: p.id, createdAt: now(), season: 1 }, CIRCLE_DEFAULTS, settings);
+    const d = { circle, seasons: {} };
+    for (const c of COLLS) d[c] = {};
+    d.members[p.id] = { uid: p.id, name: p.name || "Moi", avatar: p.avatar || "", joinedAt: now() };
+    Store.set("local." + code, d);
+    MyCircles.add({ code, name, emoji, local: true });
+    return code;
+  },
+
+  async createOnline(name, emoji, settings) {
+    const p = Profile.get();
+    let code;
+    for (let i = 0; i < 6; i++) {
+      code = newCode();
+      const s = await FB.circle(code).get();
+      if (!s.exists) break;
+    }
+    const circle = Object.assign({ name, emoji, owner: FB.uid, createdAt: now(), season: 1 }, CIRCLE_DEFAULTS, settings);
+    await FB.circle(code).set(circle);
+    await FB.sub(code, "members").doc(FB.uid).set({ uid: FB.uid, name: p.name || "Moi", avatar: p.avatar || "", joinedAt: now() });
+    await FB.sub(code, "private").doc("owner").set({ key: rid(10).toUpperCase() });
+    MyCircles.add({ code, name, emoji, local: false });
+    Account.syncCircles();
+    return code;
+  },
+
+  async join(code) {
+    const p = Profile.get();
+    const s = await FB.circle(code).get();
+    if (!s.exists) throw { code: "not-found" };
+    const c = s.data();
+    const ref = FB.sub(code, "members").doc(FB.uid);
+    const me = await ref.get();
+    if (!me.exists) await ref.set({ uid: FB.uid, name: p.name || "Joueur", avatar: p.avatar || "", joinedAt: now() });
+    MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false });
+    Account.syncCircles();
+    return c;
+  },
+};
+
+/* Rendu groupé : plusieurs instantanés Firestore = un seul rendu */
+let _rq = false;
+function queueRender() {
+  if (_rq) return;
+  _rq = true;
+  requestAnimationFrame(() => { _rq = false; liveRender(); });
+}
+
+/* ===== engine.js ===== */
+/* Pronohub — moteur : cotes en pari mutuel, soldes, classement, statistiques, badges.
+   Tout est recalculé à partir des données brutes : personne n'écrit le solde d'un autre. */
+
+/* Identifiant de l'utilisateur qui agit dans le cercle ouvert */
+function myId(cc = DB.cur()) {
+  if (!cc) return null;
+  if (cc.local) return S.actor && cc.members[S.actor] ? S.actor : Profile.get().id;
+  return FB.uid;
+}
+
+/* Fusion des identités (compte anonyme rattaché à un compte Google ou e-mail) */
+function aliasMap(cc) {
+  const m = {};
+  for (const [uid, mem] of Object.entries(cc.members)) if (mem.alias) m[mem.alias] = uid;
+  return m;
+}
+
+function memberOf(cc, uid) {
+  return cc.members[uid] || { uid, name: "Ancien membre", avatar: "👻", gone: true };
+}
+
+/* Membres visibles (sans les identités anonymes fusionnées) */
+function visibleMembers(cc) {
+  const al = aliasMap(cc);
+  return Object.entries(cc.members).filter(([uid]) => !al[uid]).map(([uid, m]) => Object.assign({ uid }, m));
+}
+
+function isOwner(cc, uid = myId(cc)) { return cc && cc.circle && cc.circle.owner === uid; }
+
+function betSeed(b) { return b.kind === "duel" ? 0 : (b.seed ?? CIRCLE_DEFAULTS.seed); }
+
+/* Analyse complète du cercle pour la saison en cours */
+function compute(cc) {
+  const season = cc.circle.season || 1;
+  const al = aliasMap(cc);
+  const U = uid => al[uid] || uid;
+  const T = Date.now();
+
+  const bets = {};
+  const wagersByBet = {};
+  for (const [id, w] of Object.entries(cc.wagers)) {
+    if ((w.season || 1) !== season) continue;
+    if (!cc.bets[w.bet]) continue;
+    (wagersByBet[w.bet] = wagersByBet[w.bet] || []).push(Object.assign({ id }, w, { u: U(w.uid) }));
+  }
+
+  const flagsByBet = {};
+  for (const f of Object.values(cc.flags)) (flagsByBet[f.bet] = flagsByBet[f.bet] || []).push(f);
+
+  const players = {};
+  const P = uid => players[uid] || (players[uid] = {
+    uid, bal: cc.circle.start, locked: 0, staked: 0, won: 0, bets: 0, wins: 0, losses: 0,
+    exact: 0, duelWins: 0, best: 0, bestOdds: 0, streak: 0, maxStreak: 0, lossStreak: 0, maxLoss: 0,
+    created: 0, comments: 0, rescues: 0, biggest: 0, history: [],
+  });
+  for (const m of visibleMembers(cc)) P(m.uid);
+
+  for (const l of Object.values(cc.ledger)) {
+    if ((l.season || 1) !== season) continue;
+    const p = P(U(l.uid));
+    p.bal += l.amt;
+    if (l.type === "rescue") p.rescues++;
+  }
+  for (const c of Object.values(cc.comments)) P(U(c.uid)).comments++;
+
+  const settledOrder = [];
+
+  for (const [id, b] of Object.entries(cc.bets)) {
+    if ((b.season || 1) !== season) continue;
+    if (cc.members[b.createdBy] || al[b.createdBy]) P(U(b.createdBy)).created++;
+    const ws = wagersByBet[id] || [];
+    const seed = betSeed(b);
+    const byOpt = {};
+    for (const o of b.options) byOpt[o.id] = 0;
+    let pool = 0;
+    for (const w of ws) { byOpt[w.opt] = (byOpt[w.opt] || 0) + w.amt; pool += w.amt; }
+    const total = pool + seed * b.options.length;
+    const odds = {};
+    for (const o of b.options) {
+      const d = byOpt[o.id] + seed;
+      odds[o.id] = b.kind === "duel" ? 2 : d > 0 ? total / d : null;
+    }
+    const participants = new Set(ws.map(w => w.u));
+    let state = b.status === "void" ? "void" : b.status === "settled" ? "settled" : (T >= b.closesAt ? "closed" : "open");
+    let contest = 0, contestNeed = 0;
+    if (state === "settled") {
+      const elig = [...participants].filter(u => u !== U(b.settledBy));
+      contestNeed = Math.floor(elig.length / 2) + 1;
+      contest = (flagsByBet[id] || []).filter(f => f.result === b.result && elig.includes(U(f.uid))).length;
+      if (elig.length && contest >= contestNeed) state = "contested";
+    }
+    if (b.kind === "duel" && state === "open" && ws.length < 2 && T >= b.closesAt) state = "void";
+
+    const payouts = {};
+    const info = { id, b, ws, pool, byOpt, odds, total, seed, state, payouts, participants, contest, contestNeed };
+    bets[id] = info;
+
+    if (state === "settled") {
+      const winD = byOpt[b.result] + seed;
+      const refund = winD === 0 || (b.kind === "duel" && ws.length < 2);
+      for (const w of ws) {
+        let pay = refund ? w.amt : (w.opt === b.result ? Math.floor(w.amt * total / winD) : 0);
+        let bonus = 0;
+        if (!refund && b.score && w.score && b.bonus && w.score.h === b.score.h && w.score.a === b.score.a) bonus = b.bonus;
+        payouts[w.id] = pay + bonus;
+        const p = P(w.u);
+        p.bal += pay + bonus - w.amt;
+        p.staked += w.amt;
+        if (!refund) {
+          p.bets++;
+          if (bonus) p.exact++;
+        }
+      }
+      if (!refund) settledOrder.push(info);
+    } else if (state === "void") {
+      for (const w of ws) payouts[w.id] = w.amt;
+    } else {
+      for (const w of ws) { const p = P(w.u); p.bal -= w.amt; p.locked += w.amt; p.staked += w.amt; }
+    }
+    for (const w of ws) { const p = P(w.u); if (w.amt > p.biggest) p.biggest = w.amt; }
+  }
+
+  // Séries et records, dans l'ordre chronologique des résultats
+  settledOrder.sort((a, b) => (a.b.settledAt || 0) - (b.b.settledAt || 0));
+  for (const info of settledOrder) {
+    const seen = new Set();
+    for (const w of info.ws) {
+      if (seen.has(w.u)) continue;
+      seen.add(w.u);
+      const p = P(w.u);
+      const gain = info.payouts[w.id] - w.amt;
+      const won = w.opt === info.b.result;
+      p.history.push({ bet: info.id, gain, won, at: info.b.settledAt });
+      if (won) {
+        p.wins++; p.won += info.payouts[w.id];
+        p.streak++; p.maxStreak = Math.max(p.maxStreak, p.streak); p.lossStreak = 0;
+        if (gain > p.best) p.best = gain;
+        const o = info.odds[w.opt] || 0;
+        if (o > p.bestOdds) p.bestOdds = o;
+        if (info.b.kind === "duel") p.duelWins++;
+      } else {
+        p.losses++;
+        p.lossStreak++; p.maxLoss = Math.max(p.maxLoss, p.lossStreak); p.streak = 0;
+      }
+    }
+  }
+
+  const standings = visibleMembers(cc).map(m => Object.assign({}, m, players[m.uid] || P(m.uid)))
+    .sort((a, b) => b.bal - a.bal || a.name.localeCompare(b.name));
+  standings.forEach((s, i) => { s.rank = i > 0 && s.bal === standings[i - 1].bal ? standings[i - 1].rank : i + 1; });
+
+  return { bets, players, standings, season, U };
+}
+
+/* Mémoïsation simple : un calcul par rendu */
+let _cmp = null, _cmpKey = "";
+function analysis(cc = DB.cur()) {
+  if (!cc || !cc.circle) return null;
+  const key = cc.code + ":" + _renderTick;
+  if (_cmpKey !== key) { _cmp = compute(cc); _cmpKey = key; }
+  return _cmp;
+}
+
+/* Gain potentiel si l'on ajoute `x` jetons sur l'option `opt` */
+function potential(info, opt, x, mine) {
+  const already = mine && mine.opt === opt ? mine.amt : 0;
+  const total = info.total + x;
+  const d = info.byOpt[opt] + info.seed + x;
+  if (d <= 0) return 0;
+  return Math.floor((already + x) * total / d);
+}
+
+/* Badges gagnés par un joueur */
+function badgesOf(cc, a, uid) {
+  const p = a.players[uid];
+  if (!p) return [];
+  const out = [];
+  if (p.bets > 0 || p.locked > 0 || p.biggest > 0) out.push("first");
+  if (p.created >= 5) out.push("creator");
+  if (p.wins && p.bestOdds >= 3) out.push("nostra");
+  if (p.maxStreak >= 3) out.push("streak");
+  if (p.exact > 0) out.push("sniper");
+  if (p.biggest >= 500) out.push("whale");
+  if (p.duelWins > 0) out.push("duelist");
+  if (p.comments >= 10) out.push("talk");
+  if (p.rescues > 0) out.push("broke");
+  if (p.maxLoss >= 5) out.push("unlucky");
+  const champ = Object.values(cc.seasons || {}).some(s => s.standings && s.standings[0] && (s.standings[0].uid === uid || a.U(s.standings[0].uid) === uid));
+  if (champ) out.push("champ");
+  return out;
+}
+
+/* Trophées des saisons passées */
+function trophiesOf(cc, a, uid) {
+  const t = [];
+  for (const s of Object.values(cc.seasons || {})) {
+    (s.standings || []).slice(0, 3).forEach((x, i) => { if (x.uid === uid || a.U(x.uid) === uid) t.push({ season: s.n, place: i + 1 }); });
+  }
+  return t.sort((x, y) => x.season - y.season);
+}
+
+/* Libellé de l'option gagnante d'un pari */
+function optLabel(b, id) { const o = b.options.find(o => o.id === id); return o ? o.label : "?"; }
+
+/* Résultat d'un match à partir du score */
+function matchResult(b, h, a) {
+  if (h > a) return "h";
+  if (h < a) return "a";
+  return b.options.some(o => o.id === "d") ? "d" : null;
+}
+
+/* ===== sports.js ===== */
+/* Pronohub — import des matchs et résultats depuis une source gratuite (API publique d'ESPN, non officielle).
+   Si la source ne répond pas, le créateur du pari peut toujours saisir le résultat à la main. */
+
+const Sports = {
+  base: "https://site.api.espn.com/apis/site/v2/sports/",
+  cache: {},
+  tried: {},
+
+  ymd(t) {
+    const d = new Date(t);
+    return d.getUTCFullYear() + String(d.getUTCMonth() + 1).padStart(2, "0") + String(d.getUTCDate()).padStart(2, "0");
+  },
+
+  async get(url) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 12000);
+    try {
+      const r = await fetch(url, { signal: ctl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return await r.json();
+    } finally { clearTimeout(t); }
+  },
+
+  parse(ev) {
+    const c = (ev.competitions || [])[0] || {};
+    const cs = c.competitors || [];
+    const home = cs.find(x => x.homeAway === "home") || cs[0] || {};
+    const away = cs.find(x => x.homeAway === "away") || cs[1] || {};
+    const st = (ev.status || c.status || {}).type || {};
+    const team = x => (x.team && (x.team.shortDisplayName || x.team.displayName)) || "?";
+    return {
+      id: String(ev.id),
+      date: Date.parse(ev.date),
+      home: team(home), away: team(away),
+      homeLogo: (home.team && home.team.logo) || "",
+      awayLogo: (away.team && away.team.logo) || "",
+      state: st.state || "pre",
+      completed: !!st.completed,
+      statusName: st.name || "",
+      sh: home.score != null ? parseInt(home.score, 10) : null,
+      sa: away.score != null ? parseInt(away.score, 10) : null,
+    };
+  },
+
+  /* Matchs à venir d'une compétition (les 14 prochains jours) */
+  async fixtures(leagueId) {
+    const L = LEAGUE[leagueId];
+    const key = "fx:" + leagueId;
+    const c = this.cache[key];
+    if (c && Date.now() - c.t < 10 * 60000) return c.list;
+    const from = this.ymd(Date.now()), to = this.ymd(Date.now() + 14 * 86400000);
+    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${from}-${to}&limit=300`);
+    const list = (j.events || []).map(e => this.parse(e)).filter(e => e.state === "pre" && e.date > Date.now()).sort((a, b) => a.date - b.date);
+    this.cache[key] = { t: Date.now(), list };
+    return list;
+  },
+
+  /* Résultat d'un match importé : {done, void, h, a} */
+  async result(src, kickoff) {
+    const L = LEAGUE[src.league];
+    if (!L) return null;
+    const d1 = this.ymd(kickoff - 86400000), d2 = this.ymd(kickoff + 86400000);
+    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${d1}-${d2}&limit=300`);
+    const ev = (j.events || []).find(e => String(e.id) === String(src.event));
+    if (!ev) return null;
+    const m = this.parse(ev);
+    if (/POSTPONED|CANCELED|CANCELLED|ABANDONED|SUSPENDED/.test(m.statusName)) return { done: true, void: true };
+    if (m.completed && m.sh != null && m.sa != null) return { done: true, h: m.sh, a: m.sa };
+    return { done: false };
+  },
+
+  /* Règlement automatique des paris importés dont le match est terminé */
+  async autoSettle() {
+    const cc = DB.cur();
+    if (!cc || cc.status !== "ok" || !cc.circle) return;
+    const T = Date.now();
+    for (const [id, b] of Object.entries(cc.bets)) {
+      if (!b.src || b.status !== "open" || (b.season || 1) !== cc.circle.season) continue;
+      if (T < b.closesAt + 100 * 60000) continue;
+      if (this.tried[id] && T - this.tried[id] < 10 * 60000) continue;
+      this.tried[id] = T;
+      try {
+        const r = await this.result(b.src, b.closesAt);
+        if (!r || !r.done || DB.code !== cc.code) continue;
+        if (r.void) {
+          await DB.put("bets", id, { status: "void", settledBy: "auto", settledAt: Date.now() }, true);
+          continue;
+        }
+        const res = matchResult(b, r.h, r.a);
+        if (!res) await DB.put("bets", id, { status: "void", score: { h: r.h, a: r.a }, settledBy: "auto", settledAt: Date.now() }, true);
+        else await DB.put("bets", id, { status: "settled", result: res, score: { h: r.h, a: r.a }, settledBy: "auto", settledAt: Date.now() }, true);
+      } catch (e) { /* source indisponible : on réessaiera plus tard */ }
+    }
+  },
+};
+
+/* ===== account.js ===== */
+/* Pronohub — compte : anonyme par défaut, Google ou e-mail facultatif */
+
+const Account = {
+  async onAuth(u) {
+    // Récupère le profil et la liste des cercles enregistrés sur le compte
+    try {
+      const s = await FB.userDoc().get();
+      const p = Profile.get();
+      if (s.exists) {
+        const d = s.data();
+        if (d.name && !p.name) Profile.set({ name: d.name, avatar: d.avatar || "" });
+        for (const c of d.circles || []) if (!MyCircles.has(c.code)) MyCircles.add(Object.assign({}, c, { local: false }));
+      }
+      this.syncCircles();
+    } catch (e) { /* hors ligne : on garde la liste locale */ }
+  },
+
+  syncCircles: debounce(async function () {
+    if (!FB.ok || !FB.uid) return;
+    const p = Profile.get();
+    const circles = MyCircles.list().filter(c => !c.local).map(c => ({ code: c.code, name: c.name, emoji: c.emoji || "🎯" }));
+    try { await FB.userDoc().set({ name: p.name || "", avatar: p.avatar || "", circles, updatedAt: now() }, { merge: true }); }
+    catch (e) { }
+  }, 800),
+
+  /* Met à jour mon nom/avatar dans tous mes cercles en ligne */
+  async pushProfile() {
+    const p = Profile.get();
+    this.syncCircles();
+    if (!FB.ok || !FB.uid) return;
+    for (const c of MyCircles.list().filter(c => !c.local)) {
+      try { await FB.sub(c.code, "members").doc(FB.uid).set({ name: p.name, avatar: p.avatar || "" }, { merge: true }); } catch (e) { }
+    }
+  },
+
+  async linkGoogle() {
+    const prov = new firebase.auth.GoogleAuthProvider();
+    try {
+      await FB.auth.currentUser.linkWithPopup(prov);
+      await FB.auth.currentUser.reload();
+      FB.user = FB.auth.currentUser;
+      toast("Compte Google lié : tes paris te suivent partout", "good");
+    } catch (e) {
+      if (e.code === "auth/credential-already-in-use" && e.credential) {
+        await this.switchTo(() => FB.auth.signInWithCredential(e.credential)).catch(err => toast(fbErr(err), "bad"));
+      } else toast(fbErr(e), "bad");
+    }
+    S.modal = null; render();
+  },
+
+  async email(mode, email, pass) {
+    try {
+      if (mode === "create") {
+        const cred = firebase.auth.EmailAuthProvider.credential(email, pass);
+        await FB.auth.currentUser.linkWithCredential(cred);
+        await FB.auth.currentUser.reload();
+        FB.user = FB.auth.currentUser;
+        toast("Compte créé", "good");
+      } else {
+        await this.switchTo(() => FB.auth.signInWithEmailAndPassword(email, pass));
+      }
+      S.modal = null; render();
+    } catch (e) {
+      if (e.code === "auth/email-already-in-use" || e.code === "auth/credential-already-in-use") {
+        S.modal = Object.assign({}, S.modal, { mode: "login", err: "Cet e-mail a déjà un compte : entre ton mot de passe pour te connecter." });
+      } else S.modal = Object.assign({}, S.modal, { err: fbErr(e) });
+      render();
+    }
+  },
+
+  /* Bascule sur un compte existant en emportant ce qui appartenait à l'identité anonyme.
+     Preuve : un secret stocké dans claims/{ancienUid}, lisible seulement par l'ancienne identité,
+     recopié dans la fiche membre et vérifié par les règles Firestore. */
+  async switchTo(signIn) {
+    const old = FB.uid;
+    const wasAnon = FB.user && FB.user.isAnonymous;
+    const secret = rid(24);
+    const circles = MyCircles.list().filter(c => !c.local);
+    if (wasAnon && circles.length) {
+      try { await FB.db.collection("claims").doc(old).set({ secret, at: now() }); } catch (e) { }
+    }
+    DB.close();
+    let res;
+    try { res = await signIn(); }
+    catch (e) { if (S.code) DB.open(S.code); throw e; }
+    if (res && res.user) { FB.user = res.user; FB.uid = res.user.uid; }
+    const p = Profile.get();
+    for (const c of circles) {
+      try {
+        const ref = FB.sub(c.code, "members").doc(FB.uid);
+        const data = { uid: FB.uid, name: p.name || "Joueur", avatar: p.avatar || "" };
+        const ex = await ref.get();
+        if (!ex.exists) data.joinedAt = now();
+        if (wasAnon && (!ex.exists || !ex.data().alias)) { data.alias = old; data.aliasKey = secret; }
+        await ref.set(data, { merge: true });
+      } catch (e) { }
+    }
+    if (wasAnon && circles.length) { try { await FB.db.collection("claims").doc(old).delete(); } catch (e) { } }
+    this.syncCircles();
+    toast("Connecté : tes cercles sont rattachés à ton compte", "good");
+    if (S.code) DB.open(S.code);
+  },
+
+  async signOut() {
+    if (!(await ask("Te déconnecter ? Sur cet appareil, tu repartiras avec une identité anonyme vierge.", "Se déconnecter"))) return;
+    DB.close();
+    await FB.auth.signOut();
+    MyCircles.save(MyCircles.list().filter(c => c.local));
+    S.code = null; S.view = "home"; S.modal = null;
+    toast("Déconnecté");
+    render();
+  },
+
+  async deleteAccount() {
+    if (!(await ask("Supprimer ton compte ? Tu quittes tous tes cercles en ligne et ton profil est effacé. C'est définitif.", "Supprimer mon compte", true))) return;
+    try {
+      for (const c of MyCircles.list().filter(c => !c.local)) {
+        try {
+          const cs = await FB.circle(c.code).get();
+          if (cs.exists && cs.data().owner === FB.uid) continue; // un cercle ne peut pas rester sans propriétaire
+          await FB.sub(c.code, "members").doc(FB.uid).delete();
+        } catch (e) { }
+      }
+      await FB.userDoc().delete();
+      await FB.auth.currentUser.delete();
+      for (const k of Store.keys()) if (!k.startsWith("local.") && k !== "prefs") Store.del(k);
+      MyCircles.save(MyCircles.list().filter(c => c.local));
+      DB.close();
+      S.code = null; S.view = "home"; S.modal = null;
+      toast("Compte supprimé");
+    } catch (e) { toast(fbErr(e), "bad"); }
+    render();
+  },
+
+  modal() {
+    const m = S.modal;
+    if (!FB.ok) {
+      return `<h2>Compte</h2>
+        <p class="muted">Les comptes et les cercles en ligne ne sont pas encore activés sur cette installation. Tes cercles « sur cet appareil » fonctionnent normalement.</p>
+        <div class="row end"><button class="btn" data-a="close">Fermer</button></div>`;
+    }
+    const prov = FB.provider();
+    if (m.mode === "email" || m.mode === "login") {
+      const login = m.mode === "login";
+      return `<h2>${login ? "Se connecter avec un e-mail" : "Créer un compte e-mail"}</h2>
+        ${m.err ? `<p class="err">${esc(m.err)}</p>` : ""}
+        <form data-f="email" data-mode="${login ? "login" : "create"}" class="stack">
+          <label class="fld"><span>E-mail</span><input type="email" name="email" autocomplete="email" required value="${esc(m.email || "")}"></label>
+          <label class="fld"><span>Mot de passe</span><input type="password" name="pass" minlength="6" autocomplete="${login ? "current-password" : "new-password"}" required></label>
+          <div class="row end">
+            <button type="button" class="btn ghost" data-a="accMode" data-mode="${login ? "email" : "login"}">${login ? "Créer un compte" : "J'ai déjà un compte"}</button>
+            <button class="btn primary">${login ? "Se connecter" : "Créer le compte"}</button>
+          </div>
+        </form>`;
+    }
+    const who = prov === "anon"
+      ? `<p>Tu joues avec une <b>identité anonyme</b> liée à cet appareil. Crée un compte pour retrouver tes cercles sur ton téléphone, ta tablette et ton PC.</p>`
+      : `<p>Connecté avec <b>${prov === "google" ? "Google" : "un e-mail"}</b>${FB.user && FB.user.email ? ` (${esc(FB.user.email)})` : ""}. Tes cercles te suivent sur tous tes appareils.</p>`;
+    return `<h2>Compte</h2>
+      ${who}
+      ${prov === "anon" ? `<div class="stack">
+        <button class="btn primary wide" data-a="accGoogle"><span class="g">G</span> Continuer avec Google</button>
+        <button class="btn wide" data-a="accMode" data-mode="email">Continuer avec un e-mail</button>
+      </div>` : `<div class="stack">
+        <button class="btn wide" data-a="accSignOut">Se déconnecter</button>
+        <button class="btn danger wide" data-a="accDelete">Supprimer mon compte</button>
+      </div>`}
+      <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
+  },
+};
+
+function accountAct(a, d) {
+  switch (a) {
+    case "account": S.modal = { k: "account" }; return true;
+    case "accMode": S.modal = { k: "account", mode: d.mode }; return true;
+    case "accGoogle": Account.linkGoogle(); return true;
+    case "accSignOut": Account.signOut(); return true;
+    case "accDelete": Account.deleteAccount(); return true;
+  }
+  return false;
+}
+
+function accountSubmit(f, fd) {
+  if (f.dataset.f !== "email") return false;
+  const email = String(fd.get("email") || "").trim(), pass = String(fd.get("pass") || "");
+  S.modal.email = email;
+  Account.email(f.dataset.mode, email, pass);
+  return true;
+}
+
+/* ===== settings.js ===== */
+/* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
+
+const APP_VERSION = "1.0.0";
+
+const Prefs = {
+  get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
+  set(p) { Store.set("prefs", Object.assign(this.get(), p)); applyTheme(); },
+};
+
+function applyTheme() {
+  const t = Prefs.get().theme;
+  const dark = t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  const m = $('meta[name="theme-color"]');
+  if (m) m.content = dark ? "#121a33" : "#f3f5fb";
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+
+function setLang(l) {
+  Store.set("lang", l);
+  if (l === LANG) return;
+  location.href = l === "en" ? "./en/" : "../";
+}
+
+function settingsView() {
+  const p = Prefs.get();
+  const seg = (k, v, label) => `<button class="seg ${p[k] === v ? "on" : ""}" data-a="pref" data-k="${k}" data-v="${v}" aria-pressed="${p[k] === v}">${label}</button>`;
+  const prov = FB.ok ? FB.provider() : "";
+  return `<section class="page narrow">
+    <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button><h1>Réglages</h1></div>
+
+    <div class="panel">
+      <h3>Apparence</h3>
+      <div class="segs">${seg("theme", "auto", "Automatique")}${seg("theme", "light", "Clair")}${seg("theme", "dark", "Sombre")}</div>
+      <h3>Langue</h3>
+      <div class="segs">
+        <button class="seg ${LANG === "fr" ? "on" : ""}" data-a="lang" data-v="fr">Français</button>
+        <button class="seg ${LANG === "en" ? "on" : ""}" data-a="lang" data-v="en">English</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Compte</h3>
+      <p class="muted">${!FB.ok ? "Mode hors ligne : tes cercles restent sur cet appareil." : prov === "anon" ? "Identité anonyme sur cet appareil." : "Compte connecté : tes cercles te suivent partout."}</p>
+      <button class="btn" data-a="account">Gérer mon compte</button>
+    </div>
+
+    <div class="panel">
+      <h3>Sauvegarde</h3>
+      <p class="muted">Exporte ton profil et tes cercles « sur cet appareil » dans un fichier, pour les transférer ou les garder au chaud. Les cercles en ligne sont déjà sauvegardés.</p>
+      <div class="row wrap">
+        <button class="btn" data-a="export">Exporter mes données</button>
+        <label class="btn">Importer un fichier<input type="file" accept="application/json,.json" data-f="import" hidden></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Une idée, un bug ?</h3>
+      <p class="muted">Dis-nous ce qui coince ou ce qui manque.</p>
+      <button class="btn" data-a="feedback">Envoyer un retour</button>
+    </div>
+
+    <div class="panel">
+      <h3>À propos</h3>
+      <p class="muted">Pronohub ${APP_VERSION}. Jetons fictifs uniquement : ils ne s'achètent pas, ne se revendent pas et n'ont aucune valeur.</p>
+      <div class="row wrap">
+        <button class="btn ghost" data-a="legal">Mentions et confidentialité</button>
+        <button class="btn ghost" data-a="tour">Revoir la présentation</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function feedbackModal() {
+  const m = S.modal;
+  if (m.sent) return `<h2>Merci !</h2><p>Ton retour est bien arrivé.</p><div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;
+  return `<h2>Envoyer un retour</h2>
+    <form data-f="feedback" class="stack">
+      <div class="segs" role="radiogroup">
+        ${[["bug", "🐞 Bug"], ["idea", "💡 Idée"], ["other", "💬 Autre"]].map(([v, l], i) => `<label class="seg radio"><input type="radio" name="type" value="${v}" ${i === 1 ? "checked" : ""}><span>${l}</span></label>`).join("")}
+      </div>
+      <label class="fld"><span>Message</span><textarea name="msg" rows="5" required maxlength="2000" placeholder="Décris ce que tu as vu ou ce que tu aimerais"></textarea></label>
+      <label class="fld"><span>E-mail (facultatif, pour te répondre)</span><input type="email" name="email" autocomplete="email"></label>
+      ${FB.ok ? "" : `<p class="muted">L'envoi en ligne n'est pas activé : ton message sera copié, colle-le où tu veux.</p>`}
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Envoyer</button></div>
+    </form>`;
+}
+
+function legalModal() {
+  return `<h2>Mentions et confidentialité</h2>
+    <div class="prose">
+      <p><b>Un jeu entre amis, sans argent réel.</b> Pronohub utilise des jetons fictifs. Ils sont distribués gratuitement, ne peuvent être ni achetés ni échangés contre de l'argent ou un lot. Aucune mise réelle n'est possible.</p>
+      <p><b>Données enregistrées.</b> Ton pseudo, ton avatar, les cercles que tu rejoins, tes paris, mises et commentaires. Sans compte, elles restent dans ton navigateur. Avec un compte ou un cercle en ligne, elles sont stockées chez Google Firebase (Union européenne ou États-Unis selon la configuration) et visibles par les membres de tes cercles uniquement.</p>
+      <p><b>E-mail.</b> Si tu crées un compte e-mail ou Google, l'adresse sert seulement à te connecter. Elle n'est jamais montrée aux autres joueurs.</p>
+      <p><b>Suppression.</b> Tu peux supprimer ton compte à tout moment depuis Compte. Tes mises passées restent dans l'historique des cercles sous le nom « Ancien membre ».</p>
+      <p><b>Résultats sportifs.</b> Les matchs importés viennent de l'API publique d'ESPN, utilisée sans garantie. En cas d'erreur, le pari peut être contesté ou corrigé à la main.</p>
+      <p><b>Mesure d'audience.</b> Aucune publicité, aucun traceur.</p>
+    </div>
+    <div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;
+}
+
+function exportData() {
+  Store.flush();
+  const data = {};
+  for (const k of Store.keys()) data[k] = Store.get(k);
+  download(`pronohub-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "pronohub", v: APP_VERSION, at: now(), data }, null, 1));
+  toast("Données exportées");
+}
+
+function importData(file) {
+  const r = new FileReader();
+  r.onload = async () => {
+    try {
+      const j = JSON.parse(r.result);
+      if (j.app !== "pronohub" || !j.data) throw 0;
+      if (!(await ask("Importer ce fichier ? Ton profil et tes cercles sur cet appareil seront remplacés.", "Importer"))) return;
+      for (const [k, v] of Object.entries(j.data)) Store.set(k, v);
+      toast("Import terminé", "good");
+      setTimeout(() => location.reload(), 600);
+    } catch (e) { toast("Ce fichier n'est pas une sauvegarde Pronohub", "bad"); }
+  };
+  r.readAsText(file);
+}
+
+async function sendFeedback(fd) {
+  const d = { type: fd.get("type"), msg: String(fd.get("msg") || "").slice(0, 2000), email: String(fd.get("email") || "").slice(0, 200), app: "pronohub", v: APP_VERSION, lang: LANG, at: now(), ua: navigator.userAgent.slice(0, 200) };
+  if (!FB.ok) { copyText(`[Pronohub ${APP_VERSION}] ${d.type} : ${d.msg}`); S.modal = null; render(); return; }
+  try {
+    d.uid = FB.uid;
+    await FB.db.collection("feedback").add(d);
+    S.modal = { k: "feedback", sent: true };
+  } catch (e) { toast(fbErr(e), "bad"); }
+  render();
+}
+
+function settingsAct(a, d) {
+  switch (a) {
+    case "settings": go("settings"); return true;
+    case "pref": Prefs.set({ [d.k]: d.v }); return true;
+    case "lang": setLang(d.v); return true;
+    case "export": exportData(); return true;
+    case "feedback": S.modal = { k: "feedback" }; return true;
+    case "legal": S.modal = { k: "legal" }; return true;
+    case "tour": S.modal = { k: "tour", step: 0 }; return true;
+  }
+  return false;
+}
+
+/* ===== circles.js ===== */
+/* Pronohub — accueil, cercles, invitations, saisons */
+
+function homeView() {
+  const p = Profile.get();
+  if (!p.name) return welcomeView();
+  const list = MyCircles.list();
+  return `<section class="page home">
+    <div class="hello">
+      <div class="hello-av">${avatar({ uid: p.id, name: p.name, avatar: p.avatar }, "xl")}</div>
+      <div>
+        <p class="kicker">Salut ${esc(p.name)}</p>
+        <h1 class="display">${list.length ? "Choisis ton cercle" : "Crée ton premier cercle"}</h1>
+      </div>
+    </div>
+    ${list.length ? `<div class="circle-list">${list.map(c => `
+      <button class="circle-card" data-a="openCircle" data-code="${esc(c.code)}">
+        <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
+        <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "Sur cet appareil" : "Code " + esc(c.code)}</small></span>
+        <span class="cc-go" aria-hidden="true">${ICON.chev}</span>
+      </button>`).join("")}</div>` : `<div class="empty-hero">
+        <p>Un cercle, c'est ta bande : les collègues, la famille, les potes du foot. Chacun reçoit des jetons fictifs, on parie, on chambre, le meilleur finit en tête.</p>
+      </div>`}
+    <div class="home-actions">
+      <button class="btn primary big" data-a="newCircle">${ICON.plus} Créer un cercle</button>
+      <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Rejoindre avec un code</button>
+    </div>
+    ${FB.ok ? "" : `<p class="note">Les cercles en ligne ne sont pas encore activés sur cette installation : crée un cercle « sur cet appareil » et passez-vous le téléphone.</p>`}
+  </section>`;
+}
+
+function welcomeView() {
+  const p = Profile.get();
+  const sel = S.pickAvatar || p.avatar || AVATARS[0];
+  return `<section class="page welcome">
+    <div class="welcome-hero">
+      <div class="logo-mark" aria-hidden="true">${TICKET_SVG}</div>
+      <h1 class="brand">Pronohub</h1>
+      <p class="lead">Les paris entre amis, avec des jetons pour rire. Sport, élections, ou « qui arrivera en retard lundi ? ».</p>
+    </div>
+    <form data-f="profile" class="panel stack welcome-form">
+      <label class="fld"><span>Ton pseudo</span><input name="name" maxlength="24" required autocomplete="nickname" placeholder="Ex. Fanfan" value="${esc(p.name)}"></label>
+      <fieldset class="fld"><legend>Ton avatar</legend>
+        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+      </fieldset>
+      <button class="btn primary big">C'est parti</button>
+    </form>
+  </section>`;
+}
+
+/* Écran d'état clair quand le cercle n'est pas prêt */
+function circleStateView(cc) {
+  const st = cc ? cc.status : "loading";
+  const box = (title, text, actions) => `<section class="page state"><div class="state-box"><h2>${title}</h2><p>${text}</p><div class="row center wrap">${actions}</div></div></section>`;
+  const home = `<button class="btn" data-a="home">Mes cercles</button>`;
+  switch (st) {
+    case "loading": return box("Ouverture du cercle…", "On récupère les paris et le classement.", home);
+    case "auth": return box("Connexion impossible", FB.error ? fbErr({ code: FB.error }) : "La connexion à Firebase n'a pas abouti. Vérifie ta connexion internet.", `<button class="btn primary" data-a="retry">Réessayer</button>${home}`);
+    case "nofb": return box("Cercle en ligne indisponible", "Cette installation n'a pas encore Firebase. Les cercles en ligne reviendront quand il sera configuré.", home);
+    case "missing": return box("Cercle introuvable", "Ce code ne correspond à aucun cercle, ou il a été supprimé.", `<button class="btn" data-a="forgetCircle" data-code="${esc(cc.code)}">Retirer de ma liste</button>${home}`);
+    case "notmember": return box("Tu ne fais pas partie de ce cercle", "Tu as peut-être été retiré, ou tu viens d'un autre appareil. Tu peux le rejoindre à nouveau avec son code.", `<button class="btn primary" data-a="rejoin" data-code="${esc(cc.code)}">Rejoindre ${esc(cc.code)}</button>${home}`);
+    case "denied": return box("Accès refusé", (cc.err || "") + " Si tu viens d'activer Firebase, publie les règles de firestore.rules dans la console.", `<button class="btn primary" data-a="retry">Réessayer</button>${home}`);
+    case "offline": return box("Pas de connexion", "Impossible de joindre le serveur. Vérifie ta connexion puis réessaie.", `<button class="btn primary" data-a="retry">Réessayer</button>${home}`);
+  }
+  return box("Oups", "État inattendu.", home);
+}
+
+/* ---------- Fenêtres ---------- */
+
+function newCircleModal() {
+  const m = S.modal;
+  const emo = m.emoji || CIRCLE_EMOJIS[0];
+  const online = FB.ok && m.where !== "local";
+  return `<h2>Nouveau cercle</h2>
+    <form data-f="newCircle" class="stack">
+      <label class="fld"><span>Nom du cercle</span><input name="name" maxlength="32" required placeholder="Ex. Les collègues du 3e" value="${esc(m.name || "")}"></label>
+      <fieldset class="fld"><legend>Emblème</legend>
+        <div class="emoji-grid small">${CIRCLE_EMOJIS.map(e => `<label class="emo ${e === emo ? "on" : ""}"><input type="radio" name="emoji" value="${e}" ${e === emo ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+      </fieldset>
+      <fieldset class="fld"><legend>Où jouez-vous ?</legend>
+        <div class="choice-list">
+          <label class="choice ${online ? "on" : ""} ${FB.ok ? "" : "disabled"}"><input type="radio" name="where" value="online" ${online ? "checked" : ""} ${FB.ok ? "" : "disabled"}>
+            <span><b>En ligne</b><small>Chacun sur son téléphone, on rejoint avec un code</small></span></label>
+          <label class="choice ${online ? "" : "on"}"><input type="radio" name="where" value="local" ${online ? "" : "checked"}>
+            <span><b>Sur cet appareil</b><small>Pour une soirée : on se passe le téléphone</small></span></label>
+        </div>
+      </fieldset>
+      <details class="adv"><summary>Règles du jeu</summary>
+        <div class="grid2">
+          ${numField("start", "Jetons de départ", CIRCLE_DEFAULTS.start, 100, 100000)}
+          ${numField("daily", "Bonus quotidien", CIRCLE_DEFAULTS.daily, 0, 10000)}
+          ${numField("rescue", "Renflouement si à sec", CIRCLE_DEFAULTS.rescue, 0, 10000)}
+          ${numField("bonus", "Bonus score exact", CIRCLE_DEFAULTS.bonus, 0, 10000)}
+        </div>
+      </details>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Créer le cercle</button></div>
+    </form>`;
+}
+
+function numField(name, label, val, min, max) {
+  return `<label class="fld"><span>${label}</span><input type="number" inputmode="numeric" name="${name}" value="${val}" min="${min}" max="${max}" step="1" required></label>`;
+}
+
+function joinModal() {
+  const m = S.modal;
+  return `<h2>Rejoindre un cercle</h2>
+    <p class="muted">Demande le code à un membre du cercle. Il ressemble à ABC-234.</p>
+    ${m.err ? `<p class="err">${esc(m.err)}</p>` : ""}
+    <form data-f="join" class="stack">
+      <label class="fld"><span>Code du cercle</span><input name="code" class="code-input" required maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC-234" value="${esc(m.code || "")}"></label>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary" ${m.busy ? "disabled" : ""}>${m.busy ? "Recherche…" : "Rejoindre"}</button></div>
+    </form>`;
+}
+
+function inviteModal() {
+  const code = S.code;
+  const meta = MyCircles.list().find(c => c.code === code) || { name: "" };
+  const url = location.origin + location.pathname + "?join=" + code;
+  return `<h2>Inviter des amis</h2>
+    <p class="muted">Envoie ce code ou ce lien : tes amis rejoindront « ${esc(meta.name)} » en un clic.</p>
+    <div class="code-big" aria-label="Code du cercle">${esc(code)}</div>
+    <div class="row center wrap">
+      ${navigator.share ? `<button class="btn primary" data-a="share" data-url="${esc(url)}">Partager le lien</button>` : ""}
+      <button class="btn" data-a="copy" data-text="${esc(url)}">Copier le lien</button>
+      <button class="btn ghost" data-a="copy" data-text="${esc(code)}">Copier le code</button>
+    </div>
+    <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
+}
+
+function switcherModal() {
+  const list = MyCircles.list();
+  return `<h2>Mes cercles</h2>
+    <div class="circle-list compact">${list.map(c => `
+      <button class="circle-card ${c.code === S.code ? "on" : ""}" data-a="openCircle" data-code="${esc(c.code)}">
+        <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
+        <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "Sur cet appareil" : "Code " + esc(c.code)}</small></span>
+      </button>`).join("")}</div>
+    <div class="row wrap">
+      <button class="btn" data-a="newCircle">${ICON.plus} Créer</button>
+      <button class="btn" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Rejoindre</button>
+      <button class="btn ghost" data-a="home">Accueil</button>
+    </div>`;
+}
+
+function circleModal() {
+  const cc = DB.cur(), c = cc.circle, owner = isOwner(cc);
+  const a = analysis(cc);
+  const mem = visibleMembers(cc).sort((x, y) => x.name.localeCompare(y.name));
+  const m = S.modal;
+  return `<h2>${esc(c.emoji || "🎯")} ${esc(c.name)}</h2>
+    <p class="muted">${cc.local ? "Cercle sur cet appareil" : "Code " + esc(cc.code)}, saison ${c.season}, ${mem.length} ${pl(mem.length, "membre", "membres")}</p>
+    ${owner ? `<form data-f="circleEdit" class="stack">
+      <label class="fld"><span>Nom</span><input name="name" maxlength="32" required value="${esc(c.name)}"></label>
+      <fieldset class="fld"><legend>Emblème</legend>
+        <div class="emoji-grid small">${CIRCLE_EMOJIS.map(e => `<label class="emo ${e === c.emoji ? "on" : ""}"><input type="radio" name="emoji" value="${e}" ${e === c.emoji ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+      </fieldset>
+      <div class="grid2">
+        ${numField("daily", "Bonus quotidien", c.daily, 0, 10000)}
+        ${numField("rescue", "Renflouement si à sec", c.rescue, 0, 10000)}
+        ${numField("bonus", "Bonus score exact", c.bonus, 0, 10000)}
+        ${numField("seed", "Mise de la banque par choix", c.seed, 0, 10000)}
+      </div>
+      <p class="hint">Les jetons de départ (${nf(c.start)}) s'appliquent à toute la saison. La mise de la banque rend les cotes intéressantes même quand peu de joueurs ont misé.</p>
+      <div class="row end"><button class="btn primary">Enregistrer</button></div>
+    </form>` : `<p>Seul le créateur du cercle peut en changer les règles.</p>`}
+
+    <h3>Membres</h3>
+    <ul class="member-list">${mem.map(x => `<li>${avatar(x)}<span class="grow">${esc(x.name)}${x.uid === c.owner ? ` <small class="tag">créateur</small>` : ""}${cc.local && x.uid === myId(cc) ? ` <small class="tag">joue</small>` : ""}</span>
+      ${owner && x.uid !== c.owner ? `<button class="btn tiny ghost" data-a="giveOwner" data-uid="${esc(x.uid)}" title="Donner la main">Donner la main</button><button class="btn tiny danger ghost" data-a="kick" data-uid="${esc(x.uid)}">Retirer</button>` : ""}</li>`).join("")}</ul>
+    ${cc.local ? `<form data-f="addPlayer" class="row">
+      <input name="name" maxlength="24" required placeholder="Ajouter un joueur" aria-label="Nom du joueur">
+      <button class="btn">Ajouter</button></form>` : ""}
+
+    ${owner ? `<h3>Saison</h3>
+      <p class="muted">Clôture la saison ${c.season} : le classement est archivé, les trois premiers reçoivent un trophée et tout le monde repart avec ${nf(c.start)} jetons.</p>
+      <button class="btn" data-a="newSeason">Démarrer la saison ${c.season + 1}</button>` : ""}
+
+    ${owner && !cc.local ? `<h3>Clé de récupération</h3>
+      <p class="muted">Garde-la précieusement : elle te permet de reprendre la main sur ce cercle depuis un autre appareil.</p>
+      ${m.key ? `<div class="code-big small">${esc(m.key)}</div>` : `<button class="btn ghost" data-a="showKey">Afficher la clé</button>`}` : ""}
+    ${!owner && !cc.local ? `<p class="hint">Tu as créé ce cercle sur un autre appareil ? <button class="link" data-a="recover">Reprendre la main avec la clé</button></p>` : ""}
+
+    <div class="row between wrap modal-foot">
+      ${owner ? (cc.local ? `<button class="btn danger ghost" data-a="deleteLocal">Supprimer le cercle</button>` : `<span></span>`) : `<button class="btn danger ghost" data-a="leave">Quitter le cercle</button>`}
+      <button class="btn" data-a="close">Fermer</button>
+    </div>`;
+}
+
+function recoverModal() {
+  const m = S.modal;
+  return `<h2>Reprendre la main</h2>
+    <p class="muted">Entre la clé de récupération affichée chez le créateur du cercle.</p>
+    ${m.err ? `<p class="err">${esc(m.err)}</p>` : ""}
+    <form data-f="recover" class="stack">
+      <label class="fld"><span>Clé</span><input name="key" required autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Valider</button></div>
+    </form>`;
+}
+
+function actorModal() {
+  const cc = DB.cur();
+  return `<h2>Qui joue ?</h2>
+    <p class="muted">Passe le téléphone : les mises sont faites au nom du joueur choisi.</p>
+    <div class="choice-list">${visibleMembers(cc).map(x => `<button class="choice ${x.uid === myId(cc) ? "on" : ""}" data-a="setActor" data-uid="${esc(x.uid)}">${avatar(x)}<span><b>${esc(x.name)}</b></span></button>`).join("")}</div>
+    <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
+}
+
+/* ---------- Actions ---------- */
+
+async function openCircle(code) {
+  S.code = code;
+  S.view = "circle";
+  S.tab = "bets";
+  S.modal = null;
+  S.actor = null;
+  Store.set("last", code);
+  DB.open(code);
+  render();
+}
+
+async function newSeason() {
+  const cc = DB.cur(), a = analysis(cc), c = cc.circle;
+  const open = Object.values(a.bets).filter(x => x.state === "open" || x.state === "closed").length;
+  if (!(await ask(`Démarrer la saison ${c.season + 1} ?${open ? ` ${open} pari(s) encore en cours seront annulés et remboursés.` : ""}`, "Démarrer la saison"))) return;
+  const standings = a.standings.map(s => ({ uid: s.uid, name: s.name, avatar: s.avatar || "", bal: s.bal }));
+  for (const x of Object.values(a.bets)) if (x.state === "open" || x.state === "closed") await DB.put("bets", x.id, { status: "void", settledAt: now(), settledBy: myId(cc) }, true);
+  await DB.putSeason(c.season, { n: c.season, endedAt: now(), standings });
+  await DB.setCircle({ season: c.season + 1 });
+  S.modal = null;
+  S.tab = "rank";
+  toast(`Saison ${c.season + 1} lancée : bonne chance à tous !`, "good");
+  render();
+}
+
+function circlesAct(a, d) {
+  const cc = DB.cur();
+  switch (a) {
+    case "home": DB.close(); S.code = null; S.view = "home"; S.modal = null; Store.del("last"); return true;
+    case "openCircle": openCircle(d.code); return true;
+    case "newCircle": S.modal = { k: "newCircle" }; return true;
+    case "joinCircle": S.modal = { k: "join" }; return true;
+    case "switcher": S.modal = { k: "switcher" }; return true;
+    case "invite": S.modal = { k: "invite" }; return true;
+    case "circleInfo": S.modal = { k: "circle" }; return true;
+    case "recover": S.modal = { k: "recover" }; return true;
+    case "actor": S.modal = { k: "actor" }; return true;
+    case "setActor": S.actor = d.uid; S.modal = null; toast(LANG === "en" ? memberOf(cc, d.uid).name + "'s turn" : "À " + memberOf(cc, d.uid).name + " de jouer"); return true;
+    case "retry": { const c = S.code; DB.close(); DB.open(c); return true; }
+    case "forgetCircle": MyCircles.remove(d.code); Account.syncCircles(); circlesAct("home", {}); return true;
+    case "rejoin": S.modal = { k: "join", code: d.code }; return true;
+    case "share": navigator.share({ title: "Pronohub", text: "Rejoins mon cercle de paris sur Pronohub", url: d.url }).catch(() => { }); return true;
+    case "copy": copyText(d.text); return true;
+    case "showKey":
+      FB.sub(cc.code, "private").doc("owner").get().then(s => { S.modal.key = s.exists ? s.data().key : "?"; render(); }).catch(e => toast(fbErr(e), "bad"));
+      return true;
+    case "newSeason": newSeason(); return true;
+    case "giveOwner":
+      ask(`Donner la main à ${memberOf(cc, d.uid).name} ? Tu ne pourras plus changer les règles du cercle.`, "Donner la main")
+        .then(ok => ok && DB.setCircle({ owner: d.uid }).then(ok => ok && toast("C'est fait")));
+      return true;
+    case "kick":
+      ask(`Retirer ${memberOf(cc, d.uid).name} du cercle ?`, "Retirer", true).then(ok => ok && DB.del("members", d.uid));
+      return true;
+    case "leave":
+      ask("Quitter ce cercle ? Tu pourras revenir avec le code.", "Quitter le cercle", true).then(ok => ok && DB.del("members", myId(cc))).then(ok => {
+        if (!ok) return;
+        MyCircles.remove(cc.code); Account.syncCircles(); circlesAct("home", {}); render();
+      });
+      return true;
+    case "deleteLocal":
+      ask("Supprimer définitivement ce cercle et tous ses paris ?", "Supprimer le cercle", true).then(ok => {
+        if (!ok) return;
+        Store.del("local." + cc.code); MyCircles.remove(cc.code); circlesAct("home", {}); render();
+      });
+      return true;
+  }
+  return false;
+}
+
+function circlesSubmit(f, fd) {
+  const k = f.dataset.f;
+  const num = (n, def) => Math.max(0, Math.min(100000, parseInt(fd.get(n), 10) || def || 0));
+  if (k === "profile") {
+    const name = String(fd.get("name") || "").trim().slice(0, 24);
+    if (!name) return true;
+    Profile.set({ name, avatar: fd.get("avatar") || "" });
+    Account.pushProfile();
+    if (S.pendingJoin && FB.ok) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
+    else if (!Store.get("tourDone")) { S.modal = { k: "tour", step: 0 }; Store.set("tourDone", 1); }
+    render();
+    return true;
+  }
+  if (k === "newCircle") {
+    const name = String(fd.get("name") || "").trim().slice(0, 32);
+    const emoji = fd.get("emoji") || "🎯";
+    const st = { start: Math.max(100, num("start", 1000)), daily: num("daily"), rescue: num("rescue"), bonus: num("bonus"), seed: CIRCLE_DEFAULTS.seed };
+    const local = fd.get("where") !== "online" || !FB.ok;
+    (local ? DB.createLocal(name, emoji, st) : DB.createOnline(name, emoji, st))
+      .then(code => { openCircle(code); S.modal = { k: local ? "circle" : "invite" }; toast("Cercle créé", "good"); render(); })
+      .catch(e => toast(fbErr(e), "bad"));
+    return true;
+  }
+  if (k === "join") {
+    const code = normCode(fd.get("code"));
+    if (!code) { S.modal.err = "Le code a 6 caractères, par exemple ABC-234."; render(); return true; }
+    S.modal.busy = true; S.modal.code = code; render();
+    DB.join(code).then(() => { toast("Bienvenue dans le cercle !", "good"); openCircle(code); })
+      .catch(e => { S.modal.busy = false; S.modal.err = e.code === "not-found" ? "Aucun cercle avec ce code. Vérifie les lettres et les chiffres." : fbErr(e); render(); });
+    return true;
+  }
+  if (k === "circleEdit") {
+    DB.setCircle({ name: String(fd.get("name")).trim().slice(0, 32), emoji: fd.get("emoji") || "🎯", daily: num("daily"), rescue: num("rescue"), bonus: num("bonus"), seed: num("seed") })
+      .then(ok => { if (ok) { toast("Règles enregistrées", "good"); Account.syncCircles(); } });
+    return true;
+  }
+  if (k === "addPlayer") {
+    const name = String(fd.get("name") || "").trim().slice(0, 24);
+    if (!name) return true;
+    const id = "p_" + rid(6);
+    DB.put("members", id, { uid: id, name, avatar: AVATARS[hashStr(id) % AVATARS.length], joinedAt: now() });
+    toast(name + " rejoint le cercle");
+    return true;
+  }
+  if (k === "recover") {
+    const key = String(fd.get("key") || "").trim().toUpperCase();
+    const cc = DB.cur();
+    FB.circle(cc.code).set({ owner: FB.uid, proof: key }, { merge: true })
+      .then(async () => {
+        const nk = rid(10).toUpperCase();
+        await FB.sub(cc.code, "private").doc("owner").set({ key: nk });
+        await FB.circle(cc.code).update({ proof: firebase.firestore.FieldValue.delete() });
+        S.modal = { k: "circle", key: nk };
+        toast("Tu as repris la main. Nouvelle clé générée.", "good");
+        render();
+      })
+      .catch(() => { S.modal.err = "Clé incorrecte."; render(); });
+    return true;
+  }
+  return false;
+}
+
+/* ===== bets.js ===== */
+/* Pronohub — paris : liste, détail, création, mises, résultats, contestations, duels */
+
+const STATE_LABEL = { open: "Ouvert", closed: "En attente du résultat", settled: "Terminé", void: "Annulé", contested: "Contesté" };
+
+function canManage(cc, b, uid = myId(cc)) { return b.createdBy === uid || isOwner(cc, uid); }
+function myWager(info, uid) { return info.ws.find(w => w.u === uid); }
+
+/* ---------- Bandeau bonus du jour / renflouement ---------- */
+function bonusCard(cc, a) {
+  const me = myId(cc), p = a.players[me];
+  if (!p) return "";
+  const day = dayNum();
+  const c = cc.circle;
+  const out = [];
+  if (c.daily > 0 && !cc.ledger[`${me}_daily_${day}`]) {
+    out.push(`<div class="gift"><span class="gift-coin" aria-hidden="true">🪙</span><span class="grow"><b>Bonus du jour</b><small>+${nf(c.daily)} jetons t'attendent</small></span><button class="btn primary small" data-a="claimDaily">Récupérer</button></div>`);
+  }
+  if (c.rescue > 0 && p.bal < 10 && !cc.ledger[`${me}_rescue_${day}`]) {
+    out.push(`<div class="gift broke"><span class="gift-coin" aria-hidden="true">💸</span><span class="grow"><b>À sec ?</b><small>La banque te renfloue de ${nf(c.rescue)} jetons. Ça comptera comme une faillite…</small></span><button class="btn small" data-a="claimRescue">Me renflouer</button></div>`);
+  }
+  return out.join("");
+}
+
+/* ---------- Ticket (carte de pari) ---------- */
+function ticket(cc, a, info) {
+  const b = info.b, me = myId(cc), mine = myWager(info, me);
+  const cat = CAT[b.cat] || CAT.autre;
+  const L = b.src && LEAGUE[b.src.league];
+  let time;
+  if (info.state === "open") time = `<span class="t-time live">${ICON.clock}${countdown(b.closesAt)}</span>`;
+  else time = `<span class="t-time">${STATE_LABEL[info.state]}</span>`;
+  const maxShare = Math.max(1, ...b.options.map(o => info.byOpt[o.id] || 0));
+  const optsArr = b.options.map(o => {
+    const win = info.state === "settled" && b.result === o.id;
+    const hide = info.state === "open" && b.kind !== "duel";
+    return `<div class="t-opt ${mine && mine.opt === o.id ? "mine" : ""} ${win ? "win" : ""}">
+      <span class="t-lbl">${esc(o.label)}</span>
+      <span class="t-odd">${info.odds[o.id] ? oddsFmt(info.odds[o.id]) : "—"}</span>
+      <i class="t-bar" style="--w:${hide ? 0 : Math.round(100 * (info.byOpt[o.id] || 0) / maxShare)}%"></i>
+    </div>`;
+  });
+  const opts = optsArr.length <= 4 ? optsArr.join("") : optsArr.slice(0, 3).join("") + `<div class="t-more">+ ${optsArr.length - 3} ${pl(optsArr.length - 3, "autre choix", "autres choix")}</div>`;
+  let stamp = "";
+  if (mine && info.state === "settled") {
+    const g = info.payouts[mine.id] - mine.amt;
+    stamp = g > 0 ? `<span class="stamp win">Gagné +${nf(g)}</span>` : g === 0 ? `<span class="stamp void">Remboursé</span>` : `<span class="stamp lose">Perdu</span>`;
+  } else if (info.state === "void") stamp = `<span class="stamp void">Annulé</span>`;
+  else if (info.state === "contested") stamp = `<span class="stamp lose">Contesté</span>`;
+  const title = b.kind === "match" && b.home ? matchTitle(b) : esc(b.title);
+  const duelLine = b.kind === "duel" && b.duel ? `<p class="t-sub">${esc(memberOf(cc, b.createdBy).name)} contre ${esc(memberOf(cc, b.duel.to).name)}, ${nf(b.duel.stake)} jetons chacun</p>` : "";
+  return `<article class="ticket st-${info.state} ${mine ? "has-mine" : ""}">
+    <div class="t-top"><span class="t-cat">${cat.e} ${L ? esc(L.name) : esc(cat.label)}</span>${time}</div>
+    <h3 class="t-title">${title}</h3>
+    ${duelLine}
+    <div class="t-opts n${Math.min(b.options.length, 4)}">${opts}</div>
+    <div class="t-foot">
+      <span>${ICON.coin}${nf(info.pool)}</span>
+      <span>${info.participants.size} ${pl(info.participants.size, "parieur", "parieurs")}</span>
+      ${mine ? `<span class="t-mine">Ta mise : ${nf(mine.amt)}</span>` : info.state === "open" ? `<span class="t-cta">Parier</span>` : ""}
+    </div>
+    ${stamp}
+    <button class="t-link" data-a="openBet" data-id="${esc(info.id)}" aria-label="Voir le pari : ${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}"></button>
+  </article>`;
+}
+
+function matchTitle(b) {
+  const logo = (u, n) => u ? `<img src="${esc(u)}" alt="" loading="lazy" width="22" height="22" onerror="this.remove()">` : `<span class="crest" aria-hidden="true">${esc(n.charAt(0))}</span>`;
+  return `<span class="match"><span class="team">${logo(b.homeLogo, b.home)}${esc(b.home)}</span><span class="vs">${b.score ? `${b.score.h}–${b.score.a}` : "–"}</span><span class="team away">${esc(b.away)}${logo(b.awayLogo, b.away)}</span></span>`;
+}
+
+/* ---------- Onglet Paris ---------- */
+function betsTab(cc, a) {
+  const all = Object.values(a.bets);
+  const groups = {
+    open: all.filter(x => x.state === "open").sort((x, y) => x.b.closesAt - y.b.closesAt),
+    todo: all.filter(x => x.state === "closed" || x.state === "contested").sort((x, y) => x.b.closesAt - y.b.closesAt),
+    done: all.filter(x => x.state === "settled" || x.state === "void").sort((x, y) => (y.b.settledAt || 0) - (x.b.settledAt || 0)),
+  };
+  const f = S.filter in groups ? S.filter : "open";
+  const list = groups[f];
+  const seg = (k, l) => `<button class="seg ${f === k ? "on" : ""}" data-a="filter" data-v="${k}" aria-pressed="${f === k}">${l}<span class="count">${groups[k].length}</span></button>`;
+  const empty = {
+    open: `<div class="empty"><p class="empty-big">Aucun pari en cours.</p><p>Lance le premier : un match, une élection ou une question qui fera débat à la pause café.</p><button class="btn primary" data-a="newBet">${ICON.plus} Créer un pari</button></div>`,
+    todo: `<div class="empty"><p class="empty-big">Rien à régler.</p><p>Les paris clôturés attendant un résultat apparaîtront ici.</p></div>`,
+    done: `<div class="empty"><p class="empty-big">Pas encore de résultat.</p><p>Les paris terminés et tes gains s'afficheront ici.</p></div>`,
+  }[f];
+  return `<section class="page">
+    ${bonusCard(cc, a)}
+    <div class="segs tabs-filter" role="group" aria-label="Filtrer les paris">${seg("open", "En cours")}${seg("todo", "À régler")}${seg("done", "Terminés")}</div>
+    <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
+  </section>`;
+}
+
+/* ---------- Détail d'un pari ---------- */
+function betView(cc, a) {
+  const info = a.bets[S.betId];
+  if (!info) return `<section class="page"><div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button><h1>Pari introuvable</h1></div><p class="muted">Il a peut-être été supprimé, ou il appartient à une saison terminée.</p></section>`;
+  const b = info.b, me = myId(cc), mine = myWager(info, me);
+  const cat = CAT[b.cat] || CAT.autre;
+  const L = b.src && LEAGUE[b.src.league];
+  const open = info.state === "open";
+  const manage = canManage(cc, b, me);
+  const reveal = !open || b.kind === "duel";
+  const isDuelTarget = b.kind === "duel" && b.duel && b.duel.to === me;
+
+  const opts = b.options.map(o => {
+    const share = info.pool ? (info.byOpt[o.id] || 0) / info.pool : 0;
+    const n = info.ws.filter(w => w.opt === o.id).length;
+    const win = (info.state === "settled" || info.state === "contested") && b.result === o.id;
+    const can = open && b.kind !== "duel" && (!mine || mine.opt === o.id);
+    const tag = can ? "button" : "div";
+    return `<${tag} class="opt ${mine && mine.opt === o.id ? "mine" : ""} ${win ? "win" : ""} ${can ? "can" : ""}" ${can ? `data-a="wager" data-opt="${esc(o.id)}"` : ""}>
+      <span class="opt-main"><b>${esc(o.label)}</b>${reveal ? `<small>${nf(info.byOpt[o.id] || 0)} jetons, ${n} ${pl(n, "parieur", "parieurs")}</small>` : ""}</span>
+      <span class="opt-odd">${info.odds[o.id] ? oddsFmt(info.odds[o.id]) : "—"}</span>
+      ${reveal ? `<i class="opt-bar" style="--w:${Math.round(share * 100)}%"></i>` : ""}
+      ${win ? `<span class="opt-check" aria-label="Résultat">${ICON.check}</span>` : ""}
+    </${tag}>`;
+  }).join("");
+
+  let banner = "";
+  if (info.state === "settled") {
+    banner = `<div class="banner good"><b>Résultat : ${esc(optLabel(b, b.result))}${b.score ? ` (${b.score.h}–${b.score.a})` : ""}</b><small>${b.settledBy === "auto" ? "Réglé automatiquement" : "Réglé par " + esc(memberOf(cc, b.settledBy).name)}, ${rel(b.settledAt)}</small></div>`;
+  } else if (info.state === "contested") {
+    banner = `<div class="banner bad"><b>Résultat contesté</b><small>La majorité des parieurs conteste « ${esc(optLabel(b, b.result))} ». Les gains sont gelés jusqu'à correction.</small></div>`;
+  } else if (info.state === "void") {
+    banner = `<div class="banner"><b>Pari annulé</b><small>Toutes les mises ont été remboursées.</small></div>`;
+  } else if (info.state === "closed") {
+    banner = b.src
+      ? `<div class="banner"><b>Mises clôturées</b><small>Le résultat arrivera automatiquement après le match.</small></div>`
+      : `<div class="banner"><b>Mises clôturées</b><small>${manage ? "À toi de saisir le résultat." : "En attente du résultat de " + esc(memberOf(cc, b.createdBy).name) + "."}</small></div>`;
+  }
+
+  // Ma position
+  let minePanel = "";
+  if (mine) {
+    const pay = info.payouts[mine.id];
+    const gain = pay != null ? pay - mine.amt : null;
+    minePanel = `<div class="panel mine-panel">
+      <div class="row between"><span>Ta mise</span><b>${nf(mine.amt)} sur ${esc(optLabel(b, mine.opt))}</b></div>
+      ${mine.score ? `<div class="row between"><span>Ton score</span><b>${mine.score.h}–${mine.score.a}</b></div>` : ""}
+      ${gain != null ? `<div class="row between"><span>Résultat</span><b class="${gain > 0 ? "pos" : gain < 0 ? "neg" : ""}">${gain > 0 ? "+" : ""}${nf(gain)}</b></div>`
+        : `<div class="row between"><span>Gain si ça passe (estimé)</span><b class="pos">${nf(potential(info, mine.opt, 0, mine))}</b></div>`}
+      ${open && b.kind !== "duel" ? `<button class="btn small" data-a="wager" data-opt="${esc(mine.opt)}">Ajouter des jetons</button>` : ""}
+    </div>`;
+  }
+
+  // Duel : accepter ou refuser
+  let duelPanel = "";
+  if (b.kind === "duel" && open && b.duel) {
+    if (isDuelTarget && !mine) duelPanel = `<div class="panel duel">
+      <p><b>${esc(memberOf(cc, b.createdBy).name)}</b> te défie : ${nf(b.duel.stake)} jetons chacun, le gagnant rafle ${nf(b.duel.stake * 2)}.</p>
+      <div class="row wrap"><button class="btn primary" data-a="duelAccept">Relever le défi</button><button class="btn ghost" data-a="duelDecline">Refuser</button></div></div>`;
+    else if (b.createdBy === me && info.ws.length < 2) duelPanel = `<div class="panel duel"><p>En attente de la réponse de <b>${esc(memberOf(cc, b.duel.to).name)}</b>. Sans réponse avant la clôture, le duel est annulé.</p></div>`;
+  }
+
+  // Parieurs
+  const byU = info.ws.slice().sort((x, y) => y.amt - x.amt);
+  const people = byU.length ? `<h3>Parieurs</h3><ul class="bettors">${byU.map(w => {
+    const m = memberOf(cc, w.u);
+    const pay = info.payouts[w.id];
+    const g = pay != null ? pay - w.amt : null;
+    return `<li>${avatar(m)}<span class="grow">${esc(m.name)}${reveal ? `<small>${esc(optLabel(b, w.opt))}${w.score && !open ? ", " + w.score.h + "–" + w.score.a : ""}</small>` : `<small>a misé</small>`}</span>
+      <span class="amt">${nf(w.amt)}${g != null && g !== 0 ? `<small class="${g > 0 ? "pos" : "neg"}">${g > 0 ? "+" : ""}${nf(g)}</small>` : ""}</span></li>`;
+  }).join("")}</ul>${open && b.kind !== "duel" ? `<p class="hint">Les choix de chacun seront révélés à la clôture.</p>` : ""}` : "";
+
+  // Actions de gestion
+  const acts = [];
+  if (b.src && (info.state === "closed" || info.state === "open") && Date.now() > b.closesAt) acts.push(`<button class="btn" data-a="checkResult">Vérifier le résultat</button>`);
+  if (manage && (info.state === "closed" || info.state === "contested" || (open && !b.src && b.kind !== "duel"))) acts.push(`<button class="btn primary" data-a="settle">${info.state === "contested" ? "Corriger le résultat" : "Saisir le résultat"}</button>`);
+  if (manage && b.kind === "duel" && (info.state === "closed" || (open && info.ws.length === 2))) acts.push(`<button class="btn primary" data-a="settle">Désigner le gagnant</button>`);
+  if (manage && info.state === "settled") acts.push(`<button class="btn ghost" data-a="settle">Corriger le résultat</button>`);
+  if (manage && open) acts.push(`<button class="btn ghost" data-a="closeNow">Clôturer les mises</button>`);
+  if (manage && info.state !== "void" && info.state !== "settled") acts.push(`<button class="btn ghost danger" data-a="voidBet">Annuler le pari</button>`);
+  if (manage && !info.ws.some(w => w.u !== me)) acts.push(`<button class="btn ghost danger" data-a="deleteBet">Supprimer</button>`);
+
+  // Contestation
+  let contest = "";
+  if ((info.state === "settled" || info.state === "contested") && mine && b.settledBy !== me && a.U(b.settledBy) !== me) {
+    const flagged = !!cc.flags[`${info.id}_${me}`] && cc.flags[`${info.id}_${me}`].result === b.result;
+    contest = `<div class="contest"><span>${flagged ? "Tu contestes ce résultat." : "Le résultat te semble faux ?"} <small>${info.contest}/${info.contestNeed} ${pl(info.contestNeed, "voix nécessaire", "voix nécessaires")}</small></span>
+      <button class="btn small ${flagged ? "" : "ghost"}" data-a="${flagged ? "unflag" : "flag"}">${flagged ? "Retirer ma contestation" : "Contester"}</button></div>`;
+  }
+
+  return `<section class="page bet-page">
+    <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button>
+      <span class="t-cat">${cat.e} ${L ? esc(L.name) : esc(cat.label)}</span></div>
+    <div class="bet-hero">
+      <h1 class="bet-title">${b.kind === "match" && b.home ? matchTitle(b) : esc(b.title)}</h1>
+      ${b.desc ? `<p class="bet-desc">${esc(b.desc)}</p>` : ""}
+      <p class="bet-meta">${open ? `Clôture ${fmtDate(b.closesAt)}, ${rel(b.closesAt)}` : `Clôturé le ${fmtDate(b.closesAt)}`}</p>
+      <p class="bet-meta">Proposé par ${esc(memberOf(cc, b.createdBy).name)}${b.src ? ", résultat automatique" : ""}${b.bonus ? `, bonus score exact +${nf(b.bonus)}` : ""}</p>
+    </div>
+    ${banner}
+    ${duelPanel}
+    <div class="opts">${opts}</div>
+    <p class="pool-line">${ICON.coin} <span><b>${nf(info.pool)}</b> jetons dans la cagnotte${info.seed ? `, + ${nf(info.seed * b.options.length)} de la banque` : ""}</span></p>
+    ${minePanel}
+    ${contest}
+    ${acts.length ? `<div class="row wrap acts">${acts.join("")}</div>` : ""}
+    ${reactionsBar(cc, info.id)}
+    ${people}
+    ${commentsBlock(cc, info.id)}
+    ${b.src ? `<p class="source">Matchs et scores : ESPN (source publique non officielle).</p>` : ""}
+  </section>`;
+}
+
+/* ---------- Mise ---------- */
+function wagerModal(cc, a) {
+  const info = a.bets[S.modal.bet];
+  if (!info) return "";
+  const b = info.b, me = myId(cc), mine = myWager(info, me);
+  const opt = S.modal.opt;
+  const bal = a.players[me] ? a.players[me].bal : 0;
+  const amt = S.modal.amt != null ? S.modal.amt : Math.min(100, Math.max(0, bal));
+  const chips = [10, 50, 100, 250, 500].filter(v => v < bal);
+  const scoreOk = b.kind === "match" && b.bonus > 0;
+  return `<h2>${mine ? "Ajouter des jetons" : "Ta mise"}</h2>
+    <p class="wager-on">Sur <b>${esc(optLabel(b, opt))}</b>, cote actuelle ${info.odds[opt] ? oddsFmt(info.odds[opt]) : "—"}</p>
+    <form data-f="wager" class="stack">
+      <div class="amount">
+        <button type="button" class="icon-btn" data-a="amt" data-d="-10" aria-label="Moins 10">−</button>
+        <input name="amt" type="number" inputmode="numeric" min="1" max="${bal}" step="1" value="${amt}" aria-label="Montant en jetons" required>
+        <button type="button" class="icon-btn" data-a="amt" data-d="10" aria-label="Plus 10">+</button>
+      </div>
+      <div class="chips">${chips.map(v => `<button type="button" class="chip" data-a="amtSet" data-v="${v}">${v}</button>`).join("")}<button type="button" class="chip hot" data-a="amtSet" data-v="${bal}">Tapis (${nf(bal)})</button></div>
+      <p class="potential">Gain estimé si ça passe : <b id="potential">${nf(potential(info, opt, amt, mine))}</b> <small>La cote finale dépend des mises de tous jusqu'à la clôture.</small></p>
+      ${scoreOk && !mine ? `<fieldset class="fld score-fld"><legend>Score exact (facultatif, +${nf(b.bonus)} si trouvé)</legend>
+        <div class="score"><span>${esc(b.home)}</span><input name="sh" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.home)}"><span class="dash">–</span><input name="sa" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.away)}"><span>${esc(b.away)}</span></div>
+      </fieldset>` : ""}
+      <p class="muted small">Ton solde : ${nf(bal)} jetons</p>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary big" ${bal < 1 ? "disabled" : ""}>Miser</button></div>
+    </form>`;
+}
+
+/* ---------- Résultat ---------- */
+function settleModal(cc, a) {
+  const info = a.bets[S.modal.bet];
+  const b = info.b;
+  if (b.kind === "match") {
+    return `<h2>Score final</h2>
+      <form data-f="settle" class="stack">
+        <div class="score big"><span>${esc(b.home)}</span><input name="sh" type="number" inputmode="numeric" min="0" max="99" required aria-label="Score ${esc(b.home)}" value="${b.score ? b.score.h : ""}"><span class="dash">–</span><input name="sa" type="number" inputmode="numeric" min="0" max="99" required aria-label="Score ${esc(b.away)}" value="${b.score ? b.score.a : ""}"><span>${esc(b.away)}</span></div>
+        ${b.options.some(o => o.id === "d") ? "" : `<p class="hint">Pas de match nul possible : en cas d'égalité, le pari sera annulé et remboursé.</p>`}
+        <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Valider le résultat</button></div>
+      </form>`;
+  }
+  return `<h2>${b.kind === "duel" ? "Qui a gagné ?" : "Quel est le résultat ?"}</h2>
+    <form data-f="settle" class="stack">
+      <div class="choice-list">${b.options.map(o => `<label class="choice"><input type="radio" name="res" value="${esc(o.id)}" required ${b.result === o.id ? "checked" : ""}><span><b>${esc(o.label)}</b></span></label>`).join("")}</div>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Valider le résultat</button></div>
+    </form>`;
+}
+
+/* ---------- Création ---------- */
+function newBetModal(cc) {
+  const m = S.modal;
+  if (!m.kind) {
+    return `<h2>Nouveau pari</h2>
+      <button class="kind-card feature" data-a="betKind" data-kind="import">
+        <span class="k-emo" aria-hidden="true">📡</span><span><b>Importer des matchs</b><small>Football, NBA, NHL, NFL : calendrier et résultats automatiques</small></span></button>
+      <div class="kind-grid">${KINDS.map(k => `<button class="kind-card" data-a="betKind" data-kind="${k.id}"><span class="k-emo" aria-hidden="true">${k.e}</span><span><b>${k.label}</b><small>${esc(k.hint)}</small></span></button>`).join("")}</div>
+      <div class="row end"><button class="btn ghost" data-a="close">Annuler</button></div>`;
+  }
+  if (m.kind === "import") return importModal(cc);
+  const d = m.draft;
+  const kind = KINDS.find(k => k.id === m.kind);
+  const others = visibleMembers(cc).filter(x => x.uid !== myId(cc));
+  const catSel = `<label class="fld"><span>Catégorie</span><select name="cat">${CATS.map(c => `<option value="${c.id}" ${d.cat === c.id ? "selected" : ""}>${c.e} ${c.label}</option>`).join("")}</select></label>`;
+  const close = `<label class="fld"><span>${m.kind === "duel" ? "Réponse attendue avant le" : "Fin des mises"}</span><input type="datetime-local" name="closesAt" required value="${esc(d.closesAt)}"></label>`;
+  let body = "";
+  if (m.kind === "match") {
+    body = `<div class="grid2">
+        <label class="fld"><span>Équipe à domicile</span><input name="home" maxlength="40" required value="${esc(d.home || "")}" placeholder="Ex. Standard"></label>
+        <label class="fld"><span>Équipe à l'extérieur</span><input name="away" maxlength="40" required value="${esc(d.away || "")}" placeholder="Ex. Anderlecht"></label>
+      </div>
+      <label class="check"><input type="checkbox" name="draw" ${d.draw !== false ? "checked" : ""}><span>Match nul possible</span></label>
+      <label class="check"><input type="checkbox" name="bonus" ${d.bonus !== false ? "checked" : ""}><span>Bonus score exact (+${nf(cc.circle.bonus)})</span></label>
+      ${catSel}${close}`;
+  } else if (m.kind === "duel") {
+    body = others.length ? `<label class="fld"><span>Adversaire</span><select name="to" required>${others.map(x => `<option value="${esc(x.uid)}" ${d.to === x.uid ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+      <label class="fld"><span>Je parie que…</span><input name="title" maxlength="120" required value="${esc(d.title || "")}" placeholder="Ex. le Standard gagne le derby"></label>
+      <label class="fld"><span>Mise de chacun</span><input name="stake" type="number" inputmode="numeric" min="1" required value="${esc(d.stake || 100)}"></label>
+      ${catSel}${close}` : `<p class="muted">Il faut au moins un autre membre dans le cercle pour lancer un duel.</p>`;
+  } else {
+    body = `<label class="fld"><span>${m.kind === "vote" ? "Élection" : "Question"}</span><input name="title" maxlength="120" required value="${esc(d.title || "")}" placeholder="${m.kind === "vote" ? "Ex. Qui sera bourgmestre d'Ouffet ?" : m.kind === "yesno" ? "Ex. Julie va-t-elle oublier son badge lundi ?" : "Ex. Qui sera l'employé du mois ?"}"></label>
+      <label class="fld"><span>Précisions (facultatif)</span><textarea name="desc" rows="2" maxlength="300" placeholder="Règles, source du résultat…">${esc(d.desc || "")}</textarea></label>
+      ${m.kind === "yesno" ? "" : `<fieldset class="fld"><legend>${m.kind === "vote" ? "Candidats ou partis" : "Choix possibles"}</legend>
+        <div class="opt-inputs">${d.opts.map((o, i) => `<div class="row"><input name="opt${i}" maxlength="50" value="${esc(o)}" placeholder="Choix ${i + 1}" aria-label="Choix ${i + 1}" ${i < 2 ? "required" : ""}>${d.opts.length > 2 ? `<button type="button" class="icon-btn" data-a="optDel" data-i="${i}" aria-label="Retirer ce choix">${ICON.x}</button>` : ""}</div>`).join("")}</div>
+        ${d.opts.length < 12 ? `<button type="button" class="btn small ghost" data-a="optAdd">${ICON.plus} Ajouter un choix</button>` : ""}
+      </fieldset>`}
+      ${catSel}${close}`;
+  }
+  return `<h2>${kind.e} ${kind.label}</h2>
+    <form data-f="newBet" class="stack">${body}
+      <div class="row between"><button type="button" class="btn ghost" data-a="betKind" data-kind="">Retour</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Lancer le défi" : "Publier le pari"}</button>`}</div>
+    </form>`;
+}
+
+function importModal(cc) {
+  const m = S.modal;
+  const lg = m.league || LEAGUES[0].id;
+  let list;
+  if (m.loading) list = `<p class="muted center">Chargement du calendrier…</p>`;
+  else if (m.err) list = `<div class="banner bad"><b>Calendrier indisponible</b><small>${esc(m.err)} Tu peux créer le match à la main avec « Match ».</small></div>`;
+  else if (!m.fx) list = "";
+  else if (!m.fx.length) list = `<p class="muted center">Aucun match dans les 14 prochains jours pour cette compétition.</p>`;
+  else {
+    const existing = new Set(Object.values(cc.bets).filter(b => b.src).map(b => b.src.event));
+    let lastDay = "";
+    list = `<div class="fixtures">${m.fx.map(e => {
+      const day = fmtDate(e.date, false);
+      const head = day !== lastDay ? `<p class="fx-day">${day}</p>` : "";
+      lastDay = day;
+      const dup = existing.has(e.id);
+      return `${head}<label class="fx ${dup ? "dup" : ""}"><input type="checkbox" name="fx" value="${esc(e.id)}" ${dup ? "disabled" : ""} ${(m.sel || []).includes(e.id) ? "checked" : ""}>
+        <span class="fx-time">${fmtTime(e.date)}</span><span class="fx-teams">${esc(e.home)}<small>${esc(e.away)}</small></span>${dup ? `<small class="tag">déjà proposé</small>` : ""}</label>`;
+    }).join("")}</div>`;
+  }
+  return `<h2>Importer des matchs</h2>
+    <label class="fld"><span>Compétition</span><select data-f="league">${LEAGUES.map(l => `<option value="${l.id}" ${l.id === lg ? "selected" : ""}>${CAT[l.cat].e} ${esc(l.name)} (${esc(l.country)})</option>`).join("")}</select></label>
+    <form data-f="import" class="stack">
+      ${list}
+      ${m.fx && m.fx.length ? `<label class="check"><input type="checkbox" name="bonus" checked><span>Bonus score exact (+${nf(cc.circle.bonus)})</span></label>` : ""}
+      <p class="source">Calendrier et scores : ESPN (source publique non officielle). Les mises se ferment au coup d'envoi.</p>
+      <div class="row between"><button type="button" class="btn ghost" data-a="betKind" data-kind="">Retour</button>${m.fx && m.fx.length ? `<button class="btn primary">Créer les paris</button>` : ""}</div>
+    </form>`;
+}
+
+async function loadFixtures(lg) {
+  S.modal.league = lg; S.modal.loading = true; S.modal.err = ""; S.modal.fx = null; render();
+  try { const fx = await Sports.fixtures(lg); if (S.modal && S.modal.league === lg) { S.modal.fx = fx; } }
+  catch (e) { if (S.modal) S.modal.err = "La source de résultats ne répond pas."; }
+  if (S.modal) { S.modal.loading = false; render(); }
+}
+
+function defaultClose() {
+  const d = new Date(Date.now() + 86400000);
+  d.setHours(20, 0, 0, 0);
+  return toLocalInput(d.getTime());
+}
+
+/* Relit les champs du formulaire de création pour ne rien perdre lors d'un nouveau rendu */
+function syncDraft() {
+  const f = $('form[data-f="newBet"]');
+  if (!f || !S.modal || !S.modal.draft) return;
+  const fd = new FormData(f), d = S.modal.draft;
+  for (const k of ["title", "desc", "cat", "closesAt", "home", "away", "to", "stake"]) if (fd.has(k)) d[k] = fd.get(k);
+  if (f.querySelector('[name="draw"]')) d.draw = fd.has("draw");
+  if (f.querySelector('[name="bonus"]')) d.bonus = fd.has("bonus");
+  d.opts = d.opts.map((o, i) => fd.has("opt" + i) ? fd.get("opt" + i) : o);
+}
+
+/* ---------- Actions ---------- */
+async function claim(type) {
+  const cc = DB.cur(), me = myId(cc), day = dayNum();
+  const amt = type === "daily" ? cc.circle.daily : cc.circle.rescue;
+  const ok = await DB.put("ledger", `${me}_${type}_${day}`, { uid: me, type, amt, day, season: cc.circle.season, at: now() });
+  if (ok) toast(type === "daily" ? `+${nf(amt)} jetons, à toi de jouer !` : `La banque te prête ${nf(amt)} jetons. Fais-en bon usage…`, "good");
+}
+
+async function setResult(cc, b, id, patch) {
+  const ok = await DB.put("bets", id, Object.assign({ settledBy: myId(cc), settledAt: now() }, patch), true);
+  if (ok) { S.modal = null; toast(patch.status === "void" ? "Pari annulé : tout le monde est remboursé" : "Résultat enregistré", "good"); render(); }
+}
+
+function betsAct(a, d) {
+  const cc = DB.cur();
+  const an = cc && cc.status === "ok" ? analysis(cc) : null;
+  const info = an && S.betId ? an.bets[S.betId] : null;
+  switch (a) {
+    case "filter": S.filter = d.v; return true;
+    case "openBet": go("bet", { betId: d.id }); return true;
+    case "claimDaily": claim("daily"); return true;
+    case "claimRescue": claim("rescue"); return true;
+    case "newBet": S.modal = { k: "newBet" }; return true;
+    case "betKind": {
+      syncDraft();
+      if (!d.kind) { S.modal = { k: "newBet" }; return true; }
+      const draft = { closesAt: defaultClose(), cat: d.kind === "vote" ? "vote" : d.kind === "match" ? "foot" : d.kind === "duel" ? "potes" : "potes", opts: ["", ""] };
+      if (d.kind === "vote") draft.opts = ["", "", ""];
+      S.modal = { k: "newBet", kind: d.kind, draft };
+      if (d.kind === "import") loadFixtures(S.lastLeague || LEAGUES[0].id);
+      return true;
+    }
+    case "optAdd": syncDraft(); S.modal.draft.opts.push(""); return true;
+    case "optDel": syncDraft(); S.modal.draft.opts.splice(+d.i, 1); return true;
+    case "wager": {
+      if (!info) return true;
+      S.modal = { k: "wager", bet: S.betId, opt: d.opt };
+      return true;
+    }
+    case "amt": case "amtSet": {
+      const inp = $('form[data-f="wager"] input[name="amt"]');
+      if (!inp) return true;
+      const v = a === "amt" ? (parseInt(inp.value, 10) || 0) + parseInt(d.d, 10) : parseInt(d.v, 10);
+      inp.value = Math.max(1, Math.min(+inp.max || v, v));
+      updatePotential();
+      return "keep";
+    }
+    case "duelAccept": {
+      const me = myId(cc), b = info.b;
+      const bal = an.players[me] ? an.players[me].bal : 0;
+      if (bal < b.duel.stake) { toast("Pas assez de jetons pour relever ce défi", "bad"); return true; }
+      DB.put("wagers", `${info.id}_${me}`, { bet: info.id, uid: me, opt: "n", amt: b.duel.stake, season: b.season, at: now() })
+        .then(ok => ok && toast("Défi relevé. Que le meilleur gagne !", "good"));
+      return true;
+    }
+    case "duelDecline":
+      ask("Refuser ce défi ?", "Refuser").then(ok => ok && DB.put("bets", info.id, { status: "void", settledBy: myId(cc), settledAt: now() }, true).then(ok => ok && toast("Défi refusé")));
+      return true;
+    case "settle": S.modal = { k: "settle", bet: S.betId }; return true;
+    case "closeNow":
+      ask("Fermer les mises maintenant ?", "Clôturer les mises").then(ok => ok && DB.put("bets", info.id, { closesAt: now() }, true).then(ok => ok && toast("Mises clôturées")));
+      return true;
+    case "voidBet":
+      ask("Annuler ce pari ? Toutes les mises seront remboursées.", "Annuler le pari", true).then(ok => ok && setResult(cc, info.b, info.id, { status: "void" }));
+      return true;
+    case "deleteBet":
+      ask("Supprimer ce pari ?", "Supprimer", true).then(async ok => {
+        if (!ok) return;
+        {
+          for (const w of info.ws) await DB.del("wagers", w.id);
+          if (await DB.del("bets", info.id)) { toast("Pari supprimé"); goBack(); }
+        }
+      });
+      return true;
+    case "checkResult":
+      delete Sports.tried[info.id];
+      toast("Vérification auprès de la source…");
+      Sports.autoSettle().then(() => { const b = DB.cur().bets[info.id]; if (b && b.status === "open") toast("Pas encore de résultat final"); });
+      return true;
+    case "flag": DB.put("flags", `${info.id}_${myId(cc)}`, { bet: info.id, uid: myId(cc), result: info.b.result, at: now() }).then(ok => ok && toast("Contestation enregistrée")); return true;
+    case "unflag": DB.del("flags", `${info.id}_${myId(cc)}`); return true;
+  }
+  return false;
+}
+
+function updatePotential() {
+  const cc = DB.cur(), an = analysis(cc);
+  const inp = $('form[data-f="wager"] input[name="amt"]'), out = $("#potential");
+  if (!inp || !out || !S.modal) return;
+  const info = an.bets[S.modal.bet];
+  const amt = Math.max(0, parseInt(inp.value, 10) || 0);
+  S.modal.amt = amt;
+  out.textContent = nf(potential(info, S.modal.opt, amt, myWager(info, myId(cc))));
+}
+
+function betsSubmit(f, fd) {
+  const k = f.dataset.f;
+  const cc = DB.cur();
+  if (k === "wager") {
+    const an = analysis(cc), info = an.bets[S.modal.bet], me = myId(cc);
+    const amt = parseInt(fd.get("amt"), 10);
+    const bal = an.players[me] ? an.players[me].bal : 0;
+    if (info.state !== "open") { toast("Les mises sont fermées", "bad"); S.modal = null; render(); return true; }
+    if (!(amt >= 1)) { toast("Mise d'au moins 1 jeton", "bad"); return true; }
+    if (amt > bal) { toast(`Tu n'as que ${nf(bal)} jetons`, "bad"); return true; }
+    const mine = myWager(info, me);
+    const data = { bet: info.id, uid: me, opt: S.modal.opt, amt: (mine ? mine.amt : 0) + amt, season: info.b.season, at: mine ? mine.at : now() };
+    if (mine && mine.score) data.score = mine.score;
+    const sh = fd.get("sh"), sa = fd.get("sa");
+    if (sh !== null && sa !== null && sh !== "" && sa !== "") data.score = { h: Math.max(0, parseInt(sh, 10) || 0), a: Math.max(0, parseInt(sa, 10) || 0) };
+    DB.put("wagers", `${info.id}_${me}`, data).then(ok => { if (ok) { S.modal = null; toast(`${nf(amt)} jetons misés sur ${optLabel(info.b, data.opt)}`, "good"); render(); } });
+    return true;
+  }
+  if (k === "settle") {
+    const an = analysis(cc), info = an.bets[S.modal.bet], b = info.b;
+    if (b.kind === "match") {
+      const h = parseInt(fd.get("sh"), 10), aa = parseInt(fd.get("sa"), 10);
+      if (isNaN(h) || isNaN(aa)) return true;
+      const res = matchResult(b, h, aa);
+      setResult(cc, b, info.id, res ? { status: "settled", result: res, score: { h, a: aa }, closesAt: Math.min(b.closesAt, now()) } : { status: "void", score: { h, a: aa } });
+    } else {
+      const res = fd.get("res");
+      if (!res) return true;
+      setResult(cc, b, info.id, { status: "settled", result: res, closesAt: Math.min(b.closesAt, now()) });
+    }
+    return true;
+  }
+  if (k === "newBet") {
+    syncDraft();
+    const m = S.modal, d = m.draft, me = myId(cc);
+    const closesAt = new Date(d.closesAt).getTime();
+    if (!(closesAt > now() + 60000)) { toast("Choisis une fin des mises dans le futur", "bad"); return true; }
+    const id = rid(14);
+    const bet = { kind: m.kind, cat: d.cat || "autre", closesAt, createdBy: me, createdAt: now(), season: cc.circle.season, status: "open", seed: cc.circle.seed, bonus: 0, title: "", desc: "" };
+    if (m.kind === "yesno") { bet.title = d.title.trim(); bet.desc = (d.desc || "").trim(); bet.options = [{ id: "y", label: "Oui" }, { id: "n", label: "Non" }]; }
+    else if (m.kind === "multi" || m.kind === "vote") {
+      const labels = [...new Set(d.opts.map(x => x.trim()).filter(Boolean))];
+      if (labels.length < 2) { toast("Il faut au moins deux choix différents", "bad"); return true; }
+      bet.title = d.title.trim(); bet.desc = (d.desc || "").trim();
+      bet.options = labels.map((l, i) => ({ id: "o" + (i + 1), label: l }));
+    } else if (m.kind === "match") {
+      bet.home = d.home.trim(); bet.away = d.away.trim();
+      bet.title = bet.home + " – " + bet.away;
+      bet.options = [{ id: "h", label: bet.home }].concat(d.draw ? [{ id: "d", label: "Match nul" }] : [], [{ id: "a", label: bet.away }]);
+      bet.bonus = d.bonus ? cc.circle.bonus : 0;
+    } else if (m.kind === "duel") {
+      const stake = parseInt(d.stake, 10);
+      const an = analysis(cc), bal = an.players[me] ? an.players[me].bal : 0;
+      if (!(stake >= 1)) { toast("Mise d'au moins 1 jeton", "bad"); return true; }
+      if (stake > bal) { toast(`Tu n'as que ${nf(bal)} jetons`, "bad"); return true; }
+      const foe = memberOf(cc, d.to);
+      bet.title = d.title.trim();
+      bet.seed = 0;
+      bet.duel = { to: d.to, stake };
+      bet.options = [{ id: "y", label: memberOf(cc, me).name + " a raison" }, { id: "n", label: foe.name + " a raison" }];
+    }
+    if (!bet.title) { toast("Donne un titre à ton pari", "bad"); return true; }
+    DB.put("bets", id, bet).then(async ok => {
+      if (!ok) return;
+      if (m.kind === "duel") await DB.put("wagers", `${id}_${me}`, { bet: id, uid: me, opt: "y", amt: bet.duel.stake, season: bet.season, at: now() });
+      S.modal = null;
+      toast(m.kind === "duel" ? "Défi lancé !" : "Pari publié", "good");
+      go("bet", { betId: id });
+    });
+    return true;
+  }
+  if (k === "import") {
+    const ids = fd.getAll("fx");
+    if (!ids.length) { toast("Coche au moins un match", "bad"); return true; }
+    const L = LEAGUE[S.modal.league];
+    const bonus = fd.has("bonus") ? cc.circle.bonus : 0;
+    const me = myId(cc);
+    (async () => {
+      let n = 0;
+      for (const fid of ids) {
+        const e = S.modal.fx.find(x => x.id === fid);
+        if (!e) continue;
+        const bet = {
+          kind: "match", cat: L.cat, title: e.home + " – " + e.away, desc: "", home: e.home, away: e.away, homeLogo: e.homeLogo, awayLogo: e.awayLogo,
+          options: [{ id: "h", label: e.home }].concat(L.draw ? [{ id: "d", label: "Match nul" }] : [], [{ id: "a", label: e.away }]),
+          closesAt: e.date, createdBy: me, createdAt: now(), season: cc.circle.season, status: "open", seed: cc.circle.seed, bonus,
+          src: { league: L.id, event: e.id },
+        };
+        if (await DB.put("bets", "m_" + L.id.replace(/\./g, "") + "_" + e.id, bet)) n++;
+      }
+      S.lastLeague = L.id;
+      S.modal = null; S.filter = "open";
+      toast(`${n} ${pl(n, "match importé", "matchs importés")}`, "good");
+      render();
+    })();
+    return true;
+  }
+  return false;
+}
+
+/* ===== feed.js ===== */
+/* Pronohub — fil d'activité, commentaires, réactions */
+
+function reactionsBar(cc, betId) {
+  const me = myId(cc);
+  const counts = {};
+  let mine = null;
+  for (const r of Object.values(cc.reacts)) {
+    if (r.bet !== betId) continue;
+    counts[r.e] = (counts[r.e] || 0) + 1;
+    if (r.uid === me) mine = r.e;
+  }
+  return `<div class="reacts" role="group" aria-label="Réactions">${REACTIONS.map(e => `<button class="react ${mine === e ? "on" : ""}" data-a="react" data-bet="${esc(betId)}" data-e="${e}" aria-pressed="${mine === e}">${e}${counts[e] ? `<small>${counts[e]}</small>` : ""}</button>`).join("")}</div>`;
+}
+
+function commentsBlock(cc, betId) {
+  const list = Object.entries(cc.comments).filter(([, c]) => c.bet === betId).sort((a, b) => a[1].at - b[1].at);
+  return `<div class="comments">
+    <h3>Commentaires${list.length ? ` <small>${list.length}</small>` : ""}</h3>
+    ${list.length ? `<ul class="clist">${list.map(([id, c]) => commentItem(cc, id, c)).join("")}</ul>` : `<p class="muted">Personne n'a encore chambré. Lance-toi.</p>`}
+    ${composer(betId)}
+  </div>`;
+}
+
+function commentItem(cc, id, c) {
+  const m = memberOf(cc, c.uid), me = myId(cc);
+  return `<li class="cmt">${avatar(m, "sm")}<div class="bubble"><span class="who">${esc(m.name)} <time>${rel(c.at)}</time></span><p>${esc(c.text)}</p></div>
+    ${c.uid === me || isOwner(cc) ? `<button class="icon-btn tiny" data-a="delComment" data-id="${esc(id)}" aria-label="Supprimer le commentaire">${ICON.x}</button>` : ""}</li>`;
+}
+
+function composer(betId) {
+  return `<form data-f="comment" data-bet="${esc(betId || "")}" class="composer">
+    <input name="text" maxlength="280" autocomplete="off" placeholder="${betId ? "Ton pronostic, ta vanne…" : "Écris au cercle…"}" aria-label="Message" required>
+    <button class="btn primary icon" aria-label="Envoyer">${ICON.send}</button>
+  </form>`;
+}
+
+/* Événements du fil, du plus récent au plus ancien */
+function feedEvents(cc, a, limit = 80) {
+  const ev = [];
+  const name = uid => esc(memberOf(cc, uid).name);
+  const betLink = (id, b) => `<button class="link" data-a="openBet" data-id="${esc(id)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button>`;
+  for (const [id, c] of Object.entries(cc.comments)) {
+    const b = c.bet && cc.bets[c.bet];
+    ev.push({ at: c.at, uid: c.uid, kind: "comment", id, html: `<b>${name(c.uid)}</b>${b ? ` sur ${betLink(c.bet, b)}` : ""}`, text: c.text, bet: c.bet });
+  }
+  for (const [id, info] of Object.entries(a.bets)) {
+    const b = info.b;
+    if (b.kind === "duel") ev.push({ at: b.createdAt, uid: b.createdBy, kind: "bet", bet: id, html: `<b>${name(b.createdBy)}</b> défie <b>${name(b.duel.to)}</b> : ${betLink(id, b)}, ${nf(b.duel.stake)} jetons` });
+    else ev.push({ at: b.createdAt, uid: b.createdBy, kind: "bet", bet: id, html: `<b>${name(b.createdBy)}</b> a lancé un pari : ${betLink(id, b)}` });
+    if (info.state === "settled" || info.state === "contested") {
+      const winners = info.ws.filter(w => info.payouts[w.id] > w.amt).sort((x, y) => (info.payouts[y.id] - y.amt) - (info.payouts[x.id] - x.amt));
+      const wtxt = winners.length ? winners.slice(0, 4).map(w => `${name(w.u)} <span class="pos">+${nf(info.payouts[w.id] - w.amt)}</span>`).join(", ") + (winners.length > 4 ? "…" : "") : "personne n'a vu juste";
+      ev.push({ at: b.settledAt || b.closesAt, kind: "result", bet: id, html: `Résultat de ${betLink(id, b)} : <b>${esc(optLabel(b, b.result))}</b>${b.score ? ` (${b.score.h}–${b.score.a})` : ""}. ${wtxt}.` });
+    } else if (info.state === "void" && b.settledAt) {
+      ev.push({ at: b.settledAt, kind: "void", bet: id, html: `${betLink(id, b)} est annulé, mises remboursées.` });
+    }
+    for (const w of info.ws) {
+      ev.push({ at: w.at, uid: w.u, kind: "wager", bet: id, html: `<b>${name(w.u)}</b> a misé ${nf(w.amt)} sur ${betLink(id, b)}` });
+    }
+  }
+  for (const l of Object.values(cc.ledger)) {
+    if (l.type === "rescue") ev.push({ at: l.at, uid: l.uid, kind: "rescue", html: `<b>${name(l.uid)}</b> s'est fait renflouer par la banque 💸` });
+  }
+  for (const m of visibleMembers(cc)) ev.push({ at: m.joinedAt || 0, uid: m.uid, kind: "join", html: `<b>${esc(m.name)}</b> a rejoint le cercle` });
+  for (const s of Object.values(cc.seasons || {})) {
+    const ch = s.standings && s.standings[0];
+    ev.push({ at: s.endedAt, kind: "season", html: `Fin de la saison ${s.n}${ch ? ` : <b>${esc(ch.name)}</b> est sacré champion avec ${nf(ch.bal)} jetons 🏆` : ""}` });
+  }
+  return ev.filter(e => e.at).sort((x, y) => y.at - x.at).slice(0, limit);
+}
+
+const FEED_ICON = { comment: "💬", bet: "🎟️", result: "🏁", void: "↩️", wager: "🪙", rescue: "💸", join: "👋", season: "🏆" };
+
+function feedItem(cc, e) {
+  const who = e.uid ? memberOf(cc, e.uid) : null;
+  return `<li class="ev ev-${e.kind}">
+    <span class="ev-ico">${who && e.kind === "comment" ? avatar(who, "sm") : `<span class="ev-emo" aria-hidden="true">${FEED_ICON[e.kind]}</span>`}</span>
+    <div class="ev-body"><p>${e.html}</p>${e.text ? `<p class="ev-text">${esc(e.text)}</p>` : ""}<time>${rel(e.at)}</time></div>
+  </li>`;
+}
+
+function feedTab(cc, a) {
+  const ev = feedEvents(cc, a);
+  return `<section class="page narrow">
+    <h2 class="section-title">Le fil du cercle</h2>
+    ${composer(null)}
+    ${ev.length ? `<ul class="feed">${ev.map(e => feedItem(cc, e)).join("")}</ul>` : `<div class="empty"><p class="empty-big">C'est calme ici.</p><p>Les paris, résultats et vannes du cercle apparaîtront dans ce fil.</p></div>`}
+  </section>`;
+}
+
+function feedAct(a, d) {
+  const cc = DB.cur();
+  switch (a) {
+    case "react": {
+      const me = myId(cc), id = `${d.bet}_${me}`;
+      const cur = cc.reacts[id];
+      if (cur && cur.e === d.e) DB.del("reacts", id);
+      else DB.put("reacts", id, { bet: d.bet, uid: me, e: d.e, at: now() });
+      return "keep";
+    }
+    case "delComment": DB.del("comments", d.id); return true;
+  }
+  return false;
+}
+
+function feedSubmit(f, fd) {
+  if (f.dataset.f !== "comment") return false;
+  const text = String(fd.get("text") || "").trim().slice(0, 280);
+  if (!text) return true;
+  const cc = DB.cur();
+  DB.put("comments", rid(14), { uid: myId(cc), text, bet: f.dataset.bet || null, at: now(), season: cc.circle.season });
+  f.reset();
+  return "keep";
+}
+
+/* ===== profile.js ===== */
+/* Pronohub — classement, profil, statistiques, badges */
+
+function rankTab(cc, a) {
+  const st = a.standings;
+  const me = myId(cc);
+  const pod = st.slice(0, 3);
+  const order = [1, 0, 2].filter(i => pod[i]);
+  const seasons = Object.values(cc.seasons || {}).sort((x, y) => y.n - x.n);
+  if (!cc.local && !cc.seasonsLoaded) DB.loadSeasons(cc);
+  return `<section class="page narrow">
+    <div class="row between"><h2 class="section-title">Saison ${a.season}</h2>${isOwner(cc) ? `<button class="btn small ghost" data-a="circleInfo">Règles et saison</button>` : ""}</div>
+    ${pod.length ? `<div class="podium">${order.map(i => {
+      const s = pod[i];
+      return `<button class="pod p${i + 1}" data-a="player" data-uid="${esc(s.uid)}">
+        ${avatar(s, i === 0 ? "xl" : "lg")}<b>${esc(s.name)}</b><span class="pod-bal">${nf(s.bal)}</span>
+        <span class="pod-step"><span>${s.rank}</span></span></button>`;
+    }).join("")}</div>` : ""}
+    <ol class="ranking">${st.map(s => `<li class="${s.uid === me ? "me" : ""}"><button data-a="player" data-uid="${esc(s.uid)}">
+      <span class="rk">${s.rank}</span>${avatar(s)}<span class="grow"><b>${esc(s.name)}</b><small>${s.wins} ${pl(s.wins, "victoire", "victoires")} pour ${s.wins + s.losses} ${pl(s.wins + s.losses, "pari", "paris")}${s.locked ? `, ${nf(s.locked)} en jeu` : ""}</small></span>
+      <span class="bal">${nf(s.bal)}</span></button></li>`).join("")}</ol>
+    <p class="hint">Le classement se fait au solde de jetons. Les mises en cours sont déduites jusqu'au résultat.</p>
+    ${seasons.length ? `<h3>Palmarès</h3><ul class="honours">${seasons.map(s => `<li><span class="h-season">Saison ${s.n}</span>${(s.standings || []).slice(0, 3).map((x, i) => `<span class="h-place">${["🥇", "🥈", "🥉"][i]} ${esc(x.name)} <small>${nf(x.bal)}</small></span>`).join("")}</li>`).join("")}</ul>` : ""}
+  </section>`;
+}
+
+function playerCard(cc, a, uid, self) {
+  const m = memberOf(cc, uid);
+  const s = a.standings.find(x => x.uid === uid) || Object.assign({}, m, a.players[uid] || {});
+  const p = a.players[uid] || { bets: 0, wins: 0 };
+  const badges = badgesOf(cc, a, uid);
+  const trophies = trophiesOf(cc, a, uid);
+  const rate = p.bets ? Math.round(100 * p.wins / p.bets) : 0;
+  const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
+  const hist = (p.history || []).slice().reverse().slice(0, 15);
+  return `<div class="profile-head">
+      ${avatar(m, "xl")}
+      <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
+        <p class="muted">${s.rank ? `Rang ${s.rank} / ${a.standings.length}` : ""}</p></div>
+      ${self ? `<button class="btn small ghost" data-a="editProfile">Modifier</button>` : ""}
+    </div>
+    <div class="balance-card"><span>Solde</span><b>${nf(s.bal || 0)}</b><small>${p.locked ? `dont ${nf(p.locked)} en jeu` : "jetons"}</small></div>
+    <div class="stats">
+      ${stat(p.bets, "paris réglés")}
+      ${stat(rate + " %", "de réussite")}
+      ${stat(nf(p.best || 0), "plus gros gain")}
+      ${stat(p.maxStreak || 0, "meilleure série")}
+      ${stat(p.bestOdds ? oddsFmt(p.bestOdds) : "—", "plus belle cote")}
+      ${stat(p.rescues || 0, pl(p.rescues || 0, "faillite", "faillites"))}
+    </div>
+    ${trophies.length ? `<h3>Trophées</h3><div class="trophies">${trophies.map(t => `<span class="trophy">${["🥇", "🥈", "🥉"][t.place - 1]} Saison ${t.season}</span>`).join("")}</div>` : ""}
+    <h3>Badges <small>${badges.length}/${BADGES.length}</small></h3>
+    <div class="badges">${BADGES.map(bd => {
+      const got = badges.includes(bd.id);
+      return `<div class="badge ${got ? "got" : ""}"><span class="b-emo" aria-hidden="true">${bd.e}</span><b>${bd.name}</b><small>${bd.desc}</small></div>`;
+    }).join("")}</div>
+    ${hist.length ? `<h3>Derniers résultats</h3><ul class="history">${hist.map(h => {
+      const info = a.bets[h.bet];
+      if (!info) return "";
+      const b = info.b;
+      return `<li><button class="link" data-a="openBet" data-id="${esc(h.bet)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button><span class="${h.gain > 0 ? "pos" : h.gain < 0 ? "neg" : ""}">${h.gain > 0 ? "+" : ""}${nf(h.gain)}</span></li>`;
+    }).join("")}</ul>` : ""}`;
+}
+
+function meTab(cc, a) {
+  const me = myId(cc);
+  return `<section class="page narrow">
+    ${bonusCard(cc, a)}
+    ${playerCard(cc, a, me, !cc.local || me === Profile.get().id)}
+    <div class="row wrap me-actions">
+      <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
+      <button class="btn ghost" data-a="circleInfo">Le cercle</button>
+      <button class="btn ghost" data-a="settings">Réglages</button>
+    </div>
+  </section>`;
+}
+
+function playerView(cc, a) {
+  return `<section class="page narrow">
+    <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button></div>
+    ${playerCard(cc, a, S.playerId, S.playerId === myId(cc) && (!cc.local || S.playerId === Profile.get().id))}
+  </section>`;
+}
+
+function editProfileModal() {
+  const p = Profile.get();
+  const sel = p.avatar || AVATARS[0];
+  return `<h2>Mon profil</h2>
+    <form data-f="editProfile" class="stack">
+      <label class="fld"><span>Pseudo</span><input name="name" maxlength="24" required value="${esc(p.name)}"></label>
+      <fieldset class="fld"><legend>Avatar</legend>
+        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+      </fieldset>
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Enregistrer</button></div>
+    </form>`;
+}
+
+function profileAct(a, d) {
+  switch (a) {
+    case "player": go("player", { playerId: d.uid }); return true;
+    case "editProfile": S.modal = { k: "editProfile" }; return true;
+  }
+  return false;
+}
+
+function profileSubmit(f, fd) {
+  if (f.dataset.f !== "editProfile") return false;
+  const name = String(fd.get("name") || "").trim().slice(0, 24);
+  if (!name) return true;
+  const p = Profile.set({ name, avatar: fd.get("avatar") || "" });
+  // Cercles locaux : mettre à jour ma fiche
+  for (const c of MyCircles.list().filter(c => c.local)) {
+    const d = Store.get("local." + c.code);
+    if (d && d.members[p.id]) { Object.assign(d.members[p.id], { name: p.name, avatar: p.avatar }); Store.set("local." + c.code, d); }
+  }
+  const cc = DB.cur();
+  if (cc && cc.local && cc.members[p.id]) Object.assign(cc.members[p.id], { name: p.name, avatar: p.avatar });
+  Account.pushProfile();
+  S.modal = null;
+  toast("Profil mis à jour", "good");
+  render();
+  return true;
+}
+
+/* ===== app.js ===== */
+/* Pronohub — état, rendu, navigation, actions */
+
+const S = {
+  view: "home",     // home | circle | bet | player | settings
+  tab: "bets",      // bets | rank | feed | me
+  code: null,       // cercle ouvert
+  betId: null,
+  playerId: null,
+  modal: null,
+  filter: "open",
+  actor: null,      // joueur actif dans un cercle « sur cet appareil »
+  pendingJoin: null,
+};
+let _renderTick = 0;
+
+const svg = (p, extra = "") => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${p}</svg>`;
+const ICON = {
+  back: svg('<path d="M15 18l-6-6 6-6"/>'),
+  chev: svg('<path d="M9 18l6-6-6-6"/>'),
+  down: svg('<path d="M6 9l6 6 6-6"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  x: svg('<path d="M18 6L6 18M6 6l12 12"/>'),
+  check: svg('<path d="M20 6L9 17l-5-5"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  gear: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
+  ticket: svg('<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>'),
+  trophy: svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>'),
+  chat: svg('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'),
+  user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+  send: svg('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>'),
+  coin: `<span class="coin" aria-hidden="true"></span>`,
+  users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
+};
+
+const TICKET_SVG = `<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+  <path d="M10 14h44a4 4 0 0 1 4 4v8a6 6 0 0 0 0 12v8a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4v-8a6 6 0 0 0 0-12v-8a4 4 0 0 1 4-4z" fill="var(--brand)"/>
+  <path d="M42 18v28" stroke="var(--paper)" stroke-width="2.5" stroke-dasharray="3 3"/>
+  <circle cx="24" cy="32" r="9" fill="var(--gold)"/><circle cx="24" cy="32" r="5.5" fill="none" stroke="var(--gold-ink)" stroke-width="2"/>
+</svg>`;
+
+/* ---------- Navigation ---------- */
+function go(view, params = {}) {
+  Object.assign(S, params, { view, modal: null });
+  try { history.pushState({ view, ...params }, ""); } catch (e) { }
+  render();
+  window.scrollTo(0, 0);
+}
+function goBack() {
+  if (history.state && history.state.view) history.back();
+  else { S.view = S.code ? "circle" : "home"; render(); }
+}
+window.addEventListener("popstate", e => {
+  const st = e.state || {};
+  S.modal = null;
+  if (st.view) Object.assign(S, st);
+  else S.view = S.code ? "circle" : "home";
+  render();
+});
+
+/* ---------- Rendu ---------- */
+function topBar(cc, a) {
+  const me = myId(cc), p = a.players[me];
+  const c = cc.circle;
+  const tabs = [["bets", "Paris", ICON.ticket], ["rank", "Classement", ICON.trophy], ["feed", "Fil", ICON.chat], ["me", "Moi", ICON.user]];
+  return `<header class="top">
+    <button class="circle-btn" data-a="switcher" aria-label="Changer de cercle">
+      <span class="cb-emo" aria-hidden="true">${esc(c.emoji || "🎯")}</span><span class="cb-name">${esc(c.name)}</span>${ICON.down}
+    </button>
+    <nav class="top-tabs" aria-label="Sections">${tabs.map(([k, l, i]) => `<button class="${S.view === "circle" && S.tab === k ? "on" : ""}" data-a="tab" data-v="${k}">${i}<span>${l}</span></button>`).join("")}</nav>
+    <div class="top-right">
+      ${cc.local ? `<button class="actor-chip" data-a="actor" aria-label="Changer de joueur">${avatar(memberOf(cc, me), "sm")}<span>${esc(memberOf(cc, me).name)}</span></button>` : ""}
+      <button class="coin-chip" data-a="tab" data-v="me" aria-label="Mon solde">${ICON.coin}<b>${nf(p ? p.bal : 0)}</b></button>
+      <button class="icon-btn" data-a="settings" aria-label="Réglages">${ICON.gear}</button>
+    </div>
+  </header>`;
+}
+
+function tabBar() {
+  const tabs = [["bets", "Paris", ICON.ticket], ["rank", "Classement", ICON.trophy], ["feed", "Fil", ICON.chat], ["me", "Moi", ICON.user]];
+  return `<nav class="tabbar" aria-label="Sections">${tabs.map(([k, l, i]) => `<button class="${S.view === "circle" && S.tab === k ? "on" : ""}" data-a="tab" data-v="${k}" ${S.view === "circle" && S.tab === k ? 'aria-current="page"' : ""}>${i}<span>${l}</span></button>`).join("")}</nav>`;
+}
+
+function asideCol(cc, a) {
+  const me = myId(cc);
+  const top = a.standings.slice(0, 6);
+  const ev = feedEvents(cc, a, 8);
+  return `<aside class="side">
+    <div class="panel">
+      <div class="row between"><h3>Classement</h3><button class="link" data-a="tab" data-v="rank">Tout voir</button></div>
+      <ol class="mini-rank">${top.map(s => `<li class="${s.uid === me ? "me" : ""}"><span class="rk">${s.rank}</span>${avatar(s, "sm")}<span class="grow">${esc(s.name)}</span><b>${nf(s.bal)}</b></li>`).join("")}</ol>
+      ${cc.local ? "" : `<button class="btn small ghost wide" data-a="invite">${ICON.users} Inviter des amis</button>`}
+    </div>
+    <div class="panel">
+      <div class="row between"><h3>Dernières nouvelles</h3><button class="link" data-a="tab" data-v="feed">Le fil</button></div>
+      ${ev.length ? `<ul class="feed mini">${ev.map(e => feedItem(cc, e)).join("")}</ul>` : `<p class="muted">Rien pour l'instant.</p>`}
+    </div>
+  </aside>`;
+}
+
+function render() {
+  _renderTick++;
+  _pendingLive = false;
+  const app = $("#app");
+  let main = "", header = "", tabbar = "", aside = "", fab = "";
+  let view = S.view;
+  const cc = DB.cur();
+  if (view === "settings") main = settingsView();
+  else if (!S.code || view === "home") { view = "home"; main = homeView(); }
+  else if (!cc || cc.status !== "ok" || !cc.circle) { view = "state"; main = circleStateView(cc); }
+  else {
+    const a = analysis(cc);
+    header = topBar(cc, a);
+    tabbar = tabBar();
+    aside = asideCol(cc, a);
+    if (view === "bet") main = betView(cc, a);
+    else if (view === "player") main = playerView(cc, a);
+    else {
+      view = "circle";
+      main = S.tab === "rank" ? rankTab(cc, a) : S.tab === "feed" ? feedTab(cc, a) : S.tab === "me" ? meTab(cc, a) : betsTab(cc, a);
+      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>Nouveau pari</span></button>`;
+    }
+  }
+  document.body.dataset.view = view;
+  document.body.dataset.tab = S.tab;
+  app.innerHTML = `${header}<div class="shell ${aside ? "has-side" : ""}"><main id="main">${main}</main>${aside}</div>${fab}${tabbar}`;
+  renderModal();
+}
+
+let _lastModal = null;
+function renderModal() {
+  const ov = $("#overlay");
+  const m = S.modal;
+  if (!m) { ov.hidden = true; ov.innerHTML = ""; _lastModal = null; document.body.classList.remove("modal-open"); return; }
+  const cc = DB.cur();
+  const a = cc && cc.status === "ok" ? analysis(cc) : null;
+  let html = "";
+  switch (m.k) {
+    case "account": html = Account.modal(); break;
+    case "newCircle": html = newCircleModal(); break;
+    case "join": html = joinModal(); break;
+    case "invite": html = S.code ? inviteModal() : ""; break;
+    case "switcher": html = switcherModal(); break;
+    case "circle": html = cc && cc.circle ? circleModal() : ""; break;
+    case "recover": html = recoverModal(); break;
+    case "actor": html = actorModal(); break;
+    case "newBet": html = a ? newBetModal(cc) : ""; break;
+    case "wager": html = a ? wagerModal(cc, a) : ""; break;
+    case "settle": html = a ? settleModal(cc, a) : ""; break;
+    case "editProfile": html = editProfileModal(); break;
+    case "feedback": html = feedbackModal(); break;
+    case "legal": html = legalModal(); break;
+    case "tour": html = tourModal(); break;
+    case "ask": html = askModal(); break;
+  }
+  if (!html) { S.modal = null; return renderModal(); }
+  ov.hidden = false;
+  document.body.classList.add("modal-open");
+  ov.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(m.k)}"><button class="sheet-x icon-btn" data-a="close" aria-label="Fermer">${ICON.x}</button>${html}</div>`;
+  const key = m.k + (m.kind || "") + (m.mode || "") + (m.step || "");
+  if (key !== _lastModal) {
+    _lastModal = key;
+    const f = ov.querySelector("input:not([type=radio]):not([type=checkbox]):not([type=hidden]), textarea");
+    if (f && matchMedia("(pointer: fine)").matches) f.focus();
+    else ov.querySelector(".sheet").focus({ preventScroll: true });
+  }
+}
+
+/* Rendu « en direct » (données qui arrivent) sans casser une saisie en cours */
+let _pendingLive = false;
+function liveRender() {
+  const el = document.activeElement;
+  if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) && el.type !== "radio" && el.type !== "checkbox" && el.type !== "file") { _pendingLive = true; return; }
+  render();
+}
+document.addEventListener("focusout", () => setTimeout(() => { if (_pendingLive) liveRender(); }, 50));
+
+/* ---------- Confirmation (remplace confirm() du navigateur) ---------- */
+function ask(msg, ok = "Confirmer", danger = false) {
+  return new Promise(res => {
+    S.modal = { k: "ask", msg, ok, danger, res, prev: S.modal && S.modal.k !== "ask" ? S.modal : null };
+    render();
+  });
+}
+function askModal() {
+  const m = S.modal;
+  return `<div class="ask"><p class="ask-msg">${esc(m.msg)}</p>
+    <div class="row end"><button class="btn ghost" data-a="askNo">Annuler</button><button class="btn ${m.danger ? "danger" : "primary"}" data-a="askYes">${esc(m.ok)}</button></div></div>`;
+}
+function askDone(v) {
+  const m = S.modal;
+  S.modal = m.prev;
+  m.res(v);
+}
+
+/* ---------- Présentation ---------- */
+const TOUR = [
+  { e: "🪙", t: "Des jetons, pas d'argent", d: "Chaque membre reçoit des jetons au début de la saison, plus un petit bonus chaque jour. Ils n'ont aucune valeur : seule la gloire compte." },
+  { e: "📈", t: "Les cotes bougent toutes seules", d: "Toutes les mises vont dans une cagnotte que se partagent les gagnants. Moins il y a de monde sur ton choix, plus il rapporte." },
+  { e: "🎟️", t: "Parie sur tout", d: "Importe les matchs de foot ou de NBA, crée une question pour le bureau, une élection, ou défie un ami en duel." },
+  { e: "🧑‍⚖️", t: "Un résultat juste", d: "Le créateur du pari saisit le résultat, ou il arrive tout seul pour les matchs importés. Si la majorité des parieurs le conteste, les gains sont gelés." },
+];
+function tourModal() {
+  const i = S.modal.step || 0, s = TOUR[i];
+  return `<div class="tour">
+    <div class="tour-emo" aria-hidden="true">${s.e}</div>
+    <h2>${s.t}</h2><p>${s.d}</p>
+    <div class="dots" aria-hidden="true">${TOUR.map((_, j) => `<i class="${j === i ? "on" : ""}"></i>`).join("")}</div>
+    <div class="row between">
+      <button class="btn ghost" data-a="close">Passer</button>
+      ${i < TOUR.length - 1 ? `<button class="btn primary" data-a="tourNext">Suivant</button>` : `<button class="btn primary" data-a="close">Compris</button>`}
+    </div></div>`;
+}
+
+/* ---------- Actions ---------- */
+function act(a, d) {
+  switch (a) {
+    case "close": if (S.modal && S.modal.k === "ask") { askDone(false); return true; } S.modal = null; return true;
+    case "askYes": askDone(true); return true;
+    case "askNo": askDone(false); return true;
+    case "back": goBack(); return "keep";
+    case "reload": location.reload(); return "keep";
+    case "tab":
+      S.tab = d.v;
+      if (S.view !== "circle") { go("circle"); return "keep"; }
+      window.scrollTo(0, 0);
+      return true;
+    case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
+  }
+  return circlesAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+}
+
+document.addEventListener("click", e => {
+  const ov = $("#overlay");
+  if (e.target === ov) { if (S.modal && S.modal.k === "ask") askDone(false); else S.modal = null; render(); return; }
+  const el = e.target.closest("[data-a]");
+  if (!el || el.disabled) return;
+  if (el.tagName === "A") e.preventDefault();
+  const r = act(el.dataset.a, Object.assign({}, el.dataset));
+  if (r === true) render();
+});
+
+document.addEventListener("submit", e => {
+  const f = e.target.closest("form[data-f]");
+  if (!f) return;
+  e.preventDefault();
+  const fd = new FormData(f);
+  const r = circlesSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  if (r === true) render();
+});
+
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.name === "amt" && t.closest('form[data-f="wager"]')) updatePotential();
+  if (t.classList.contains("code-input")) {
+    const v = t.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    t.value = v.length > 3 ? v.slice(0, 3) + "-" + v.slice(3) : v;
+  }
+});
+
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.f === "league") { loadFixtures(t.value); return; }
+  if (t.dataset.f === "import" && t.files && t.files[0]) { importData(t.files[0]); t.value = ""; return; }
+  if (t.type === "checkbox" && t.name === "fx" && S.modal) S.modal.sel = $$('input[name="fx"]:checked').map(x => x.value);
+  if (t.type === "radio") {
+    const grp = t.closest(".emoji-grid, .choice-list, .segs");
+    if (grp) $$("label", grp).forEach(l => l.classList.toggle("on", !!l.querySelector("input:checked")));
+    if (t.name === "where" && S.modal) S.modal.where = t.value;
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && S.modal) { if (S.modal.k === "ask") askDone(false); else S.modal = null; render(); }
+});
+
+/* ---------- Démarrage ---------- */
+function boot() {
+  applyTheme();
+  FB.onAuth(() => Account.onAuth());
+  FB.onAuth(() => {
+    const cc = DB.cur();
+    if (S.code && (!cc || !cc.local) && (!cc || cc.status !== "ok")) { const c = S.code; DB.close(); DB.open(c); }
+    if (S.pendingJoin && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
+  });
+  FB.init();
+
+  const q = new URLSearchParams(location.search);
+  const join = normCode(q.get("join"));
+  if (join) {
+    history.replaceState(null, "", location.pathname);
+    if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
+    else S.pendingJoin = join;
+  }
+  const last = Store.get("last");
+  if (!S.code && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
+  if (S.code) DB.open(S.code);
+  if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
+  if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }
+  render();
+  $("#splash") && $("#splash").remove();
+
+  setInterval(() => { if (!S.modal) liveRender(); }, 30000);
+  setInterval(() => Sports.autoSettle(), 60000);
+  setTimeout(() => Sports.autoSettle(), 4000);
+
+  // Service worker et mises à jour
+  if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+    let had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register(BASE + "sw.js", { scope: BASE }).catch(() => { });
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (had) $("#update").hidden = false;
+      had = true;
+    });
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

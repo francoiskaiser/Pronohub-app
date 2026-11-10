@@ -1,0 +1,168 @@
+rules_version = '2';
+
+// Règles de sécurité de Pronohub — à copier dans la console Firebase (Firestore > Règles > Publier).
+// Principe : tout passe par un utilisateur connecté (même anonyme). Seuls les membres d'un cercle
+// en voient le contenu. Personne n'écrit le solde d'un autre : les soldes sont recalculés par l'app
+// à partir des mises, des bonus et des résultats.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function nowMs() { return request.time.toMillis(); }
+    function today() { return math.floor(request.time.toMillis() / 86400000); }
+    function d() { return request.resource.data; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function str(v, max) { return v is string && v.size() <= max; }
+    function intIn(v, lo, hi) { return v is int && v >= lo && v <= hi; }
+
+    function circlePath(c) { return /databases/$(database)/documents/circles/$(c); }
+    function circleOf(c) { return get(circlePath(c)).data; }
+    function isMember(c) { return signedIn() && exists(/databases/$(database)/documents/circles/$(c)/members/$(me())); }
+    function isOwner(c) { return signedIn() && circleOf(c).owner == me(); }
+    function betOf(c, b) { return get(/databases/$(database)/documents/circles/$(c)/bets/$(b)).data; }
+    function betExists(c, b) { return exists(/databases/$(database)/documents/circles/$(c)/bets/$(b)); }
+
+    function circleValid(x) {
+      return str(x.name, 32) && x.name.size() > 0 && str(x.emoji, 16) && x.owner is string
+        && intIn(x.season, 1, 100000) && intIn(x.start, 100, 100000)
+        && intIn(x.daily, 0, 10000) && intIn(x.rescue, 0, 10000)
+        && intIn(x.seed, 0, 10000) && intIn(x.bonus, 0, 10000);
+    }
+
+    // ----- Profil de l'utilisateur et preuves de rattachement de compte -----
+    match /users/{u} {
+      allow read, write: if signedIn() && me() == u;
+    }
+    match /claims/{u} {
+      allow read, write: if signedIn() && me() == u;
+    }
+
+    // ----- Retours utilisateurs : création seule -----
+    match /feedback/{id} {
+      allow create: if signedIn()
+        && d().keys().hasOnly(['type', 'msg', 'email', 'app', 'v', 'lang', 'at', 'ua', 'uid'])
+        && str(d().msg, 2000) && str(d().email, 200) && d().type in ['bug', 'idea', 'other']
+        && d().uid == me();
+    }
+
+    // ----- Cercles -----
+    match /circles/{c} {
+      // Lecture d'un cercle précis (nécessaire pour le rejoindre avec son code), jamais de liste
+      allow get: if signedIn();
+      allow list: if false;
+
+      allow create: if signedIn() && d().owner == me() && d().season == 1 && circleValid(d());
+
+      allow update: if signedIn() && (
+        // Le propriétaire règle le cercle, peut passer la main et démarrer la saison suivante
+        (resource.data.owner == me() && circleValid(d())
+          && !changed().hasAny(['start', 'createdAt'])
+          && (d().season == resource.data.season || d().season == resource.data.season + 1))
+        ||
+        // Reprise en main avec la clé de récupération
+        (changed().hasOnly(['owner', 'proof']) && d().owner == me()
+          && d().proof == get(/databases/$(database)/documents/circles/$(c)/private/owner).data.key)
+      );
+      allow delete: if false;
+
+      // Clé de récupération : lisible et modifiable par le propriétaire seul
+      match /private/{doc} {
+        allow read, write: if isOwner(c);
+      }
+
+      // Membres : chacun gère sa propre fiche ; le propriétaire peut retirer quelqu'un
+      match /members/{m} {
+        allow read: if isMember(c);
+        allow create: if signedIn() && m == me() && d().uid == me() && str(d().name, 24)
+          && (!('alias' in d()) || get(/databases/$(database)/documents/claims/$(d().alias)).data.secret == d().aliasKey);
+        allow update: if signedIn() && m == me() && d().uid == me() && str(d().name, 24)
+          && (!changed().hasAny(['alias', 'aliasKey'])
+              || (!('alias' in resource.data) && get(/databases/$(database)/documents/claims/$(d().alias)).data.secret == d().aliasKey));
+        allow delete: if signedIn() && (m == me() || isOwner(c));
+      }
+
+      // Paris
+      match /bets/{b} {
+        allow read: if isMember(c);
+        allow create: if isMember(c) && d().createdBy == me() && d().status == 'open'
+          && d().season == circleOf(c).season
+          && d().closesAt is int && d().closesAt > nowMs()
+          && str(d().title, 140) && d().options is list && d().options.size() >= 2 && d().options.size() <= 12
+          && d().kind in ['yesno', 'multi', 'match', 'vote', 'duel']
+          && intIn(d().seed, 0, 10000) && intIn(d().bonus, 0, 10000)
+          && (d().kind != 'duel' || (d().seed == 0 && d().duel.to is string && intIn(d().duel.stake, 1, 1000000)));
+        allow update: if isMember(c) && (
+          // Créateur du pari ou propriétaire du cercle : résultat, annulation, clôture anticipée
+          ((resource.data.createdBy == me() || circleOf(c).owner == me())
+            && changed().hasOnly(['status', 'result', 'score', 'settledBy', 'settledAt', 'closesAt'])
+            && d().status in ['open', 'settled', 'void'])
+          ||
+          // Match importé : n'importe quel membre enregistre le résultat officiel une fois le match commencé
+          (resource.data.get('src', null) != null && resource.data.status == 'open' && resource.data.closesAt < nowMs()
+            && changed().hasOnly(['status', 'result', 'score', 'settledBy', 'settledAt'])
+            && d().settledBy == 'auto' && d().status in ['settled', 'void'])
+          ||
+          // Duel : la personne défiée peut refuser
+          (resource.data.kind == 'duel' && resource.data.get('duel', {}).get('to', '') == me() && resource.data.status == 'open'
+            && changed().hasOnly(['status', 'settledBy', 'settledAt']) && d().status == 'void')
+        );
+        allow delete: if isMember(c) && (resource.data.createdBy == me() || circleOf(c).owner == me());
+      }
+
+      // Mises : une par joueur et par pari, identifiant « pari_joueur »
+      function wagerOk(bet) {
+        return d().uid == me() && intIn(d().amt, 1, 1000000) && str(d().opt, 8)
+          && bet.status == 'open' && nowMs() < bet.closesAt && d().season == bet.season
+          && (bet.kind != 'duel' || (d().amt == bet.duel.stake
+              && ((me() == bet.createdBy && d().opt == 'y') || (me() == bet.duel.to && d().opt == 'n'))));
+      }
+      match /wagers/{w} {
+        allow read: if isMember(c);
+        allow create: if isMember(c) && w == d().bet + '_' + me() && wagerOk(betOf(c, d().bet));
+        allow update: if isMember(c) && resource.data.uid == me() && w == d().bet + '_' + me()
+          && d().bet == resource.data.bet && d().opt == resource.data.opt && d().amt > resource.data.amt
+          && changed().hasOnly(['amt', 'at', 'score'])
+          && betOf(c, d().bet).kind != 'duel' && wagerOk(betOf(c, d().bet));
+        allow delete: if isMember(c) && (
+          circleOf(c).owner == me()
+          || (betExists(c, resource.data.bet) && betOf(c, resource.data.bet).createdBy == me())
+          || (resource.data.uid == me() && !betExists(c, resource.data.bet)));
+      }
+
+      // Bonus du jour et renflouement : un de chaque par jour, montant fixé par le cercle
+      match /ledger/{l} {
+        allow read: if isMember(c);
+        allow create: if isMember(c) && d().uid == me() && d().type in ['daily', 'rescue']
+          && d().day == today() && l == me() + '_' + d().type + '_' + string(d().day)
+          && d().season == circleOf(c).season
+          && d().amt == (d().type == 'daily' ? circleOf(c).daily : circleOf(c).rescue);
+        allow update, delete: if false;
+      }
+
+      // Contestations, commentaires, réactions
+      match /flags/{f} {
+        allow read: if isMember(c);
+        allow create, update: if isMember(c) && d().uid == me() && f == d().bet + '_' + me() && str(d().result, 8);
+        allow delete: if isMember(c) && resource.data.uid == me();
+      }
+      match /comments/{id} {
+        allow read: if isMember(c);
+        allow create: if isMember(c) && d().uid == me() && str(d().text, 280) && d().text.size() > 0;
+        allow delete: if isMember(c) && (resource.data.uid == me() || circleOf(c).owner == me());
+      }
+      match /reacts/{r} {
+        allow read: if isMember(c);
+        allow create, update: if isMember(c) && d().uid == me() && r == d().bet + '_' + me() && str(d().e, 16);
+        allow delete: if isMember(c) && resource.data.uid == me();
+      }
+
+      // Palmarès des saisons
+      match /seasons/{n} {
+        allow read: if isMember(c);
+        allow write: if isOwner(c);
+      }
+    }
+  }
+}
