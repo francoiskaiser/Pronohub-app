@@ -1823,7 +1823,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.1.1";
+const APP_VERSION = "1.1.2";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -3307,7 +3307,9 @@ function installModal() {
     android: [
       `In Chrome, open the ${k(DOTS_ICON)} menu at the top right.`,
       `Choose “Install app” or “Add to Home screen”.`,
-      `Confirm with “Install”.`,
+      `Confirm with “Install”, then wait a few seconds for the icon to appear.`,
+      `If you see a ✕ at the top left instead of the address bar, the page was opened by another app: tap ${k(DOTS_ICON)} then “Open in Chrome” before installing.`,
+      `If Chrome says the app is already installed, open it from the Pronohub icon on your home screen or in your app list.`,
     ],
     samsung: [
       `Open the ${k("☰")} menu at the bottom right.`,

@@ -537,7 +537,6 @@
  "Choisis « Sur l'écran d'accueil ». Si l'option manque, ouvre la page dans Safari.": "Choose “Add to Home Screen”. If it's missing, open the page in Safari.",
  "Compétitions": "Competitions",
  "Confirme avec « Ajouter ».": "Confirm with “Add”.",
- "Confirme avec « Installer ».": "Confirm with “Install”.",
  "Copier le lien de la page": "Copy the page link",
  "Crée d'abord un cercle pour parier sur ce match": "Create a circle first to bet on this match",
  "Crée ton cercle": "Create your circle",
@@ -591,5 +590,9 @@
  "paris ouverts": "open bets",
  "résultats à saisir": "results to enter",
  "à régler": "to settle",
- "Pas de match dans les trois prochaines semaines pour cette compétition.": "No match in the next three weeks for this competition."
+ "Pas de match dans les trois prochaines semaines pour cette compétition.": "No match in the next three weeks for this competition.",
+ "Confirme avec « Installer », puis attends quelques secondes que l'icône apparaisse.": "Confirm with “Install”, then wait a few seconds for the icon to appear.",
+ "Si tu vois une croix ✕ en haut à gauche au lieu de la barre d'adresse, la page a été ouverte par une autre app : touche": "If you see a ✕ at the top left instead of the address bar, the page was opened by another app: tap",
+ "puis « Ouvrir dans Chrome » avant d'installer.": "then “Open in Chrome” before installing.",
+ "Si Chrome dit que l'appli est déjà installée, ouvre-la depuis l'icône Pronohub de ton écran d'accueil ou de la liste des applis.": "If Chrome says the app is already installed, open it from the Pronohub icon on your home screen or in your app list."
 }

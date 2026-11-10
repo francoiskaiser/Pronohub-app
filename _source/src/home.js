@@ -233,7 +233,9 @@ function installModal() {
     android: [
       `Dans Chrome, ouvre le menu ${k(DOTS_ICON)} en haut à droite.`,
       `Choisis « Installer l'application » ou « Ajouter à l'écran d'accueil ».`,
-      `Confirme avec « Installer ».`,
+      `Confirme avec « Installer », puis attends quelques secondes que l'icône apparaisse.`,
+      `Si tu vois une croix ✕ en haut à gauche au lieu de la barre d'adresse, la page a été ouverte par une autre app : touche ${k(DOTS_ICON)} puis « Ouvrir dans Chrome » avant d'installer.`,
+      `Si Chrome dit que l'appli est déjà installée, ouvre-la depuis l'icône Pronohub de ton écran d'accueil ou de la liste des applis.`,
     ],
     samsung: [
       `Ouvre le menu ${k("☰")} en bas à droite.`,

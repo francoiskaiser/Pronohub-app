@@ -1,5 +1,9 @@
 # Journal des versions de Pronohub
 
+## 1.1.2 — 10 novembre 2026
+
+- Étapes d'installation sur Android plus complètes : que faire quand la page s'ouvre depuis WhatsApp ou une autre app, et quand Chrome indique que l'appli est déjà installée.
+
 ## 1.1.1 — 10 novembre 2026
 
 - Les matchs à venir couvrent maintenant les trois prochaines semaines, pour ne pas afficher un bandeau vide pendant les trêves internationales.
