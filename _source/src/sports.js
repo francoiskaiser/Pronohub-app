@@ -43,16 +43,43 @@ const Sports = {
     };
   },
 
-  /* Matchs à venir d'une compétition (les 14 prochains jours) */
-  async fixtures(leagueId) {
-    const L = LEAGUE[leagueId];
-    const key = "fx:" + leagueId;
+  ym(t) {
+    const d = new Date(t);
+    return d.getUTCFullYear() + String(d.getUTCMonth() + 1).padStart(2, "0");
+  },
+
+  /* Tous les matchs d'un mois (ESPN n'accepte plus les plages de dates, seulement un jour ou un mois) */
+  async month(L, ym, fresh = false) {
+    const key = "m:" + L.id + ":" + ym;
     const c = this.cache[key];
-    if (c && Date.now() - c.t < 10 * 60000) return c.list;
-    const from = this.ymd(Date.now()), to = this.ymd(Date.now() + 14 * 86400000);
-    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${from}-${to}&limit=300`);
-    const list = (j.events || []).map(e => this.parse(e)).filter(e => e.state === "pre" && e.date > Date.now()).sort((a, b) => a.date - b.date);
+    if (!fresh && c && Date.now() - c.t < 10 * 60000) return c.list;
+    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${ym}&limit=500`);
+    const list = (j.events || []).map(e => this.parse(e));
     this.cache[key] = { t: Date.now(), list };
+    return list;
+  },
+
+  /* Matchs à venir d'une compétition (les `days` prochains jours) */
+  async fixtures(leagueId, days = 14) {
+    const L = LEAGUE[leagueId];
+    const T = Date.now(), end = T + days * 86400000;
+    const key = "fx:" + leagueId + ":" + days;
+    const c = this.cache[key];
+    if (c && T - c.t < 10 * 60000) return c.list;
+    // Petit cache local d'une heure : l'accueil s'affiche tout de suite, même hors ligne
+    const stored = Store.get("fx." + leagueId);
+    if (!c && stored && T - stored.t < 3600000 && stored.days >= days) {
+      const list = stored.list.filter(e => e.date > T && e.date < end);
+      this.cache[key] = { t: stored.t, list };
+      return list;
+    }
+    const months = [...new Set([this.ym(T), this.ym(end)])];
+    const all = (await Promise.all(months.map(m => this.month(L, m)))).flat();
+    const seen = new Set();
+    const list = all.filter(e => e.state === "pre" && e.date > T && e.date < end && !seen.has(e.id) && seen.add(e.id))
+      .sort((a, b) => a.date - b.date);
+    this.cache[key] = { t: T, list };
+    Store.set("fx." + leagueId, { t: T, days, list: list.map(e => ({ id: e.id, date: e.date, home: e.home, away: e.away, homeLogo: e.homeLogo, awayLogo: e.awayLogo, state: e.state })) });
     return list;
   },
 
@@ -60,11 +87,10 @@ const Sports = {
   async result(src, kickoff) {
     const L = LEAGUE[src.league];
     if (!L) return null;
-    const d1 = this.ymd(kickoff - 86400000), d2 = this.ymd(kickoff + 86400000);
-    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${d1}-${d2}&limit=300`);
-    const ev = (j.events || []).find(e => String(e.id) === String(src.event));
-    if (!ev) return null;
-    const m = this.parse(ev);
+    const months = [...new Set([this.ym(kickoff - 86400000), this.ym(kickoff + 86400000)])];
+    const all = (await Promise.all(months.map(m => this.month(L, m, true)))).flat();
+    const m = all.find(e => e.id === String(src.event));
+    if (!m) return null;
     if (/POSTPONED|CANCELED|CANCELLED|ABANDONED|SUSPENDED/.test(m.statusName)) return { done: true, void: true };
     if (m.completed && m.sh != null && m.sa != null) return { done: true, h: m.sh, a: m.sa };
     return { done: false };

@@ -1,33 +1,5 @@
-/* Pronohub — accueil, cercles, invitations, saisons */
+/* Pronohub — bienvenue, cercles, invitations, saisons */
 "use strict";
-
-function homeView() {
-  const p = Profile.get();
-  if (!p.name) return welcomeView();
-  const list = MyCircles.list();
-  return `<section class="page home">
-    <div class="hello">
-      <div class="hello-av">${avatar({ uid: p.id, name: p.name, avatar: p.avatar }, "xl")}</div>
-      <div>
-        <p class="kicker">Salut ${esc(p.name)}</p>
-        <h1 class="display">${list.length ? "Choisis ton cercle" : "Crée ton premier cercle"}</h1>
-      </div>
-    </div>
-    ${list.length ? `<div class="circle-list">${list.map(c => `
-      <button class="circle-card" data-a="openCircle" data-code="${esc(c.code)}">
-        <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
-        <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "Sur cet appareil" : "Code " + esc(c.code)}</small></span>
-        <span class="cc-go" aria-hidden="true">${ICON.chev}</span>
-      </button>`).join("")}</div>` : `<div class="empty-hero">
-        <p>Un cercle, c'est ta bande : les collègues, la famille, les potes du foot. Chacun reçoit des jetons fictifs, on parie, on chambre, le meilleur finit en tête.</p>
-      </div>`}
-    <div class="home-actions">
-      <button class="btn primary big" data-a="newCircle">${ICON.plus} Créer un cercle</button>
-      <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Rejoindre avec un code</button>
-    </div>
-    ${FB.ok ? "" : `<p class="note">Les cercles en ligne ne sont pas encore activés sur cette installation : crée un cercle « sur cet appareil » et passez-vous le téléphone.</p>`}
-  </section>`;
-}
 
 function welcomeView() {
   const p = Profile.get();
@@ -208,6 +180,7 @@ function actorModal() {
 /* ---------- Actions ---------- */
 
 async function openCircle(code) {
+  if (S.pendingMatch && !S.pendingMatch.code) S.pendingMatch.code = code;
   S.code = code;
   S.view = "circle";
   S.tab = "bets";

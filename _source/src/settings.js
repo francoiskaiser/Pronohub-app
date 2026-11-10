@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -39,6 +39,12 @@ function settingsView() {
         <button class="seg ${LANG === "en" ? "on" : ""}" data-a="lang" data-v="en">English</button>
       </div>
     </div>
+
+    ${Install.standalone() ? "" : `<div class="panel">
+      <h3>Installer l'app</h3>
+      <p class="muted">Ajoute Pronohub à ton écran d'accueil pour l'ouvrir comme une vraie app, en plein écran.</p>
+      <button class="btn" data-a="install">Installer Pronohub</button>
+    </div>`}
 
     <div class="panel">
       <h3>Compte</h3>

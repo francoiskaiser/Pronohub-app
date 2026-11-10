@@ -88,6 +88,7 @@ function betsTab(cc, a) {
   return `<section class="page">
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filtrer les paris">${seg("open", "En cours")}${seg("todo", "À régler")}${seg("done", "Terminés")}</div>
+    ${f === "open" ? `<div class="sec-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Paris ouverts</h2></div>` : ""}
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
   </section>`;
 }
@@ -528,13 +529,7 @@ function betsSubmit(f, fd) {
       for (const fid of ids) {
         const e = S.modal.fx.find(x => x.id === fid);
         if (!e) continue;
-        const bet = {
-          kind: "match", cat: L.cat, title: e.home + " – " + e.away, desc: "", home: e.home, away: e.away, homeLogo: e.homeLogo, awayLogo: e.awayLogo,
-          options: [{ id: "h", label: e.home }].concat(L.draw ? [{ id: "d", label: "Match nul" }] : [], [{ id: "a", label: e.away }]),
-          closesAt: e.date, createdBy: me, createdAt: now(), season: cc.circle.season, status: "open", seed: cc.circle.seed, bonus,
-          src: { league: L.id, event: e.id },
-        };
-        if (await DB.put("bets", "m_" + L.id.replace(/\./g, "") + "_" + e.id, bet)) n++;
+        if (await createMatchBet(cc, L.id, e, bonus > 0)) n++;
       }
       S.lastLeague = L.id;
       S.modal = null; S.filter = "open";

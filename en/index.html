@@ -630,6 +630,69 @@ body[data-view="home"] .toast, body[data-view="settings"] .toast { bottom: calc(
   .tickets { grid-template-columns: 1fr 1fr; }
 }
 
+
+/* ---------- Accueil enrichi ---------- */
+.home-top { display: flex; align-items: center; justify-content: space-between; margin: 0 -.4rem 1rem 0; }
+.home-brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 800; font-size: 1.25rem; letter-spacing: -.03em; }
+.logo-mark.small svg { width: 34px; height: 34px; }
+.home .hello { margin-bottom: 1.2rem; }
+.home-grid { display: grid; gap: 1.6rem; }
+.home-main, .home-side { min-width: 0; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: 1.2rem 0 .6rem; }
+.sec-head h2 { font-size: 1.15rem; margin: 0; }
+.home-main > .sec-head:first-child, .home-side > .sec-head:first-child { margin-top: 0; }
+.circle-card.rich { align-items: flex-start; padding: .95rem 1rem; }
+.circle-card.rich .cc-body { gap: .35rem; }
+.faces { display: flex; }
+.faces .av { margin-right: -6px; box-shadow: 0 0 0 2px var(--paper); }
+.tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+.tag.warn { background: var(--lose-2); color: var(--lose); }
+.tag.gold { background: color-mix(in srgb, var(--gold) 35%, var(--paper)); color: var(--gold-ink); }
+:root[data-theme="dark"] .tag.gold { color: var(--gold); background: color-mix(in srgb, var(--gold) 18%, var(--paper)); }
+.cc-bal { display: inline-flex; align-items: center; gap: .35rem; font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums; align-self: center; }
+.how { list-style: none; counter-reset: how; padding: 0; margin: 0 0 1.2rem; display: grid; gap: .5rem; }
+.how li { counter-increment: how; display: grid; grid-template-columns: 2.2rem 1fr; column-gap: .7rem; padding: .85rem 1rem; background: var(--paper); border-radius: 16px; box-shadow: var(--shadow); }
+.how li::before { content: counter(how); grid-row: span 2; width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--brand-2); color: var(--brand); }
+.how span { color: var(--ink-2); font-size: .92rem; }
+
+.strip { min-width: 0; }
+.strip-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: .1rem .1rem .6rem; margin: 0 -.1rem; }
+.strip-chips::-webkit-scrollbar { display: none; }
+.chip { white-space: nowrap; }
+.chip.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.mrow { display: flex; gap: .6rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: .2rem .1rem .8rem; margin: 0 -.1rem; scrollbar-width: thin; }
+.mcard {
+  flex: 0 0 172px; scroll-snap-align: start; display: flex; flex-direction: column; gap: .45rem; padding: .8rem .85rem; border-radius: 16px;
+  background: var(--paper); box-shadow: var(--shadow); min-width: 0;
+}
+.mcard.ghost { height: 150px; background: var(--paper-2); box-shadow: none; }
+.m-when { font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.m-when::first-letter { text-transform: uppercase; }
+.m-team { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.m-team b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .98rem; }
+.m-team img, .m-team .crest { width: 26px; height: 26px; flex: none; object-fit: contain; }
+.mcard .btn { margin-top: auto; }
+.strip-note { color: var(--ink-2); background: var(--paper); border-radius: 14px; padding: .8rem 1rem; }
+
+.install {
+  display: flex; align-items: center; gap: .8rem; padding: .8rem .8rem .8rem .9rem; border-radius: 18px; margin-bottom: 1.2rem;
+  background: var(--brand-2); border: 1.5px solid color-mix(in srgb, var(--brand) 30%, transparent);
+}
+.install-icon svg { width: 38px; height: 38px; display: block; }
+.install .grow { display: flex; flex-direction: column; }
+.install small { color: var(--ink-2); line-height: 1.3; }
+.install-acts { display: flex; align-items: center; gap: .1rem; }
+.steps { padding-left: 1.3rem; margin: 1rem 0; display: grid; gap: .7rem; }
+.steps li { padding-left: .3rem; line-height: 1.5; }
+.kbd { display: inline-grid; place-items: center; min-width: 1.8em; height: 1.6em; padding: 0 .3em; border-radius: 6px; border: 1.5px solid var(--line); background: var(--paper); vertical-align: middle; font-weight: 700; font-size: .85em; }
+
+@media (min-width: 1024px) {
+  .home { max-width: 1120px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; gap: 2.2rem; }
+  .home-side .mrow { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
+  .home-side .mcard { flex: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -662,6 +725,9 @@ function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]))
     .replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
 }
+
+/* Espaces insécables de la typographie française, pour du HTML déjà sûr */
+function typo(html) { return String(html).replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0"); }
 
 function now() { return Date.now(); }
 function dayNum(t = Date.now()) { return Math.floor(t / 86400000); }
@@ -1485,16 +1551,43 @@ const Sports = {
     };
   },
 
-  /* Matchs à venir d'une compétition (les 14 prochains jours) */
-  async fixtures(leagueId) {
-    const L = LEAGUE[leagueId];
-    const key = "fx:" + leagueId;
+  ym(t) {
+    const d = new Date(t);
+    return d.getUTCFullYear() + String(d.getUTCMonth() + 1).padStart(2, "0");
+  },
+
+  /* Tous les matchs d'un mois (ESPN n'accepte plus les plages de dates, seulement un jour ou un mois) */
+  async month(L, ym, fresh = false) {
+    const key = "m:" + L.id + ":" + ym;
     const c = this.cache[key];
-    if (c && Date.now() - c.t < 10 * 60000) return c.list;
-    const from = this.ymd(Date.now()), to = this.ymd(Date.now() + 14 * 86400000);
-    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${from}-${to}&limit=300`);
-    const list = (j.events || []).map(e => this.parse(e)).filter(e => e.state === "pre" && e.date > Date.now()).sort((a, b) => a.date - b.date);
+    if (!fresh && c && Date.now() - c.t < 10 * 60000) return c.list;
+    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${ym}&limit=500`);
+    const list = (j.events || []).map(e => this.parse(e));
     this.cache[key] = { t: Date.now(), list };
+    return list;
+  },
+
+  /* Matchs à venir d'une compétition (les `days` prochains jours) */
+  async fixtures(leagueId, days = 14) {
+    const L = LEAGUE[leagueId];
+    const T = Date.now(), end = T + days * 86400000;
+    const key = "fx:" + leagueId + ":" + days;
+    const c = this.cache[key];
+    if (c && T - c.t < 10 * 60000) return c.list;
+    // Petit cache local d'une heure : l'accueil s'affiche tout de suite, même hors ligne
+    const stored = Store.get("fx." + leagueId);
+    if (!c && stored && T - stored.t < 3600000 && stored.days >= days) {
+      const list = stored.list.filter(e => e.date > T && e.date < end);
+      this.cache[key] = { t: stored.t, list };
+      return list;
+    }
+    const months = [...new Set([this.ym(T), this.ym(end)])];
+    const all = (await Promise.all(months.map(m => this.month(L, m)))).flat();
+    const seen = new Set();
+    const list = all.filter(e => e.state === "pre" && e.date > T && e.date < end && !seen.has(e.id) && seen.add(e.id))
+      .sort((a, b) => a.date - b.date);
+    this.cache[key] = { t: T, list };
+    Store.set("fx." + leagueId, { t: T, days, list: list.map(e => ({ id: e.id, date: e.date, home: e.home, away: e.away, homeLogo: e.homeLogo, awayLogo: e.awayLogo, state: e.state })) });
     return list;
   },
 
@@ -1502,11 +1595,10 @@ const Sports = {
   async result(src, kickoff) {
     const L = LEAGUE[src.league];
     if (!L) return null;
-    const d1 = this.ymd(kickoff - 86400000), d2 = this.ymd(kickoff + 86400000);
-    const j = await this.get(`${this.base}${L.sport}/${L.id}/scoreboard?dates=${d1}-${d2}&limit=300`);
-    const ev = (j.events || []).find(e => String(e.id) === String(src.event));
-    if (!ev) return null;
-    const m = this.parse(ev);
+    const months = [...new Set([this.ym(kickoff - 86400000), this.ym(kickoff + 86400000)])];
+    const all = (await Promise.all(months.map(m => this.month(L, m, true)))).flat();
+    const m = all.find(e => e.id === String(src.event));
+    if (!m) return null;
     if (/POSTPONED|CANCELED|CANCELLED|ABANDONED|SUSPENDED/.test(m.statusName)) return { done: true, void: true };
     if (m.completed && m.sh != null && m.sa != null) return { done: true, h: m.sh, a: m.sa };
     return { done: false };
@@ -1731,7 +1823,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -1769,6 +1861,12 @@ function settingsView() {
         <button class="seg ${LANG === "en" ? "on" : ""}" data-a="lang" data-v="en">English</button>
       </div>
     </div>
+
+    ${Install.standalone() ? "" : `<div class="panel">
+      <h3>Install the app</h3>
+      <p class="muted">Add Pronohub to your home screen to open it like a real app, full screen.</p>
+      <button class="btn" data-a="install">Install Pronohub</button>
+    </div>`}
 
     <div class="panel">
       <h3>Account</h3>
@@ -1878,35 +1976,7 @@ function settingsAct(a, d) {
 }
 
 /* ===== circles.js ===== */
-/* Pronohub — accueil, cercles, invitations, saisons */
-
-function homeView() {
-  const p = Profile.get();
-  if (!p.name) return welcomeView();
-  const list = MyCircles.list();
-  return `<section class="page home">
-    <div class="hello">
-      <div class="hello-av">${avatar({ uid: p.id, name: p.name, avatar: p.avatar }, "xl")}</div>
-      <div>
-        <p class="kicker">Hi ${esc(p.name)}</p>
-        <h1 class="display">${list.length ? "Pick your circle" : "Create your first circle"}</h1>
-      </div>
-    </div>
-    ${list.length ? `<div class="circle-list">${list.map(c => `
-      <button class="circle-card" data-a="openCircle" data-code="${esc(c.code)}">
-        <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
-        <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "On this device" : "Code " + esc(c.code)}</small></span>
-        <span class="cc-go" aria-hidden="true">${ICON.chev}</span>
-      </button>`).join("")}</div>` : `<div class="empty-hero">
-        <p>A circle is your crew: colleagues, family, football mates. Everyone gets play tokens, you bet, you banter, the best ends up on top.</p>
-      </div>`}
-    <div class="home-actions">
-      <button class="btn primary big" data-a="newCircle">${ICON.plus} Create a circle</button>
-      <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Join with a code</button>
-    </div>
-    ${FB.ok ? "" : `<p class="note">Online circles aren't enabled on this installation yet: create an “on this device” circle and pass the phone around.</p>`}
-  </section>`;
-}
+/* Pronohub — bienvenue, cercles, invitations, saisons */
 
 function welcomeView() {
   const p = Profile.get();
@@ -2087,6 +2157,7 @@ function actorModal() {
 /* ---------- Actions ---------- */
 
 async function openCircle(code) {
+  if (S.pendingMatch && !S.pendingMatch.code) S.pendingMatch.code = code;
   S.code = code;
   S.view = "circle";
   S.tab = "bets";
@@ -2308,6 +2379,7 @@ function betsTab(cc, a) {
   return `<section class="page">
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filter bets">${seg("open", "Open")}${seg("todo", "To settle")}${seg("done", "Finished")}</div>
+    ${f === "open" ? `<div class="sec-head"><h2>Upcoming matches</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Other bet</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Open bets</h2></div>` : ""}
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
   </section>`;
 }
@@ -2748,13 +2820,7 @@ function betsSubmit(f, fd) {
       for (const fid of ids) {
         const e = S.modal.fx.find(x => x.id === fid);
         if (!e) continue;
-        const bet = {
-          kind: "match", cat: L.cat, title: e.home + " – " + e.away, desc: "", home: e.home, away: e.away, homeLogo: e.homeLogo, awayLogo: e.awayLogo,
-          options: [{ id: "h", label: e.home }].concat(L.draw ? [{ id: "d", label: "Draw" }] : [], [{ id: "a", label: e.away }]),
-          closesAt: e.date, createdBy: me, createdAt: now(), season: cc.circle.season, status: "open", seed: cc.circle.seed, bonus,
-          src: { league: L.id, event: e.id },
-        };
-        if (await DB.put("bets", "m_" + L.id.replace(/\./g, "") + "_" + e.id, bet)) n++;
+        if (await createMatchBet(cc, L.id, e, bonus > 0)) n++;
       }
       S.lastLeague = L.id;
       S.modal = null; S.filter = "open";
@@ -3006,6 +3072,308 @@ function profileSubmit(f, fd) {
   return true;
 }
 
+/* ===== home.js ===== */
+/* Pronohub — accueil, matchs à venir, installation de l'app */
+
+/* ---------- Matchs à venir (bandeau) ---------- */
+const STRIP_LEAGUES = ["bel.1", "uefa.champions", "fra.1", "eng.1", "esp.1", "nba"];
+const Strip = { lg: Store.get("stripLeague") || "bel.1", data: {}, loading: {}, err: {} };
+
+async function loadStrip(lg, force = false) {
+  if (Strip.loading[lg]) return;
+  if (force) { delete Sports.cache["fx:" + lg + ":10"]; Store.del("fx." + lg); }
+  Strip.loading[lg] = true; Strip.err[lg] = false;
+  try { Strip.data[lg] = (await Sports.fixtures(lg, 10)).slice(0, 16); }
+  catch (e) { Strip.err[lg] = true; }
+  Strip.loading[lg] = false;
+  queueRender();
+}
+
+function teamLogo(url, name) {
+  return url ? `<img src="${esc(url)}" alt="" loading="lazy" width="28" height="28" onerror="this.style.visibility='hidden'">`
+    : `<span class="crest" aria-hidden="true">${esc(name.charAt(0))}</span>`;
+}
+
+function matchStrip(cc) {
+  const lg = Strip.lg;
+  if (!Strip.data[lg] && !Strip.loading[lg] && !Strip.err[lg]) setTimeout(() => loadStrip(lg), 0);
+  const list = Strip.data[lg];
+  const existing = new Map();
+  if (cc) for (const [id, b] of Object.entries(cc.bets)) if (b.src && b.status === "open") existing.set(b.src.event, id);
+  const chips = STRIP_LEAGUES.map(id => {
+    const L = LEAGUE[id];
+    return `<button class="chip ${id === lg ? "on" : ""}" data-a="stripLeague" data-v="${id}" aria-pressed="${id === lg}">${CAT[L.cat].e} ${esc(L.name)}</button>`;
+  }).join("");
+  let body;
+  if (!list && !Strip.err[lg]) body = `<div class="mrow">${[0, 1, 2].map(() => `<div class="mcard ghost" aria-hidden="true"></div>`).join("")}</div>`;
+  else if (Strip.err[lg]) body = `<p class="strip-note">Fixtures aren't responding right now. <button class="link" data-a="stripRetry">Try again</button></p>`;
+  else if (!list.length) body = `<p class="strip-note">No match in the next 10 days for this competition.</p>`;
+  else body = `<div class="mrow">${list.map(e => {
+    const bet = existing.get(e.id);
+    return `<article class="mcard">
+      <span class="m-when">${fmtDate(e.date)}</span>
+      <span class="m-team">${teamLogo(e.homeLogo, e.home)}<b>${esc(e.home)}</b></span>
+      <span class="m-team">${teamLogo(e.awayLogo, e.away)}<b>${esc(e.away)}</b></span>
+      ${bet ? `<button class="btn small" data-a="openBet" data-id="${esc(bet)}">See the bet</button>`
+        : `<button class="btn small primary" data-a="matchBet" data-lg="${lg}" data-id="${esc(e.id)}">Bet</button>`}
+    </article>`;
+  }).join("")}</div>`;
+  return `<div class="strip">
+    <div class="chips strip-chips" role="group" aria-label="Competitions">${chips}</div>
+    ${body}
+    <p class="source">Fixtures: ESPN (unofficial public source).</p>
+  </div>`;
+}
+
+/* Crée (ou retrouve) le pari d'un match importé dans un cercle */
+async function createMatchBet(cc, lgId, e, withBonus = true) {
+  const L = LEAGUE[lgId];
+  const id = "m_" + L.id.replace(/\./g, "") + "_" + e.id;
+  if (cc.bets[id]) return id;
+  if (e.date <= Date.now() + 60000) { toast("This match has already started", "bad"); return null; }
+  const bet = {
+    kind: "match", cat: L.cat, title: e.home + " – " + e.away, desc: "", home: e.home, away: e.away, homeLogo: e.homeLogo || "", awayLogo: e.awayLogo || "",
+    options: [{ id: "h", label: e.home }].concat(L.draw ? [{ id: "d", label: "Draw" }] : [], [{ id: "a", label: e.away }]),
+    closesAt: e.date, createdBy: myId(cc), createdAt: now(), season: cc.circle.season, status: "open", seed: cc.circle.seed,
+    bonus: withBonus ? cc.circle.bonus : 0, src: { league: L.id, event: e.id },
+  };
+  return (await DB.put("bets", id, bet)) ? id : null;
+}
+
+/* Pari sur un match choisi depuis l'accueil : on ouvre le cercle, puis on crée le pari dès qu'il est prêt */
+function processPendingMatch() {
+  const pm = S.pendingMatch, cc = DB.cur();
+  if (!pm || !cc || cc.status !== "ok" || !cc.circle || cc.code !== pm.code) return;
+  S.pendingMatch = null;
+  createMatchBet(cc, pm.lg, pm.e).then(id => { if (id) { toast("Bet created, place your stake!", "good"); go("bet", { betId: id }); } });
+}
+
+function startMatchBet(code, lg, e) {
+  S.pendingMatch = { code, lg, e };
+  if (S.code === code && DB.cur() && DB.cur().status === "ok") { S.modal = null; processPendingMatch(); return; }
+  openCircle(code);
+}
+
+function pickCircleModal() {
+  const m = S.modal, e = m.e;
+  return `<h2>Which circle?</h2>
+    <p class="muted">${esc(e.home)} – ${esc(e.away)}, ${fmtDate(e.date)}</p>
+    <div class="circle-list compact">${MyCircles.list().map(c => `
+      <button class="circle-card" data-a="pickCircle" data-code="${esc(c.code)}">
+        <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
+        <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "On this device" : "Code " + esc(c.code)}</small></span>
+      </button>`).join("")}</div>
+    <div class="row end"><button class="btn ghost" data-a="close">Cancel</button></div>`;
+}
+
+/* Résumé de chaque cercle, gardé sur l'appareil pour enrichir l'accueil */
+function updateSnap(cc, a) {
+  const me = myId(cc), s = a.standings.find(x => x.uid === me);
+  if (!s) return;
+  const bets = Object.values(a.bets);
+  const snap = {
+    bal: s.bal, rank: s.rank, n: a.standings.length,
+    open: bets.filter(x => x.state === "open").length,
+    todo: bets.filter(x => (x.state === "closed" || x.state === "contested") && canManage(cc, x.b, me)).length,
+    bonus: cc.circle.daily > 0 && !cc.ledger[`${me}_daily_${dayNum()}`],
+    faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "" })),
+  };
+  const meta = MyCircles.list().find(c => c.code === cc.code);
+  if (meta && JSON.stringify(meta.snap) !== JSON.stringify(snap)) MyCircles.update(cc.code, { snap });
+}
+
+/* ---------- Accueil ---------- */
+function homeView() {
+  const p = Profile.get();
+  if (!p.name) return welcomeView();
+  const list = MyCircles.list();
+  const snaps = list.map(c => c.snap).filter(Boolean);
+  const bonus = snaps.filter(s => s.bonus).length;
+  const open = snaps.reduce((t, s) => t + s.open, 0);
+  const todo = snaps.reduce((t, s) => t + s.todo, 0);
+  let headline;
+  if (!list.length) headline = "Create your first circle";
+  else if (todo) headline = todo > 1 ? `${todo} results to enter` : "One result to enter";
+  else if (bonus) headline = "Your daily bonus is waiting";
+  else if (open) headline = open > 1 ? `${open} open bets` : "One open bet";
+  else headline = "Start the next bet";
+
+  const card = c => {
+    const s = c.snap;
+    const tags = [];
+    if (s) {
+      tags.push(`<span class="tag">${s.rank === 1 ? "Leading" : `Rank ${s.rank} / ${s.n}`}</span>`);
+      if (s.open) tags.push(`<span class="tag">${s.open} ${pl(s.open, "open bet", "open bets")}</span>`);
+      if (s.todo) tags.push(`<span class="tag warn">${s.todo} to settle</span>`);
+      if (s.bonus) tags.push(`<span class="tag gold">Bonus ready</span>`);
+    } else tags.push(`<span class="tag">${c.local ? "On this device" : "Code " + esc(c.code)}</span>`);
+    return `<button class="circle-card rich" data-a="openCircle" data-code="${esc(c.code)}">
+      <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
+      <span class="cc-body"><b>${esc(c.name)}</b>
+        ${s && s.faces ? `<span class="faces" aria-hidden="true">${s.faces.map(f => avatar(f, "sm")).join("")}</span>` : ""}
+        <span class="tags">${tags.join("")}</span></span>
+      ${s ? `<span class="cc-bal">${ICON.coin}<b>${nf(s.bal)}</b></span>` : `<span class="cc-go" aria-hidden="true">${ICON.chev}</span>`}
+    </button>`;
+  };
+
+  return `<section class="page home">
+    <header class="home-top">
+      <span class="home-brand"><span class="logo-mark small" aria-hidden="true">${TICKET_SVG}</span>Pronohub</span>
+      <span class="row">
+        ${FB.ok ? `<button class="icon-btn" data-a="account" aria-label="Account">${ICON.user}</button>` : ""}
+        <button class="icon-btn" data-a="settings" aria-label="Settings">${ICON.gear}</button>
+      </span>
+    </header>
+    <div class="hello">
+      <div class="hello-av">${avatar({ uid: p.id, name: p.name, avatar: p.avatar }, "xl")}</div>
+      <div>
+        <p class="kicker">Hi ${esc(p.name)}</p>
+        <h1 class="display">${headline}</h1>
+      </div>
+    </div>
+    ${installCard()}
+    <div class="home-grid">
+      <div class="home-main">
+        <div class="sec-head"><h2>My circles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Create</button>` : ""}</div>
+        ${list.length ? `<div class="circle-list">${list.map(card).join("")}</div>` : `<ol class="how">
+          <li><b>Create your circle</b><span>Colleagues, family, football mates.</span></li>
+          <li><b>Invite your friends</b><span>A code or a link is enough, they join in one tap.</span></li>
+          <li><b>Bet tokens</b><span>Matches, elections, office questions. The best ends up on top.</span></li>
+        </ol>`}
+        <div class="home-actions">
+          ${list.length ? "" : `<button class="btn primary big" data-a="newCircle">${ICON.plus} Create a circle</button>`}
+          <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Join with a code</button>
+        </div>
+        ${FB.ok ? "" : `<p class="note">Online circles aren't enabled on this installation yet: create an “on this device” circle and pass the phone around.</p>`}
+      </div>
+      <div class="home-side">
+        <div class="sec-head"><h2>Upcoming matches</h2></div>
+        ${matchStrip(null)}
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ---------- Installation sur l'écran d'accueil ---------- */
+const Install = {
+  prompt: null,
+  standalone() {
+    try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; }
+  },
+  platform() {
+    const ua = navigator.userAgent || "";
+    if (/FBAN|FBAV|Instagram|WhatsApp|Messenger|Snapchat|Line\//i.test(ua)) return "inapp";
+    const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (ios) return /CriOS|FxiOS|EdgiOS/.test(ua) ? "ios-other" : "ios";
+    if (/Android/.test(ua)) return /SamsungBrowser/.test(ua) ? "samsung" : /Firefox/.test(ua) ? "android-firefox" : "android";
+    return "desktop";
+  },
+  hidden() { const t = Store.get("installHide"); return t && Date.now() - t < 14 * 86400000; },
+};
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); Install.prompt = e; queueRender(); });
+window.addEventListener("appinstalled", () => { Install.prompt = null; toast("Pronohub is installed", "good"); queueRender(); });
+
+function installCard() {
+  if (Install.standalone() || Install.hidden()) return "";
+  const desk = Install.platform() === "desktop";
+  return `<div class="install">
+    <span class="install-icon" aria-hidden="true">${TICKET_SVG}</span>
+    <span class="grow"><b>${desk ? "Install Pronohub on your computer" : "Install Pronohub on your phone"}</b>
+      <small>An icon on your home screen, full screen, without going through the browser.</small></span>
+    <span class="install-acts">
+      <button class="btn primary small" data-a="install">Install</button>
+      <button class="icon-btn tiny" data-a="installHide" aria-label="Hide for two weeks">${ICON.x}</button>
+    </span>
+  </div>`;
+}
+
+const SHARE_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>`;
+const DOTS_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
+
+function installModal() {
+  const pf = S.modal.pf || Install.platform();
+  const k = i => `<span class="kbd">${i}</span>`;
+  const steps = {
+    ios: [
+      `In Safari, tap the Share button ${k(SHARE_ICON)}. On a recent iPhone, it's in the ${k("•••")} menu at the bottom right.`,
+      `Scroll and choose “Add to Home Screen”.`,
+      `Tap “Add”: Pronohub appears with your other apps.`,
+    ],
+    "ios-other": [
+      `Tap the Share button ${k(SHARE_ICON)} next to the address bar.`,
+      `Choose “Add to Home Screen”. If it's missing, open the page in Safari.`,
+      `Tap “Add”.`,
+    ],
+    android: [
+      `In Chrome, open the ${k(DOTS_ICON)} menu at the top right.`,
+      `Choose “Install app” or “Add to Home screen”.`,
+      `Confirm with “Install”.`,
+    ],
+    samsung: [
+      `Open the ${k("☰")} menu at the bottom right.`,
+      `Choose “Add page to”, then “Home screen”.`,
+      `Confirm with “Add”.`,
+    ],
+    "android-firefox": [
+      `Open the ${k(DOTS_ICON)}.`,
+      `Choose “Install”.`,
+      `Confirm with “Add”.`,
+    ],
+    inapp: [
+      `You're in another app's browser (WhatsApp, Messenger…). It can't install Pronohub.`,
+      `Open its ${k("•••")} ou ${k(DOTS_ICON)} menu and choose “Open in browser” (Safari or Chrome).`,
+      `Once in the browser, come back to this window with the “Install” button.`,
+    ],
+    desktop: [
+      `In Chrome or Edge, click the install icon on the right of the address bar.`,
+      `Or open the ${k(DOTS_ICON)} menu and choose “Install Pronohub” (under “Cast, save and share” in Chrome).`,
+      `On a Mac with Safari: File menu, then “Add to Dock”.`,
+    ],
+  };
+  const tabs = [["ios", "iPhone"], ["android", "Android"], ["desktop", "Computer"]];
+  const tabOn = t => pf === t || (t === "ios" && pf === "ios-other") || (t === "android" && (pf === "samsung" || pf === "android-firefox"));
+  return `<h2>Install Pronohub</h2>
+    <div class="segs" role="group" aria-label="Device">${tabs.map(([v, l]) => `<button class="seg ${tabOn(v) ? "on" : ""}" data-a="installPf" data-v="${v}" aria-pressed="${tabOn(v)}">${l}</button>`).join("")}</div>
+    <ol class="steps">${steps[pf].map(s => `<li>${typo(s)}</li>`).join("")}</ol>
+    ${pf === "inapp" ? `<button class="btn wide" data-a="copy" data-text="${esc(location.href)}">Copy the page link</button>` : ""}
+    <p class="hint">Updates arrive on their own: the app updates the next time you open it.</p>
+    <div class="row end"><button class="btn primary" data-a="close">Got it</button></div>`;
+}
+
+async function doInstall() {
+  if (Install.prompt) {
+    const p = Install.prompt;
+    Install.prompt = null;
+    try { await p.prompt(); const r = await p.userChoice; if (r && r.outcome === "dismissed") toast("Installation cancelled"); } catch (e) { S.modal = { k: "install" }; render(); }
+    return;
+  }
+  S.modal = { k: "install" };
+  render();
+}
+
+function homeAct(a, d) {
+  switch (a) {
+    case "stripLeague": Strip.lg = d.v; Store.set("stripLeague", d.v); return true;
+    case "stripRetry": loadStrip(Strip.lg, true); return true;
+    case "matchBet": {
+      const e = (Strip.data[d.lg] || []).find(x => x.id === d.id);
+      if (!e) return true;
+      const cc = DB.cur();
+      if (S.view !== "home" && S.code && cc && cc.status === "ok") { startMatchBet(S.code, d.lg, e); return true; }
+      const list = MyCircles.list();
+      if (!list.length) { S.pendingMatch = { lg: d.lg, e }; S.modal = { k: "newCircle" }; toast("Create a circle first to bet on this match"); return true; }
+      if (list.length === 1) { startMatchBet(list[0].code, d.lg, e); return true; }
+      S.modal = { k: "pickCircle", lg: d.lg, e };
+      return true;
+    }
+    case "pickCircle": { const m = S.modal; startMatchBet(d.code, m.lg, m.e); return true; }
+    case "install": doInstall(); return "keep";
+    case "installPf": S.modal.pf = d.v; return true;
+    case "installHide": Store.set("installHide", Date.now()); toast("You'll find installation in Settings"); return true;
+  }
+  return false;
+}
+
 /* ===== app.js ===== */
 /* Pronohub — état, rendu, navigation, actions */
 
@@ -3118,6 +3486,8 @@ function render() {
   else if (!cc || cc.status !== "ok" || !cc.circle) { view = "state"; main = circleStateView(cc); }
   else {
     const a = analysis(cc);
+    updateSnap(cc, a);
+    if (S.pendingMatch) setTimeout(processPendingMatch, 0);
     header = topBar(cc, a);
     tabbar = tabBar();
     aside = asideCol(cc, a);
@@ -3160,6 +3530,8 @@ function renderModal() {
     case "legal": html = legalModal(); break;
     case "tour": html = tourModal(); break;
     case "ask": html = askModal(); break;
+    case "install": html = installModal(); break;
+    case "pickCircle": html = pickCircleModal(); break;
   }
   if (!html) { S.modal = null; return renderModal(); }
   ov.hidden = false;
@@ -3235,7 +3607,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
 }
 
 document.addEventListener("click", e => {

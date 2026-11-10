@@ -133,6 +133,20 @@ with sync_playwright() as pw:
     p.click(".tabbar [data-v=bets]")
     p.click("[data-a=filter][data-v=done]")
     shot(p, "16-dark-done")
+    # Accueil enrichi + pari en un clic sur un vrai match
+    p.click("[data-a=back]") if p.locator("[data-a=back]").count() else None
+    p.click(".circle-btn"); p.click(".sheet [data-a=home]")
+    p.wait_for_selector(".mcard .btn")
+    shot(p, "40-home-rich")
+    p.click(".mcard [data-a=matchBet] >> nth=0")
+    p.wait_for_selector(".bet-page")
+    shot(p, "41-match-from-home")
+    p.click("[data-a=back]")
+    p.click("[data-a=filter][data-v=open]")
+    shot(p, "42-bets-strip")
+    p.click("[data-a=settings] >> nth=0"); p.click("[data-a=install] >> nth=0")
+    shot(p, "43-install")
+    p.click(".sheet [data-a=close] >> nth=-1"); p.click("[data-a=back]")
     # Tablette et PC
     for w, h, n in [(768, 1024, "17-tablet-portrait"), (1024, 768, "18-tablet-landscape"), (1440, 900, "19-desktop")]:
         p.set_viewport_size({"width": w, "height": h})

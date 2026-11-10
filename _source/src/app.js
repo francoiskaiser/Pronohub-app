@@ -110,6 +110,8 @@ function render() {
   else if (!cc || cc.status !== "ok" || !cc.circle) { view = "state"; main = circleStateView(cc); }
   else {
     const a = analysis(cc);
+    updateSnap(cc, a);
+    if (S.pendingMatch) setTimeout(processPendingMatch, 0);
     header = topBar(cc, a);
     tabbar = tabBar();
     aside = asideCol(cc, a);
@@ -152,6 +154,8 @@ function renderModal() {
     case "legal": html = legalModal(); break;
     case "tour": html = tourModal(); break;
     case "ask": html = askModal(); break;
+    case "install": html = installModal(); break;
+    case "pickCircle": html = pickCircleModal(); break;
   }
   if (!html) { S.modal = null; return renderModal(); }
   ov.hidden = false;
@@ -227,7 +231,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
 }
 
 document.addEventListener("click", e => {

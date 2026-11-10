@@ -1,5 +1,12 @@
 # Journal des versions de Pronohub
 
+## 1.1.0 — 10 novembre 2026
+
+- Nouvel accueil : chaque cercle affiche ton solde, ton rang, les paris ouverts, les résultats à saisir et le bonus du jour disponible.
+- Les prochains matchs s'affichent sur l'accueil et dans l'onglet Paris : un bouton « Parier » crée le pari en un geste (Pro League, Ligue des champions, Ligue 1, Premier League, LaLiga, NBA).
+- Correction : l'import de matchs fonctionne à nouveau (la source des résultats avait changé sa façon de répondre).
+- Nouveau bouton « Installer » avec les étapes adaptées à ton téléphone (iPhone, Android, navigateur de WhatsApp ou Messenger) et à l'ordinateur.
+
 ## 1.0.0 — 10 novembre 2026
 
 Première version.

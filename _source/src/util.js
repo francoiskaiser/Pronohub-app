@@ -11,6 +11,9 @@ function esc(s) {
     .replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
 }
 
+/* Espaces insécables de la typographie française, pour du HTML déjà sûr */
+function typo(html) { return String(html).replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0"); }
+
 function now() { return Date.now(); }
 function dayNum(t = Date.now()) { return Math.floor(t / 86400000); }
 
