@@ -1,5 +1,9 @@
 # Journal des versions de Pronohub
 
+## 1.1.3 — 10 novembre 2026
+
+- Correction : sur certains téléphones Android, Chrome croyait l'app déjà installée et refusait de l'installer. L'app a maintenant un identifiant neuf, ce qui permet une installation propre.
+
 ## 1.1.2 — 10 novembre 2026
 
 - Étapes d'installation sur Android plus complètes : que faire quand la page s'ouvre depuis WhatsApp ou une autre app, et quand Chrome indique que l'appli est déjà installée.
