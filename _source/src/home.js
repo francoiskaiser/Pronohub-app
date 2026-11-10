@@ -7,9 +7,9 @@ const Strip = { lg: Store.get("stripLeague") || "bel.1", data: {}, loading: {}, 
 
 async function loadStrip(lg, force = false) {
   if (Strip.loading[lg]) return;
-  if (force) { delete Sports.cache["fx:" + lg + ":10"]; Store.del("fx." + lg); }
+  if (force) { delete Sports.cache["fx:" + lg + ":21"]; Store.del("fx." + lg); }
   Strip.loading[lg] = true; Strip.err[lg] = false;
-  try { Strip.data[lg] = (await Sports.fixtures(lg, 10)).slice(0, 16); }
+  try { Strip.data[lg] = (await Sports.fixtures(lg, 21)).slice(0, 16); }
   catch (e) { Strip.err[lg] = true; }
   Strip.loading[lg] = false;
   queueRender();
@@ -33,7 +33,7 @@ function matchStrip(cc) {
   let body;
   if (!list && !Strip.err[lg]) body = `<div class="mrow">${[0, 1, 2].map(() => `<div class="mcard ghost" aria-hidden="true"></div>`).join("")}</div>`;
   else if (Strip.err[lg]) body = `<p class="strip-note">Le calendrier ne répond pas pour l'instant. <button class="link" data-a="stripRetry">Réessayer</button></p>`;
-  else if (!list.length) body = `<p class="strip-note">Pas de match dans les 10 prochains jours pour cette compétition.</p>`;
+  else if (!list.length) body = `<p class="strip-note">Pas de match dans les trois prochaines semaines pour cette compétition.</p>`;
   else body = `<div class="mrow">${list.map(e => {
     const bet = existing.get(e.id);
     return `<article class="mcard">

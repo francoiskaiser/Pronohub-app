@@ -571,7 +571,6 @@
  "Pari créé, à toi de miser !": "Bet created, place your stake!",
  "Pariez des jetons": "Bet tokens",
  "Paris ouverts": "Open bets",
- "Pas de match dans les 10 prochains jours pour cette compétition.": "No match in the next 10 days for this competition.",
  "Pronohub est installée": "Pronohub is installed",
  "Sur Mac avec Safari : menu Fichier, puis « Ajouter au Dock ».": "On a Mac with Safari: File menu, then “Add to Dock”.",
  "Ton bonus du jour t'attend": "Your daily bonus is waiting",
@@ -591,5 +590,6 @@
  "paris en cours": "open bets",
  "paris ouverts": "open bets",
  "résultats à saisir": "results to enter",
- "à régler": "to settle"
+ "à régler": "to settle",
+ "Pas de match dans les trois prochaines semaines pour cette compétition.": "No match in the next three weeks for this competition."
 }

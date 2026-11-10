@@ -1823,7 +1823,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.1.1";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -3081,9 +3081,9 @@ const Strip = { lg: Store.get("stripLeague") || "bel.1", data: {}, loading: {}, 
 
 async function loadStrip(lg, force = false) {
   if (Strip.loading[lg]) return;
-  if (force) { delete Sports.cache["fx:" + lg + ":10"]; Store.del("fx." + lg); }
+  if (force) { delete Sports.cache["fx:" + lg + ":21"]; Store.del("fx." + lg); }
   Strip.loading[lg] = true; Strip.err[lg] = false;
-  try { Strip.data[lg] = (await Sports.fixtures(lg, 10)).slice(0, 16); }
+  try { Strip.data[lg] = (await Sports.fixtures(lg, 21)).slice(0, 16); }
   catch (e) { Strip.err[lg] = true; }
   Strip.loading[lg] = false;
   queueRender();
@@ -3107,7 +3107,7 @@ function matchStrip(cc) {
   let body;
   if (!list && !Strip.err[lg]) body = `<div class="mrow">${[0, 1, 2].map(() => `<div class="mcard ghost" aria-hidden="true"></div>`).join("")}</div>`;
   else if (Strip.err[lg]) body = `<p class="strip-note">Fixtures aren't responding right now. <button class="link" data-a="stripRetry">Try again</button></p>`;
-  else if (!list.length) body = `<p class="strip-note">No match in the next 10 days for this competition.</p>`;
+  else if (!list.length) body = `<p class="strip-note">No match in the next three weeks for this competition.</p>`;
   else body = `<div class="mrow">${list.map(e => {
     const bet = existing.get(e.id);
     return `<article class="mcard">

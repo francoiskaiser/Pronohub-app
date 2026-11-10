@@ -1,5 +1,9 @@
 # Journal des versions de Pronohub
 
+## 1.1.1 — 10 novembre 2026
+
+- Les matchs à venir couvrent maintenant les trois prochaines semaines, pour ne pas afficher un bandeau vide pendant les trêves internationales.
+
 ## 1.1.0 — 10 novembre 2026
 
 - Nouvel accueil : chaque cercle affiche ton solde, ton rang, les paris ouverts, les résultats à saisir et le bonus du jour disponible.
