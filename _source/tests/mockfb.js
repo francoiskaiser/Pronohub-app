@@ -61,7 +61,12 @@
   class Doc {
     constructor(path) { this.path = path; this.id = path.split("/").pop(); }
     collection(n) { return new Coll(this.path + "/" + n); }
-    async get() { return snapDoc(this.id, load()[this.path]); }
+    async get() {
+      // Comme les vraies règles : seuls les membres d'un cercle lisent ses fiches membres
+      const mm = this.path.match(/^circles\/([^/]+)\/members\/[^/]+$/);
+      if (mm && !load()[`circles/${mm[1]}/members/${auth.currentUser && auth.currentUser.uid}`]) throw err("permission-denied");
+      return snapDoc(this.id, load()[this.path]);
+    }
     async set(data, opt) {
       if (window.__mockOffline) throw err("unavailable");
       const d = load();

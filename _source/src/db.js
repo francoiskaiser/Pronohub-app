@@ -60,9 +60,12 @@ const DB = {
       if (this.code !== code) return;
       if (!snap.exists) { cc.status = "missing"; liveRender(); return; }
       cc.circle = snap.data();
-      const me = await FB.sub(code, "members").doc(FB.uid).get();
+      // Un non-membre n'a pas le droit de lire la fiche : un refus veut dire « pas membre »
+      let isMem = false;
+      try { isMem = (await FB.sub(code, "members").doc(FB.uid).get()).exists; }
+      catch (e) { if (!/permission/.test(e.code || "")) throw e; }
       if (this.code !== code) return;
-      if (!me.exists) { cc.status = "notmember"; liveRender(); return; }
+      if (!isMem) { cc.status = "notmember"; liveRender(); return; }
     } catch (e) {
       cc.status = /permission/.test(e.code || "") ? "denied" : "offline";
       cc.err = fbErr(e);
@@ -212,8 +215,10 @@ const DB = {
     if (!s.exists) throw { code: "not-found" };
     const c = s.data();
     const ref = FB.sub(code, "members").doc(FB.uid);
-    const me = await ref.get();
-    if (!me.exists) await ref.set({ uid: FB.uid, name: p.name || "Joueur", avatar: p.avatar || "", joinedAt: now() });
+    let exists = false;
+    try { exists = (await ref.get()).exists; }
+    catch (e) { if (!/permission/.test(e.code || "")) throw e; }
+    if (!exists) await ref.set({ uid: FB.uid, name: p.name || "Joueur", avatar: p.avatar || "", joinedAt: now() });
     MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false });
     Account.syncCircles();
     return c;

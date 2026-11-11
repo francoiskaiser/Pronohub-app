@@ -1,5 +1,9 @@
 # Journal des versions de Pronohub
 
+## 1.2.1 — 11 novembre 2026
+
+- Correction : rejoindre le cercle d'un ami avec son code affichait « Accès refusé ».
+
 ## 1.2.0 — 11 novembre 2026
 
 Nouveau : le mode solo, accessible depuis l'accueil.
