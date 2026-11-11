@@ -40,22 +40,50 @@ const TICKET_SVG = `<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden=
 </svg>`;
 
 /* ---------- Navigation ---------- */
+/* Chaque écran est une entrée de l'historique du navigateur : le bouton retour du téléphone
+   ramène à l'écran précédent, ferme une fenêtre ouverte, et ne quitte l'app que depuis l'accueil. */
+const Hist = { modal: false, ignore: 0 };
+function navState(view, params = {}) {
+  return Object.assign({ view, code: S.code, tab: S.tab, betId: S.betId, playerId: S.playerId, soloView: S.soloView }, params, { view });
+}
+function navPush(st) {
+  try {
+    if (Hist.modal) { history.replaceState(st, ""); Hist.modal = false; }
+    else history.pushState(st, "");
+  } catch (e) { }
+}
 function go(view, params = {}) {
   Object.assign(S, params, { view, modal: null });
-  try { history.pushState({ view, ...params }, ""); } catch (e) { }
+  navPush(navState(view, params));
   render();
   window.scrollTo(0, 0);
 }
 function goBack() {
-  if (history.state && history.state.view) history.back();
+  if (history.state && history.state.view && history.length > 1) history.back();
   else { S.view = S.code ? "circle" : "home"; render(); }
 }
-window.addEventListener("popstate", e => {
-  const st = e.state || {};
+function restoreNav(st) {
   S.modal = null;
-  if (st.view) Object.assign(S, st);
-  else S.view = S.code ? "circle" : "home";
+  const view = st.view || "home";
+  if (view !== "home" && view !== "solo" && view !== "settings" && st.code && st.code !== S.code) {
+    S.code = st.code; S.actor = null; Store.set("last", st.code); DB.open(st.code);
+  }
+  Object.assign(S, { view, tab: st.tab || "bets", betId: st.betId ?? S.betId, playerId: st.playerId ?? S.playerId, soloView: st.soloView || S.soloView });
+  if (view === "home") Store.del("last");
   render();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("popstate", e => {
+  if (Hist.ignore) { Hist.ignore--; return; }
+  // Retour avec une fenêtre ouverte : on ferme seulement la fenêtre
+  if (Hist.modal) {
+    Hist.modal = false;
+    if (S.modal && S.modal.k === "ask") askDone(false);
+    S.modal = null;
+    render();
+    return;
+  }
+  restoreNav(e.state || {});
 });
 
 /* ---------- Rendu ---------- */
@@ -134,6 +162,11 @@ let _lastModal = null;
 function renderModal() {
   const ov = $("#overlay");
   const m = S.modal;
+  // Une fenêtre ouverte ajoute une entrée d'historique, que l'on retire à sa fermeture
+  try {
+    if (m && !Hist.modal) { history.pushState(Object.assign({}, history.state, { modal: 1 }), ""); Hist.modal = true; }
+    else if (!m && Hist.modal) { Hist.modal = false; Hist.ignore++; history.back(); }
+  } catch (e) { }
   if (!m) { ov.hidden = true; ov.innerHTML = ""; _lastModal = null; document.body.classList.remove("modal-open"); return; }
   const cc = DB.cur();
   const a = cc && cc.status === "ok" ? analysis(cc) : null;
@@ -226,8 +259,14 @@ function act(a, d) {
     case "back": goBack(); return "keep";
     case "reload": location.reload(); return "keep";
     case "tab":
-      S.tab = d.v;
-      if (S.view !== "circle") { go("circle"); return "keep"; }
+      if (S.view !== "circle") { S.tab = d.v; go("circle"); return "keep"; }
+      if (S.tab !== d.v) {
+        const hs = history.state || {};
+        S.tab = d.v;
+        // Un seul niveau d'onglet dans l'historique : retour depuis Classement, Fil ou Moi revient aux Paris
+        if (hs.view === "circle" && hs.tab && hs.tab !== "bets") history.replaceState(navState("circle"), "");
+        else navPush(navState("circle"));
+      }
       window.scrollTo(0, 0);
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
@@ -304,6 +343,11 @@ function boot() {
   if (S.code) DB.open(S.code);
   if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
   if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }
+  // L'accueil sert de première page : le retour depuis un cercle y ramène avant de quitter l'app
+  try {
+    history.replaceState({ view: "home" }, "");
+    if (S.code) history.pushState(navState("circle", { tab: "bets" }), "");
+  } catch (e) { }
   render();
   $("#splash") && $("#splash").remove();
 

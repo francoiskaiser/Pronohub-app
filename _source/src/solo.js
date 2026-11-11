@@ -735,7 +735,7 @@ function soloAct(a, d) {
   const st = Solo.s(), run = st.run;
   switch (a) {
     case "soloHub": go("solo", { soloView: "hub" }); return "keep";
-    case "soloNewRun": newRun(); S.draft = null; if (S.view === "solo") { S.soloView = "run"; window.scrollTo(0, 0); return true; } go("solo", { soloView: "run" }); return "keep";
+    case "soloNewRun": newRun(); S.draft = null; go("solo", { soloView: "run" }); return "keep";
     case "soloRun":
       if (!run || run.phase === "end") newRun();
       go("solo", { soloView: "run" }); return "keep";

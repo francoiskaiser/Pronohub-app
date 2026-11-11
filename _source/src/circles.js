@@ -29,6 +29,7 @@ function circleStateView(cc) {
     case "loading": return box("Ouverture du cercle…", "On récupère les paris et le classement.", home);
     case "auth": return box("Connexion impossible", FB.error ? fbErr({ code: FB.error }) : "La connexion à Firebase n'a pas abouti. Vérifie ta connexion internet.", `<button class="btn primary" data-a="retry">Réessayer</button>${home}`);
     case "nofb": return box("Cercle en ligne indisponible", "Cette installation n'a pas encore Firebase. Les cercles en ligne reviendront quand il sera configuré.", home);
+    case "gone": return box("Cercle supprimé", "Son créateur l'a supprimé. Il a été retiré de ta liste.", home);
     case "missing": return box("Cercle introuvable", "Ce code ne correspond à aucun cercle, ou il a été supprimé.", `<button class="btn" data-a="forgetCircle" data-code="${esc(cc.code)}">Retirer de ma liste</button>${home}`);
     case "notmember": return box("Tu ne fais pas partie de ce cercle", "Tu as peut-être été retiré, ou tu viens d'un autre appareil. Tu peux le rejoindre à nouveau avec son code.", `<button class="btn primary" data-a="rejoin" data-code="${esc(cc.code)}">Rejoindre ${esc(cc.code)}</button>${home}`);
     case "denied": return box("Accès refusé", (cc.err || "") + " Si tu viens d'activer Firebase, publie les règles de firestore.rules dans la console.", `<button class="btn primary" data-a="retry">Réessayer</button>${home}`);
@@ -153,7 +154,7 @@ function circleModal() {
     ${!owner && !cc.local ? `<p class="hint">Tu as créé ce cercle sur un autre appareil ? <button class="link" data-a="recover">Reprendre la main avec la clé</button></p>` : ""}
 
     <div class="row between wrap modal-foot">
-      ${owner ? (cc.local ? `<button class="btn danger ghost" data-a="deleteLocal">Supprimer le cercle</button>` : `<span></span>`) : `<button class="btn danger ghost" data-a="leave">Quitter le cercle</button>`}
+      ${owner ? (cc.local ? `<button class="btn danger ghost" data-a="deleteLocal">Supprimer le cercle</button>` : `<button class="btn danger ghost" data-a="deleteCircle">Supprimer le cercle</button>`) : `<button class="btn danger ghost" data-a="leave">Quitter le cercle</button>`}
       <button class="btn" data-a="close">Fermer</button>
     </div>`;
 }
@@ -188,6 +189,33 @@ async function openCircle(code) {
   S.actor = null;
   Store.set("last", code);
   DB.open(code);
+  navPush(navState("circle", { code, tab: "bets" }));
+  render();
+}
+
+/* Suppression par le créateur : le cercle est marqué supprimé (il disparaît chez tous les membres),
+   puis ses paris, mises, commentaires et membres sont effacés. */
+async function deleteOnlineCircle(cc) {
+  const code = cc.code;
+  toast("Suppression en cours…");
+  try { await FB.circle(code).set({ deleted: true, deletedAt: now() }, { merge: true }); }
+  catch (e) { toast(fbErr(e), "bad"); return; }
+  DB.close();
+  for (const coll of ["wagers", "bets", "comments", "seasons", "reacts", "flags"]) {
+    try { const s = await FB.sub(code, coll).get(); await Promise.all(s.docs.map(d => d.ref.delete().catch(() => { }))); } catch (e) { }
+  }
+  try { await FB.sub(code, "private").doc("owner").delete(); } catch (e) { }
+  try {
+    const s = await FB.sub(code, "members").get();
+    await Promise.all(s.docs.filter(d => d.id !== FB.uid).map(d => d.ref.delete().catch(() => { })));
+  } catch (e) { }
+  try { await FB.sub(code, "members").doc(FB.uid).delete(); } catch (e) { }
+  MyCircles.remove(code);
+  Account.syncCircles();
+  S.code = null; S.view = "home"; S.modal = null;
+  Store.del("last");
+  navPush({ view: "home" });
+  toast("Cercle supprimé", "good");
   render();
 }
 
@@ -208,7 +236,7 @@ async function newSeason() {
 function circlesAct(a, d) {
   const cc = DB.cur();
   switch (a) {
-    case "home": DB.close(); S.code = null; S.view = "home"; S.modal = null; Store.del("last"); return true;
+    case "home": DB.close(); S.code = null; S.view = "home"; S.modal = null; Store.del("last"); navPush({ view: "home" }); return true;
     case "openCircle": openCircle(d.code); return true;
     case "newCircle": S.modal = { k: "newCircle" }; return true;
     case "joinCircle": S.modal = { k: "join" }; return true;
@@ -239,6 +267,10 @@ function circlesAct(a, d) {
         if (!ok) return;
         MyCircles.remove(cc.code); Account.syncCircles(); circlesAct("home", {}); render();
       });
+      return true;
+    case "deleteCircle":
+      ask(`Supprimer « ${cc.circle.name} » ? Les paris, mises et commentaires de tous les membres seront effacés. C'est définitif.`, "Supprimer le cercle", true)
+        .then(ok => ok && deleteOnlineCircle(cc));
       return true;
     case "deleteLocal":
       ask("Supprimer définitivement ce cercle et tous ses paris ?", "Supprimer le cercle", true).then(ok => {

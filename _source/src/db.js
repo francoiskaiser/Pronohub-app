@@ -27,6 +27,14 @@ const DB = {
     return this.openOnline(code);
   },
 
+  gone(cc) {
+    cc.status = "gone";
+    MyCircles.remove(cc.code);
+    Account.syncCircles();
+    if (this.code === cc.code) { this.unsub.forEach(u => { try { u(); } catch (e) { } }); this.unsub = []; }
+    liveRender();
+  },
+
   close() {
     this.unsub.forEach(u => { try { u(); } catch (e) { } });
     this.unsub = [];
@@ -59,6 +67,7 @@ const DB = {
       const snap = await FB.circle(code).get();
       if (this.code !== code) return;
       if (!snap.exists) { cc.status = "missing"; liveRender(); return; }
+      if (snap.data().deleted) { this.gone(cc); return; }
       cc.circle = snap.data();
       // Un non-membre n'a pas le droit de lire la fiche : un refus veut dire « pas membre »
       let isMem = false;
@@ -93,6 +102,7 @@ const DB = {
     };
     this.unsub.push(FB.circle(code).onSnapshot(s => {
       if (!s.exists) { cc.status = "missing"; liveRender(); return; }
+      if (s.data().deleted) { this.gone(cc); return; }
       cc.circle = s.data();
       MyCircles.update(code, { name: cc.circle.name, emoji: cc.circle.emoji });
       if (cc._season !== cc.circle.season) { cc._season = cc.circle.season; this.listenSeason(cc); }
@@ -212,7 +222,7 @@ const DB = {
   async join(code) {
     const p = Profile.get();
     const s = await FB.circle(code).get();
-    if (!s.exists) throw { code: "not-found" };
+    if (!s.exists || s.data().deleted) throw { code: "not-found" };
     const c = s.data();
     const ref = FB.sub(code, "members").doc(FB.uid);
     let exists = false;

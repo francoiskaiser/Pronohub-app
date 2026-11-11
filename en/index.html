@@ -1266,6 +1266,14 @@ const DB = {
     return this.openOnline(code);
   },
 
+  gone(cc) {
+    cc.status = "gone";
+    MyCircles.remove(cc.code);
+    Account.syncCircles();
+    if (this.code === cc.code) { this.unsub.forEach(u => { try { u(); } catch (e) { } }); this.unsub = []; }
+    liveRender();
+  },
+
   close() {
     this.unsub.forEach(u => { try { u(); } catch (e) { } });
     this.unsub = [];
@@ -1298,6 +1306,7 @@ const DB = {
       const snap = await FB.circle(code).get();
       if (this.code !== code) return;
       if (!snap.exists) { cc.status = "missing"; liveRender(); return; }
+      if (snap.data().deleted) { this.gone(cc); return; }
       cc.circle = snap.data();
       // Un non-membre n'a pas le droit de lire la fiche : un refus veut dire « pas membre »
       let isMem = false;
@@ -1332,6 +1341,7 @@ const DB = {
     };
     this.unsub.push(FB.circle(code).onSnapshot(s => {
       if (!s.exists) { cc.status = "missing"; liveRender(); return; }
+      if (s.data().deleted) { this.gone(cc); return; }
       cc.circle = s.data();
       MyCircles.update(code, { name: cc.circle.name, emoji: cc.circle.emoji });
       if (cc._season !== cc.circle.season) { cc._season = cc.circle.season; this.listenSeason(cc); }
@@ -1451,7 +1461,7 @@ const DB = {
   async join(code) {
     const p = Profile.get();
     const s = await FB.circle(code).get();
-    if (!s.exists) throw { code: "not-found" };
+    if (!s.exists || s.data().deleted) throw { code: "not-found" };
     const c = s.data();
     const ref = FB.sub(code, "members").doc(FB.uid);
     let exists = false;
@@ -2006,7 +2016,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.2.2";
+const APP_VERSION = "1.3.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2189,6 +2199,7 @@ function circleStateView(cc) {
     case "loading": return box("Opening the circle…", "Fetching bets and standings.", home);
     case "auth": return box("Can't connect", FB.error ? fbErr({ code: FB.error }) : "The connection to Firebase failed. Check your internet connection.", `<button class="btn primary" data-a="retry">Try again</button>${home}`);
     case "nofb": return box("Online circle unavailable", "This installation doesn't have Firebase yet. Online circles will come back once it's set up.", home);
+    case "gone": return box("Circle deleted", "Its creator deleted it. It has been removed from your list.", home);
     case "missing": return box("Circle not found", "This code doesn't match any circle, or it has been deleted.", `<button class="btn" data-a="forgetCircle" data-code="${esc(cc.code)}">Remove from my list</button>${home}`);
     case "notmember": return box("You're not part of this circle", "You may have been removed, or you're on another device. You can join again with its code.", `<button class="btn primary" data-a="rejoin" data-code="${esc(cc.code)}">Join ${esc(cc.code)}</button>${home}`);
     case "denied": return box("Access denied", (cc.err || "") + " If you just enabled Firebase, publish the rules from firestore.rules in the console.", `<button class="btn primary" data-a="retry">Try again</button>${home}`);
@@ -2313,7 +2324,7 @@ function circleModal() {
     ${!owner && !cc.local ? `<p class="hint">Did you create this circle on another device? <button class="link" data-a="recover">Take back control with the key</button></p>` : ""}
 
     <div class="row between wrap modal-foot">
-      ${owner ? (cc.local ? `<button class="btn danger ghost" data-a="deleteLocal">Delete the circle</button>` : `<span></span>`) : `<button class="btn danger ghost" data-a="leave">Leave the circle</button>`}
+      ${owner ? (cc.local ? `<button class="btn danger ghost" data-a="deleteLocal">Delete the circle</button>` : `<button class="btn danger ghost" data-a="deleteCircle">Delete the circle</button>`) : `<button class="btn danger ghost" data-a="leave">Leave the circle</button>`}
       <button class="btn" data-a="close">Close</button>
     </div>`;
 }
@@ -2348,6 +2359,33 @@ async function openCircle(code) {
   S.actor = null;
   Store.set("last", code);
   DB.open(code);
+  navPush(navState("circle", { code, tab: "bets" }));
+  render();
+}
+
+/* Suppression par le créateur : le cercle est marqué supprimé (il disparaît chez tous les membres),
+   puis ses paris, mises, commentaires et membres sont effacés. */
+async function deleteOnlineCircle(cc) {
+  const code = cc.code;
+  toast("Deleting…");
+  try { await FB.circle(code).set({ deleted: true, deletedAt: now() }, { merge: true }); }
+  catch (e) { toast(fbErr(e), "bad"); return; }
+  DB.close();
+  for (const coll of ["wagers", "bets", "comments", "seasons", "reacts", "flags"]) {
+    try { const s = await FB.sub(code, coll).get(); await Promise.all(s.docs.map(d => d.ref.delete().catch(() => { }))); } catch (e) { }
+  }
+  try { await FB.sub(code, "private").doc("owner").delete(); } catch (e) { }
+  try {
+    const s = await FB.sub(code, "members").get();
+    await Promise.all(s.docs.filter(d => d.id !== FB.uid).map(d => d.ref.delete().catch(() => { })));
+  } catch (e) { }
+  try { await FB.sub(code, "members").doc(FB.uid).delete(); } catch (e) { }
+  MyCircles.remove(code);
+  Account.syncCircles();
+  S.code = null; S.view = "home"; S.modal = null;
+  Store.del("last");
+  navPush({ view: "home" });
+  toast("Circle deleted", "good");
   render();
 }
 
@@ -2368,7 +2406,7 @@ async function newSeason() {
 function circlesAct(a, d) {
   const cc = DB.cur();
   switch (a) {
-    case "home": DB.close(); S.code = null; S.view = "home"; S.modal = null; Store.del("last"); return true;
+    case "home": DB.close(); S.code = null; S.view = "home"; S.modal = null; Store.del("last"); navPush({ view: "home" }); return true;
     case "openCircle": openCircle(d.code); return true;
     case "newCircle": S.modal = { k: "newCircle" }; return true;
     case "joinCircle": S.modal = { k: "join" }; return true;
@@ -2399,6 +2437,10 @@ function circlesAct(a, d) {
         if (!ok) return;
         MyCircles.remove(cc.code); Account.syncCircles(); circlesAct("home", {}); render();
       });
+      return true;
+    case "deleteCircle":
+      ask(`Delete “ ${cc.circle.name} ”? Every member's bets, stakes and comments will be erased. This is permanent.`, "Delete the circle", true)
+        .then(ok => ok && deleteOnlineCircle(cc));
       return true;
     case "deleteLocal":
       ask("Permanently delete this circle and all its bets?", "Delete the circle", true).then(ok => {
@@ -4481,7 +4523,7 @@ function soloAct(a, d) {
   const st = Solo.s(), run = st.run;
   switch (a) {
     case "soloHub": go("solo", { soloView: "hub" }); return "keep";
-    case "soloNewRun": newRun(); S.draft = null; if (S.view === "solo") { S.soloView = "run"; window.scrollTo(0, 0); return true; } go("solo", { soloView: "run" }); return "keep";
+    case "soloNewRun": newRun(); S.draft = null; go("solo", { soloView: "run" }); return "keep";
     case "soloRun":
       if (!run || run.phase === "end") newRun();
       go("solo", { soloView: "run" }); return "keep";
@@ -4625,22 +4667,50 @@ const TICKET_SVG = `<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden=
 </svg>`;
 
 /* ---------- Navigation ---------- */
+/* Chaque écran est une entrée de l'historique du navigateur : le bouton retour du téléphone
+   ramène à l'écran précédent, ferme une fenêtre ouverte, et ne quitte l'app que depuis l'accueil. */
+const Hist = { modal: false, ignore: 0 };
+function navState(view, params = {}) {
+  return Object.assign({ view, code: S.code, tab: S.tab, betId: S.betId, playerId: S.playerId, soloView: S.soloView }, params, { view });
+}
+function navPush(st) {
+  try {
+    if (Hist.modal) { history.replaceState(st, ""); Hist.modal = false; }
+    else history.pushState(st, "");
+  } catch (e) { }
+}
 function go(view, params = {}) {
   Object.assign(S, params, { view, modal: null });
-  try { history.pushState({ view, ...params }, ""); } catch (e) { }
+  navPush(navState(view, params));
   render();
   window.scrollTo(0, 0);
 }
 function goBack() {
-  if (history.state && history.state.view) history.back();
+  if (history.state && history.state.view && history.length > 1) history.back();
   else { S.view = S.code ? "circle" : "home"; render(); }
 }
-window.addEventListener("popstate", e => {
-  const st = e.state || {};
+function restoreNav(st) {
   S.modal = null;
-  if (st.view) Object.assign(S, st);
-  else S.view = S.code ? "circle" : "home";
+  const view = st.view || "home";
+  if (view !== "home" && view !== "solo" && view !== "settings" && st.code && st.code !== S.code) {
+    S.code = st.code; S.actor = null; Store.set("last", st.code); DB.open(st.code);
+  }
+  Object.assign(S, { view, tab: st.tab || "bets", betId: st.betId ?? S.betId, playerId: st.playerId ?? S.playerId, soloView: st.soloView || S.soloView });
+  if (view === "home") Store.del("last");
   render();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("popstate", e => {
+  if (Hist.ignore) { Hist.ignore--; return; }
+  // Retour avec une fenêtre ouverte : on ferme seulement la fenêtre
+  if (Hist.modal) {
+    Hist.modal = false;
+    if (S.modal && S.modal.k === "ask") askDone(false);
+    S.modal = null;
+    render();
+    return;
+  }
+  restoreNav(e.state || {});
 });
 
 /* ---------- Rendu ---------- */
@@ -4719,6 +4789,11 @@ let _lastModal = null;
 function renderModal() {
   const ov = $("#overlay");
   const m = S.modal;
+  // Une fenêtre ouverte ajoute une entrée d'historique, que l'on retire à sa fermeture
+  try {
+    if (m && !Hist.modal) { history.pushState(Object.assign({}, history.state, { modal: 1 }), ""); Hist.modal = true; }
+    else if (!m && Hist.modal) { Hist.modal = false; Hist.ignore++; history.back(); }
+  } catch (e) { }
   if (!m) { ov.hidden = true; ov.innerHTML = ""; _lastModal = null; document.body.classList.remove("modal-open"); return; }
   const cc = DB.cur();
   const a = cc && cc.status === "ok" ? analysis(cc) : null;
@@ -4811,8 +4886,14 @@ function act(a, d) {
     case "back": goBack(); return "keep";
     case "reload": location.reload(); return "keep";
     case "tab":
-      S.tab = d.v;
-      if (S.view !== "circle") { go("circle"); return "keep"; }
+      if (S.view !== "circle") { S.tab = d.v; go("circle"); return "keep"; }
+      if (S.tab !== d.v) {
+        const hs = history.state || {};
+        S.tab = d.v;
+        // Un seul niveau d'onglet dans l'historique : retour depuis Classement, Fil ou Moi revient aux Paris
+        if (hs.view === "circle" && hs.tab && hs.tab !== "bets") history.replaceState(navState("circle"), "");
+        else navPush(navState("circle"));
+      }
       window.scrollTo(0, 0);
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
@@ -4889,6 +4970,11 @@ function boot() {
   if (S.code) DB.open(S.code);
   if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
   if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }
+  // L'accueil sert de première page : le retour depuis un cercle y ramène avant de quitter l'app
+  try {
+    history.replaceState({ view: "home" }, "");
+    if (S.code) history.pushState(navState("circle", { tab: "bets" }), "");
+  } catch (e) { }
   render();
   $("#splash") && $("#splash").remove();
 

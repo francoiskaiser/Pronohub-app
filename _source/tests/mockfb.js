@@ -28,7 +28,7 @@
   }
   const snapDoc = (id, data) => ({ id, exists: data !== undefined, data: () => data && JSON.parse(JSON.stringify(data)) });
 
-  function querySnap(list, prev) {
+  function querySnap(list, prev, path) {
     const changes = [], now = new Map();
     for (const x of list) {
       const j = JSON.stringify(x.data);
@@ -37,7 +37,7 @@
       else if (prev.get(x.id) !== j) changes.push({ type: "modified", doc: snapDoc(x.id, x.data) });
     }
     for (const [id] of prev) if (!now.has(id)) changes.push({ type: "removed", doc: snapDoc(id, undefined) });
-    const docs = list.map(x => snapDoc(x.id, x.data));
+    const docs = list.map(x => Object.assign(snapDoc(x.id, x.data), { ref: new Doc(path + "/" + x.id) }));
     return { snap: { docs, size: docs.length, empty: !docs.length, forEach: f => docs.forEach(f), docChanges: () => changes }, now, changed: changes.length > 0 };
   }
 
@@ -46,10 +46,10 @@
     where(f, op, v) { return new Query(this.path, Object.assign({}, this.q, { where: this.q.where.concat([[f, op, v]]) })); }
     orderBy(f, dir = "asc") { return new Query(this.path, Object.assign({}, this.q, { order: [f, dir] })); }
     limit(n) { return new Query(this.path, Object.assign({}, this.q, { lim: n })); }
-    async get() { return querySnap(docsOf(this.path, this.q), new Map()).snap; }
+    async get() { return querySnap(docsOf(this.path, this.q), new Map(), this.path).snap; }
     onSnapshot(cb) {
       let prev = new Map(), first = true;
-      const l = { run: () => { const r = querySnap(docsOf(this.path, this.q), prev); prev = r.now; if (r.changed || first) { first = false; cb(r.snap); } } };
+      const l = { run: () => { const r = querySnap(docsOf(this.path, this.q), prev, this.path); prev = r.now; if (r.changed || first) { first = false; cb(r.snap); } } };
       listeners.push(l); setTimeout(l.run, 0);
       return () => { const i = listeners.indexOf(l); if (i >= 0) listeners.splice(i, 1); };
     }

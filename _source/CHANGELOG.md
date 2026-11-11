@@ -1,5 +1,10 @@
 # Journal des versions de Pronohub
 
+## 1.3.0 — 11 novembre 2026
+
+- Le bouton retour du téléphone ramène à l'écran précédent : il ferme d'abord la fenêtre ouverte, revient des détails d'un pari à la liste, d'un onglet aux Paris, puis du cercle à l'accueil. L'app ne se ferme que depuis l'accueil.
+- Le créateur d'un cercle en ligne peut le supprimer (Le cercle > Supprimer le cercle). Le cercle disparaît chez tous les membres, avec ses paris, mises et commentaires.
+
 ## 1.2.2 — 11 novembre 2026
 
 - Le bonus quotidien est maintenant automatique et identique pour tous les membres d'un cercle, même pour ceux qui rejoignent en cours de saison. Fini les écarts de jetons parce qu'un joueur a oublié de le récupérer.

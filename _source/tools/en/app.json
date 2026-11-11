@@ -809,5 +809,10 @@
  "Bonus quotidien pour tous": "Daily bonus for everyone",
  "jetons et reçoit automatiquement": "tokens and automatically gets",
  "jetons par jour, même en rejoignant en cours de saison. Les mises en cours sont déduites jusqu'au résultat.": "tokens a day, even when joining mid-season. Open stakes are deducted until the result.",
- "Le classement se fait au solde de jetons. Tout le monde part de": "Standings are by token balance. Everyone starts with"
+ "Le classement se fait au solde de jetons. Tout le monde part de": "Standings are by token balance. Everyone starts with",
+ "Cercle supprimé": "Circle deleted",
+ "Son créateur l'a supprimé. Il a été retiré de ta liste.": "Its creator deleted it. It has been removed from your list.",
+ "Suppression en cours…": "Deleting…",
+ "Supprimer «": "Delete “",
+ "» ? Les paris, mises et commentaires de tous les membres seront effacés. C'est définitif.": "”? Every member's bets, stakes and comments will be erased. This is permanent."
 }
