@@ -870,6 +870,9 @@ body[data-view="solo"] { padding-bottom: var(--safe-b); }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
+.circle-manage{width:100%;justify-content:flex-start;margin:0 0 14px;text-align:left}
+.circle-manage svg{flex:none}
+
 </style>
 </head>
 <body data-view="home">
@@ -2016,7 +2019,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.3.1";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2272,7 +2275,9 @@ function inviteModal() {
 
 function switcherModal() {
   const list = MyCircles.list();
+  const cur = S.code && list.find(c => c.code === S.code);
   return `<h2>My circles</h2>
+    ${cur ? `<button class="btn block circle-manage" data-a="circleInfo">${ICON.gear} Manage this circle</button>` : ""}
     <div class="circle-list compact">${list.map(c => `
       <button class="circle-card ${c.code === S.code ? "on" : ""}" data-a="openCircle" data-code="${esc(c.code)}">
         <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
@@ -3244,7 +3249,7 @@ function meTab(cc, a) {
     <div class="row wrap me-actions">
       <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Invite friends</button>
       <button class="btn ghost" data-a="soloHub">Solo mode</button>
-      <button class="btn ghost" data-a="circleInfo">The circle</button>
+      <button class="btn ghost" data-a="circleInfo">Circle settings</button>
       <button class="btn ghost" data-a="settings">Settings</button>
     </div>
   </section>`;

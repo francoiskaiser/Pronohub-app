@@ -849,3 +849,6 @@ body[data-view="solo"] { padding-bottom: var(--safe-b); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+.circle-manage{width:100%;justify-content:flex-start;margin:0 0 14px;text-align:left}
+.circle-manage svg{flex:none}

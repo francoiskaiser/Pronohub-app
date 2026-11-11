@@ -1,9 +1,13 @@
 # Journal des versions de Pronohub
 
+## 1.3.1 — 11 novembre 2026
+
+- Les réglages d'un cercle sont plus faciles à trouver : touche le nom du cercle en haut, puis « Gérer ce cercle ». On y trouve les règles, les membres et la suppression du cercle.
+
 ## 1.3.0 — 11 novembre 2026
 
 - Le bouton retour du téléphone ramène à l'écran précédent : il ferme d'abord la fenêtre ouverte, revient des détails d'un pari à la liste, d'un onglet aux Paris, puis du cercle à l'accueil. L'app ne se ferme que depuis l'accueil.
-- Le créateur d'un cercle en ligne peut le supprimer (Le cercle > Supprimer le cercle). Le cercle disparaît chez tous les membres, avec ses paris, mises et commentaires.
+- Le créateur d'un cercle en ligne peut le supprimer (nom du cercle en haut > Gérer > Supprimer le cercle). Le cercle disparaît chez tous les membres, avec ses paris, mises et commentaires.
 
 ## 1.2.2 — 11 novembre 2026
 

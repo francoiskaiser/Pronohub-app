@@ -260,7 +260,9 @@ with sync_playwright() as pw:
     # Suppression du cercle par son créateur
     A.click(f"[data-code='{code}']")
     A.wait_for_selector(".top")
-    A.evaluate("S.modal = {k:'circle'}; render()")
+    A.click(".circle-btn"); A.wait_for_selector(".circle-manage")
+    shot(A, "35-switcher-manage")
+    A.click(".circle-manage")
     A.click("[data-a=deleteCircle]")
     shot(A, "36-delete-ask")
     A.click("[data-a=askYes]")

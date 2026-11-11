@@ -220,7 +220,6 @@
  "Lance le premier : un match, une élection ou une question qui fera débat à la pause café.": "Start the first one: a match, an election or a question for the coffee break.",
  "Lancer le défi": "Send the challenge",
  "Langue": "Language",
- "Le cercle": "The circle",
  "Le code a 6 caractères, par exemple ABC-234.": "The code has 6 characters, for example ABC-234.",
  "Le créateur du pari saisit le résultat, ou il arrive tout seul pour les matchs importés. Si la majorité des parieurs le conteste, les gains sont gelés.": "The bet's creator enters the result, or it arrives on its own for imported matches. If most bettors dispute it, winnings are frozen.",
  "Le fil": "The feed",
@@ -814,5 +813,7 @@
  "Son créateur l'a supprimé. Il a été retiré de ta liste.": "Its creator deleted it. It has been removed from your list.",
  "Suppression en cours…": "Deleting…",
  "Supprimer «": "Delete “",
- "» ? Les paris, mises et commentaires de tous les membres seront effacés. C'est définitif.": "”? Every member's bets, stakes and comments will be erased. This is permanent."
+ "» ? Les paris, mises et commentaires de tous les membres seront effacés. C'est définitif.": "”? Every member's bets, stakes and comments will be erased. This is permanent.",
+ "Réglages du cercle": "Circle settings",
+ "Gérer ce cercle": "Manage this circle"
 }

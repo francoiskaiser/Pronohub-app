@@ -1,6 +1,6 @@
 /* Pronohub — service worker : fonctionnement hors ligne et mises à jour.
    Incrémenter VERSION à chaque publication, sinon les joueurs gardent l'ancienne version. */
-const VERSION = "pronohub-v9";
+const VERSION = "pronohub-v10";
 const CORE = [
   "./", "index.html", "en/", "en/index.html", "manifest.webmanifest",
   "icon-192.png", "icon-512.png", "icon-maskable.png", "apple-touch-icon.png", "firebase-config.js",

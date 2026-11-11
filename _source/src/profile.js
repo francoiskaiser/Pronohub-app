@@ -72,7 +72,7 @@ function meTab(cc, a) {
     <div class="row wrap me-actions">
       <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
       <button class="btn ghost" data-a="soloHub">Mode solo</button>
-      <button class="btn ghost" data-a="circleInfo">Le cercle</button>
+      <button class="btn ghost" data-a="circleInfo">Réglages du cercle</button>
       <button class="btn ghost" data-a="settings">Réglages</button>
     </div>
   </section>`;
