@@ -106,6 +106,7 @@ function render() {
   let view = S.view;
   const cc = DB.cur();
   if (view === "settings") main = settingsView();
+  else if (view === "solo") main = soloView();
   else if (!S.code || view === "home") { view = "home"; main = homeView(); }
   else if (!cc || cc.status !== "ok" || !cc.circle) { view = "state"; main = circleStateView(cc); }
   else {
@@ -231,7 +232,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -249,13 +250,14 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 
 document.addEventListener("input", e => {
   const t = e.target;
   if (t.name === "amt" && t.closest('form[data-f="wager"]')) updatePotential();
+  if (t.name === "slipStake") updateSlip();
   if (t.classList.contains("code-input")) {
     const v = t.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     t.value = v.length > 3 ? v.slice(0, 3) + "-" + v.slice(3) : v;
@@ -280,6 +282,7 @@ document.addEventListener("keydown", e => {
 
 /* ---------- Démarrage ---------- */
 function boot() {
+  Solo.load();
   applyTheme();
   FB.onAuth(() => Account.onAuth());
   FB.onAuth(() => {
@@ -306,6 +309,7 @@ function boot() {
 
   setInterval(() => { if (!S.modal) liveRender(); }, 30000);
   setInterval(() => Sports.autoSettle(), 60000);
+  setInterval(() => { if (S.view === "solo" && S.soloView === "daily") Daily.refresh(); }, 120000);
   setTimeout(() => Sports.autoSettle(), 4000);
 
   // Service worker et mises à jour

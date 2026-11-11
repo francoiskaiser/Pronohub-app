@@ -29,6 +29,61 @@ def fixtures_json():
     ]}
 
 
+SOCCER_TEAMS = ["Brugge", "Anderlecht", "Genk", "Standard", "Gent", "Antwerp", "Union", "Charleroi", "Mechelen", "Westerlo"]
+NBA_TEAMS = ["Celtics", "Lakers", "Bucks", "Knicks", "Heat", "Nuggets", "Suns", "Warriors", "Bulls", "Nets"]
+
+
+def synthetic_month(url):
+    """Faux calendrier ESPN d'un mois : 8 journées de 5 matchs, scores déterministes."""
+    import re, random, calendar
+    m = re.search(r"/sports/([^/]+)/([^/]+)/scoreboard\?dates=(\d{6})(?!\d)", url)
+    if not m:
+        return fixtures_json()
+    sport, lg, ym = m.group(1), m.group(2), m.group(3)
+    y, mo = int(ym[:4]), int(ym[4:])
+    teams = NBA_TEAMS if sport != "soccer" else [f"{t}" for t in SOCCER_TEAMS]
+    now = time.time()
+    days_in = calendar.monthrange(y, mo)[1]
+    events = []
+    for k, day in enumerate([2, 6, 9, 13, 16, 20, 23, 27]):
+        if day > days_in:
+            continue
+        rot = teams[:1] + teams[1:][(k * 3) % 9:] + teams[1:][:(k * 3) % 9]
+        for i in range(5):
+            h, a = rot[i], rot[9 - i]
+            if k % 2:
+                h, a = a, h
+            ts = calendar.timegm((y, mo, day, 18 + (i % 3), 0, 0)) + i * 600
+            r = random.Random(f"{lg}{ym}{day}{i}")
+            if sport == "soccer":
+                strength = (teams.index(a) - teams.index(h)) * 0.12
+                sh, sa = max(0, int(r.gauss(1.4 + strength, 1.1))), max(0, int(r.gauss(1.1 - strength, 1.0)))
+            else:
+                sh, sa = int(r.gauss(112, 10)), int(r.gauss(108, 10))
+                if sh == sa: sh += 1
+            done = ts < now - 3 * 3600
+            ev_id = str(abs(hash(f"{lg}{ym}{day}{i}")) % 10**8)
+            events.append({"id": ev_id, "date": time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(ts)),
+                "status": {"type": {"state": "post" if done else "pre", "completed": done, "name": "STATUS_FULL_TIME" if done else "STATUS_SCHEDULED"}},
+                "competitions": [{"competitors": [
+                    {"homeAway": "home", "score": str(sh) if done else "0", "team": {"displayName": h, "shortDisplayName": h, "logo": ""}},
+                    {"homeAway": "away", "score": str(sa) if done else "0", "team": {"displayName": a, "shortDisplayName": a, "logo": ""}}]}]})
+    cur = time.strftime("%Y%m", time.gmtime(now))
+    if ym == cur:
+        # Quelques matchs dans les prochaines heures, pour le Défi du jour
+        for i in range(4):
+            ts = now + 3600 * (3 + i * 5)
+            r = random.Random(f"{lg}live{i}")
+            h, a = r.sample(teams, 2)
+            events.append({"id": f"L{abs(hash(lg)) % 1000}{i}", "date": time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(ts)),
+                "status": {"type": {"state": "pre", "completed": False, "name": "STATUS_SCHEDULED"}},
+                "competitions": [{"competitors": [
+                    {"homeAway": "home", "score": "0", "team": {"displayName": h, "shortDisplayName": h, "logo": ""}},
+                    {"homeAway": "away", "score": "0", "team": {"displayName": a, "shortDisplayName": a, "logo": ""}}]}]})
+        events += fixtures_json()["events"]
+    return {"events": events}
+
+
 def setup(ctx, mockfb=False, espn_result=None):
     """Interceptions réseau d'un contexte Playwright."""
     mock_js = open(os.path.join(HERE, "mockfb.js"), encoding="utf-8").read() if mockfb else ""
@@ -51,7 +106,7 @@ def setup(ctx, mockfb=False, espn_result=None):
                 return route.fulfill(status=200, content_type="application/javascript", body=mock_js)
             return route.fulfill(status=200, content_type="application/javascript", body="/* mock */")
         if "site.api.espn.com" in url:
-            body = espn_result() if espn_result else fixtures_json()
+            body = espn_result() if espn_result else synthetic_month(url)
             return route.fulfill(status=200, content_type="application/json", body=json.dumps(body),
                                  headers={"access-control-allow-origin": "*"})
         return route.abort()

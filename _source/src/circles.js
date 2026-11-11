@@ -13,7 +13,7 @@ function welcomeView() {
     <form data-f="profile" class="panel stack welcome-form">
       <label class="fld"><span>Ton pseudo</span><input name="name" maxlength="24" required autocomplete="nickname" placeholder="Ex. Fanfan" value="${esc(p.name)}"></label>
       <fieldset class="fld"><legend>Ton avatar</legend>
-        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+        <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <button class="btn primary big">C'est parti</button>
     </form>

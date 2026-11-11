@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.1.3";
+const APP_VERSION = "1.2.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -109,7 +109,7 @@ function legalModal() {
 function exportData() {
   Store.flush();
   const data = {};
-  for (const k of Store.keys()) data[k] = Store.get(k);
+  for (const k of Store.keys()) if (!/^(mo|fx)\./.test(k)) data[k] = Store.get(k);
   download(`pronohub-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "pronohub", v: APP_VERSION, at: now(), data }, null, 1));
   toast("Données exportées");
 }

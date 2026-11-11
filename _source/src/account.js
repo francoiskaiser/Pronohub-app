@@ -8,11 +8,13 @@ const Account = {
       const s = await FB.userDoc().get();
       const p = Profile.get();
       if (s.exists) {
+        Solo.mergeRemote(s.data().solo);
         const d = s.data();
         if (d.name && !p.name) Profile.set({ name: d.name, avatar: d.avatar || "" });
         for (const c of d.circles || []) if (!MyCircles.has(c.code)) MyCircles.add(Object.assign({}, c, { local: false }));
       }
       this.syncCircles();
+      Solo._sum = ""; Solo.syncSoon();
     } catch (e) { /* hors ligne : on garde la liste locale */ }
   },
 

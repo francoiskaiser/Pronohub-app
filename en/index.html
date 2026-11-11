@@ -693,6 +693,179 @@ body[data-view="home"] .toast, body[data-view="settings"] .toast { bottom: calc(
   .home-side .mcard { flex: none; }
 }
 
+
+/* ---------- Mode solo ---------- */
+body[data-view="solo"] { padding-bottom: var(--safe-b); }
+.solo-card { background: var(--ink); color: var(--bg); border-radius: var(--r-lg); padding: .4rem .5rem .6rem; margin-bottom: 1.2rem; box-shadow: var(--shadow); }
+.solo-head { width: 100%; display: flex; align-items: center; gap: .6rem; padding: .55rem .6rem; border: 0; background: none; color: inherit; text-align: left; border-radius: 14px; min-height: 52px; }
+.solo-head > span:first-child { flex: 1; display: flex; flex-direction: column; }
+.solo-head small { opacity: .7; font-weight: 600; }
+.solo-head b { font-size: 1.1rem; }
+.solo-head svg { opacity: .6; }
+.solo-acts { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.solo-btn { display: flex; align-items: center; gap: .6rem; text-align: left; padding: .7rem .75rem; min-height: 64px; border-radius: 16px; border: 0;
+  background: color-mix(in srgb, var(--bg) 12%, transparent); color: inherit; min-width: 0; }
+.solo-btn:hover { background: color-mix(in srgb, var(--bg) 20%, transparent); }
+.solo-btn > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.solo-btn small { opacity: .75; font-size: .8rem; line-height: 1.25; }
+.sb-e { font-size: 1.6rem; flex: none; }
+.flame { font-weight: 800; padding: .2rem .6rem; border-radius: 99px; background: color-mix(in srgb, var(--gold) 30%, transparent); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.lvl-card { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.1rem; border-radius: var(--r-lg); background: var(--ink); color: var(--bg); margin-bottom: 1rem; }
+.lvl-card .grow { display: flex; flex-direction: column; gap: .2rem; }
+.lvl-card b { font-size: 1.25rem; }
+.lvl-card span { opacity: .8; font-size: .9rem; }
+.bar { display: block; height: 8px; border-radius: 99px; background: color-mix(in srgb, currentColor 18%, transparent); overflow: hidden; margin-top: .3rem; }
+.bar > i { display: block; height: 100%; background: var(--gold); border-radius: 99px; }
+.mode-card { background: var(--paper); border-radius: var(--r-lg); padding: 1.1rem; box-shadow: var(--shadow); margin-bottom: 1rem; display: flex; flex-direction: column; gap: .7rem; }
+.mode-top { display: flex; gap: .8rem; align-items: flex-start; }
+.mode-top h2 { margin: 0 0 .2rem; }
+.mode-top p { margin: 0; color: var(--ink-2); }
+.mode-emo { font-size: 2.2rem; line-height: 1; }
+.run-mini { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mode-foot { margin: 0; color: var(--ink-3); font-size: .88rem; }
+.unlocks { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.unlocks li { padding: .35rem .75rem; border-radius: 99px; background: var(--paper); box-shadow: var(--shadow); font-weight: 600; font-size: .9rem; }
+.lead-s { color: var(--ink-2); font-size: 1.02rem; }
+.solo-line { margin: .2rem 0 0; font-weight: 600; color: var(--brand); font-size: .9rem; }
+
+.run-head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 15; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  margin: -1rem -1rem 1rem; padding: .5rem 1rem .8rem; border-bottom: 1px solid var(--line); }
+.run-title { font-size: 1.05rem; }
+.track { display: flex; gap: .3rem; margin: .2rem 0 .6rem; }
+.track i { flex: 1; height: 6px; border-radius: 99px; background: var(--line); }
+.track i.boss { height: 10px; margin-top: -2px; }
+.track i.done { background: var(--win); }
+.track i.cur { background: var(--brand); }
+.run-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+.run-stats span { display: flex; flex-direction: column; }
+.run-stats small { color: var(--ink-3); font-weight: 600; font-size: .78rem; }
+.run-stats b { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: .3rem; }
+.goal { height: 8px; border-radius: 99px; background: var(--paper-2); overflow: hidden; margin-top: .5rem; }
+.goal i { display: block; height: 100%; background: var(--gold); border-radius: 99px; transition: width .6s; }
+.atout-row { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; margin-top: .6rem; }
+.achip { flex: none; }
+.achip summary { list-style: none; cursor: pointer; padding: .3rem .7rem; border-radius: 99px; background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--line); font-weight: 600; font-size: .85rem; white-space: nowrap; min-height: 34px; display: flex; align-items: center; }
+.achip summary::-webkit-details-marker { display: none; }
+.achip[open] summary { box-shadow: inset 0 0 0 1.5px var(--brand); }
+.achip p { position: absolute; left: 1rem; right: 1rem; margin: .4rem 0 0; padding: .6rem .8rem; background: var(--ink); color: var(--bg); border-radius: 12px; font-size: .88rem; z-index: 3; }
+.boss-banner { display: flex; gap: .8rem; align-items: center; padding: .8rem 1rem; border-radius: 16px; background: var(--ink); color: var(--bg); margin-bottom: 1rem; }
+.boss-banner > span { font-size: 1.8rem; }
+.boss-banner div { display: flex; flex-direction: column; }
+.boss-banner small { opacity: .8; }
+.stage-label { color: var(--ink-2); font-weight: 600; margin: 0 0 .7rem; }
+
+.glist { display: grid; gap: .7rem; }
+.gcard { background: var(--paper); border-radius: 18px; padding: .8rem .9rem .9rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: .4rem; }
+.gcard.has-pick { box-shadow: inset 0 0 0 2px var(--brand), var(--shadow); }
+.gcard.locked { opacity: .78; }
+.g-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-2); font-weight: 600; }
+.g-top > span:first-child::first-letter { text-transform: uppercase; }
+.g-score { font-size: 1.2rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.g-team { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+.g-team b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-team img, .g-team .crest { width: 26px; height: 26px; flex: none; object-fit: contain; }
+.form { display: inline-flex; gap: 3px; flex: none; }
+.form i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
+.form .fW { background: var(--win); }
+.form .fL { background: var(--lose); }
+.form .fD { background: var(--ink-3); opacity: .6; }
+.g-odds { display: grid; gap: .4rem; margin-top: .3rem; }
+.g-odds.n3 { grid-template-columns: repeat(3, 1fr); }
+.g-odds.n2 { grid-template-columns: repeat(2, 1fr); }
+.odd { min-height: 48px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--paper-2); display: flex; align-items: center; justify-content: space-between; padding: 0 .7rem; gap: .3rem; }
+.odd span { color: var(--ink-3); font-weight: 700; }
+.odd b { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.odd b.boost { color: var(--win); }
+.odd:not(:disabled):hover { border-color: var(--brand); }
+.odd.placed { border-color: color-mix(in srgb, var(--brand) 50%, transparent); border-style: dashed; }
+.odd.on { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.odd.on span, .odd.on b.boost { color: inherit; }
+.odd.win { background: var(--win-2); border-color: var(--win); }
+.odd.win b { color: var(--win); }
+.odd:disabled { cursor: default; }
+.odd.miss { border-color: var(--lose); border-style: dashed; background: var(--lose-2); }
+.odd.miss b { color: var(--lose); }
+
+.tlist { display: grid; gap: .6rem; }
+.tk { position: relative; background: var(--paper); border-radius: 16px; padding: .8rem .9rem; box-shadow: var(--shadow); }
+.tk.won { box-shadow: inset 0 0 0 2px var(--win), var(--shadow); }
+.tk-head { display: flex; justify-content: space-between; gap: .5rem; align-items: center; }
+.tk .stamp { position: static; transform: rotate(-4deg); }
+.tk ul { list-style: none; padding: 0; margin: .5rem 0; display: grid; gap: .3rem; }
+.tk li { display: flex; flex-direction: column; padding-left: .7rem; border-left: 3px solid var(--line); }
+.tk li.ok { border-color: var(--win); }
+.tk li.ko { border-color: var(--lose); }
+.tk li small { color: var(--ink-3); }
+.tk-foot { display: flex; gap: 1rem; align-items: center; color: var(--ink-2); font-size: .88rem; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.tk-foot .btn { margin-left: auto; }
+.tk-note { margin: .4rem 0 0; font-size: .85rem; font-weight: 600; color: var(--brand); }
+.play-box { margin: 1.2rem 0 0; display: flex; flex-direction: column; gap: .6rem; }
+.play-box p { margin: 0; color: var(--ink-2); }
+.slip-space { height: 260px; }
+
+.slip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--paper); border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px -10px rgba(10, 14, 34, .35);
+  padding: .8rem max(1rem, env(safe-area-inset-right, 0px)) calc(.9rem + var(--safe-b)) max(1rem, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: .6rem; animation: up .22s ease-out; }
+.slip-sel { display: flex; gap: .35rem; flex-wrap: wrap; max-height: 5.5rem; overflow-y: auto; }
+.sel { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .3rem .25rem .7rem; border-radius: 99px; background: var(--brand-2); font-weight: 600; font-size: .88rem; max-width: 100%; }
+.sel b { font-variant-numeric: tabular-nums; }
+.sel .x { border: 0; background: none; color: var(--ink-2); width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; }
+.sel .x svg { width: 16px; height: 16px; }
+.slip-row { display: flex; align-items: flex-end; gap: .8rem; }
+.slip-odd { display: flex; flex-direction: column; flex: 1; }
+.slip-odd small, .slip-stake small { color: var(--ink-3); font-weight: 600; font-size: .78rem; }
+.slip-odd b { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.slip-stake { display: flex; flex-direction: column; width: 8.5rem; }
+.slip-stake input { font-size: 1.3rem !important; font-weight: 800; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+.slip-stake input::-webkit-inner-spin-button, .slip-stake input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+.verdict { display: flex; flex-direction: column; gap: .15rem; padding: .9rem 1rem; border-radius: 16px; margin-bottom: 1rem; font-variant-numeric: tabular-nums; }
+.verdict b { font-size: 1.35rem; }
+.verdict.ok { background: var(--win-2); }
+.verdict.ok b { color: var(--win); }
+.verdict.ko { background: var(--lose-2); }
+.verdict.ko b { color: var(--lose); }
+.fiches { list-style: none; padding: 0; margin: 0; }
+.fiches li { display: flex; justify-content: space-between; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+.anim .g-score { animation: pop .45s cubic-bezier(.2, .9, .3, 1.3) both; animation-delay: calc(var(--i) * 380ms); }
+.anim .odd.win { animation: glow .6s ease-out both; animation-delay: calc(var(--i, 0) * 380ms + 200ms); }
+.anim .verdict { animation: pop .5s ease-out both; animation-delay: 2s; }
+@keyframes pop { from { opacity: 0; transform: scale(.4); } }
+@keyframes glow { from { background: var(--paper-2); border-color: var(--line); } }
+
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; margin-bottom: .8rem; }
+.acard { display: flex; flex-direction: column; gap: .3rem; padding: .9rem .85rem; border-radius: 18px; background: var(--paper); box-shadow: var(--shadow); border-top: 4px solid var(--line); }
+.acard.r2 { border-top-color: var(--brand); }
+.acard.r3 { border-top-color: var(--gold); }
+.acard .a-emo { font-size: 1.9rem; }
+.acard small { color: var(--ink-2); line-height: 1.3; flex: 1; }
+.acard .btn { margin-top: .3rem; }
+.rarity { font-size: .75rem; font-weight: 700; color: var(--ink-3); }
+.fiche-count { font-weight: 800; font-variant-numeric: tabular-nums; }
+.end-hero { text-align: center; padding: 1rem 0 1.2rem; }
+.end-emo { font-size: 4rem; display: block; }
+.end .stats { grid-template-columns: repeat(2, 1fr); margin-bottom: 1rem; }
+.rep-panel p { margin: 0 0 .2rem; font-size: 1.1rem; }
+.end .row.center { margin-top: 1rem; }
+.daily-score { display: flex; gap: 1.4rem; padding: .9rem 1.1rem; border-radius: var(--r-lg); background: var(--ink); color: var(--bg); margin-bottom: 1rem; font-variant-numeric: tabular-nums; }
+.daily-score span { display: flex; flex-direction: column; }
+.daily-score small { opacity: .7; font-weight: 600; }
+.daily-score b { font-size: 1.5rem; display: inline-flex; align-items: center; gap: .3rem; }
+.state-box.center { text-align: center; padding: 3rem 1rem; margin: 0 auto; }
+.spinner { width: 42px; height: 42px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--brand); margin: 0 auto 1rem; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.daily-rank li { gap: .5rem; }
+
+@media (min-width: 640px) {
+  .slip { left: 50%; right: auto; width: 560px; transform: translateX(-50%); border-radius: 22px 22px 0 0; animation: none; }
+  .glist { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1024px) {
+  body[data-view="solo"] .shell { max-width: 900px; }
+  .page.narrow.solo-run, .page.narrow.solo-daily { max-width: 900px; margin: 0 auto; }
+  .run-head { margin: -1rem 0 1rem; border-radius: 0 0 18px 18px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -1639,11 +1812,13 @@ const Account = {
       const s = await FB.userDoc().get();
       const p = Profile.get();
       if (s.exists) {
+        Solo.mergeRemote(s.data().solo);
         const d = s.data();
         if (d.name && !p.name) Profile.set({ name: d.name, avatar: d.avatar || "" });
         for (const c of d.circles || []) if (!MyCircles.has(c.code)) MyCircles.add(Object.assign({}, c, { local: false }));
       }
       this.syncCircles();
+      Solo._sum = ""; Solo.syncSoon();
     } catch (e) { /* hors ligne : on garde la liste locale */ }
   },
 
@@ -1823,7 +1998,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.1.3";
+const APP_VERSION = "1.2.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -1931,7 +2106,7 @@ function legalModal() {
 function exportData() {
   Store.flush();
   const data = {};
-  for (const k of Store.keys()) data[k] = Store.get(k);
+  for (const k of Store.keys()) if (!/^(mo|fx)\./.test(k)) data[k] = Store.get(k);
   download(`pronohub-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ app: "pronohub", v: APP_VERSION, at: now(), data }, null, 1));
   toast("Data exported");
 }
@@ -1990,7 +2165,7 @@ function welcomeView() {
     <form data-f="profile" class="panel stack welcome-form">
       <label class="fld"><span>Your nickname</span><input name="name" maxlength="24" required autocomplete="nickname" placeholder="E.g. Fanfan" value="${esc(p.name)}"></label>
       <fieldset class="fld"><legend>Your avatar</legend>
-        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+        <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <button class="btn primary big">Let's go</button>
     </form>
@@ -2970,6 +3145,7 @@ function rankTab(cc, a) {
       <span class="rk">${s.rank}</span>${avatar(s)}<span class="grow"><b>${esc(s.name)}</b><small>${s.wins} ${pl(s.wins, "win", "wins")} from ${s.wins + s.losses} ${pl(s.wins + s.losses, "bet", "bets")}${s.locked ? `, ${nf(s.locked)} at stake` : ""}</small></span>
       <span class="bal">${nf(s.bal)}</span></button></li>`).join("")}</ol>
     <p class="hint">Standings are by token balance. Open stakes are deducted until the result.</p>
+    ${circleDailyPanel(cc)}
     ${seasons.length ? `<h3>Hall of fame</h3><ul class="honours">${seasons.map(s => `<li><span class="h-season">Season ${s.n}</span>${(s.standings || []).slice(0, 3).map((x, i) => `<span class="h-place">${["🥇", "🥈", "🥉"][i]} ${esc(x.name)} <small>${nf(x.bal)}</small></span>`).join("")}</li>`).join("")}</ul>` : ""}
   </section>`;
 }
@@ -2986,7 +3162,8 @@ function playerCard(cc, a, uid, self) {
   return `<div class="profile-head">
       ${avatar(m, "xl")}
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
-        <p class="muted">${s.rank ? `Rank ${s.rank} / ${a.standings.length}` : ""}</p></div>
+        <p class="muted">${s.rank ? `Rank ${s.rank} / ${a.standings.length}` : ""}</p>
+        ${m.solo && m.solo.level ? `<p class="solo-line">${esc(TITLES[m.solo.level - 1] || "")}, level ${m.solo.level} in solo${m.solo.best ? `, best ${m.solo.best} ${pl(m.solo.best, "stage", "stages")}` : ""}</p>` : ""}</div>
       ${self ? `<button class="btn small ghost" data-a="editProfile">Edit</button>` : ""}
     </div>
     <div class="balance-card"><span>Balance</span><b>${nf(s.bal || 0)}</b><small>${p.locked ? `incl. ${nf(p.locked)} at stake` : "tokens"}</small></div>
@@ -3019,6 +3196,7 @@ function meTab(cc, a) {
     ${playerCard(cc, a, me, !cc.local || me === Profile.get().id)}
     <div class="row wrap me-actions">
       <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Invite friends</button>
+      <button class="btn ghost" data-a="soloHub">Solo mode</button>
       <button class="btn ghost" data-a="circleInfo">The circle</button>
       <button class="btn ghost" data-a="settings">Settings</button>
     </div>
@@ -3039,7 +3217,7 @@ function editProfileModal() {
     <form data-f="editProfile" class="stack">
       <label class="fld"><span>Nickname</span><input name="name" maxlength="24" required value="${esc(p.name)}"></label>
       <fieldset class="fld"><legend>Avatar</legend>
-        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+        <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <div class="row end"><button type="button" class="btn ghost" data-a="close">Cancel</button><button class="btn primary">Save</button></div>
     </form>`;
@@ -3232,6 +3410,7 @@ function homeView() {
       </div>
     </div>
     ${installCard()}
+    ${soloHomeCard()}
     <div class="home-grid">
       <div class="home-main">
         <div class="sec-head"><h2>My circles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Create</button>` : ""}</div>
@@ -3376,6 +3555,1033 @@ function homeAct(a, d) {
   return false;
 }
 
+/* ===== odds.js ===== */
+/* Pronohub — cotes du mode solo.
+   En solo il n'y a pas de pari mutuel : l'app calcule ses propres cotes avec un classement Elo,
+   construit à partir des matchs joués avant la date du pari (jamais avec le résultat à deviner). */
+
+/* Générateur pseudo-aléatoire reproductible (mulberry32) */
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, r) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function startOfDay(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+
+const LOGO_BASE = "https://a.espncdn.com/i/teamlogos/";
+
+/* Résultat d'un match : h, d, a, "void" (annulé) ou null (pas encore joué) */
+function gameResult(g) {
+  if (!g) return null;
+  if (g.v) return "void";
+  if (!g.c || g.x == null) return null;
+  return g.x > g.y ? "h" : g.x < g.y ? "a" : "d";
+}
+
+const Odds = {
+  mem: {},
+  SEASONS: [2022, 2023, 2024, 2025],
+  DAILY: ["bel.1", "eng.1", "fra.1", "esp.1", "ita.1", "ger.1", "uefa.champions", "uefa.europa", "ned.1"],
+
+  curYm() { return Sports.ym(Date.now()); },
+  addMonths(ym, n) {
+    let y = +ym.slice(0, 4), m = +ym.slice(4) - 1 + n;
+    y += Math.floor(m / 12);
+    m = ((m % 12) + 12) % 12;
+    return y + String(m + 1).padStart(2, "0");
+  },
+  logo(p) { return p ? (p.startsWith("http") ? p : LOGO_BASE + p) : ""; },
+
+  compact(e) {
+    return {
+      i: e.id, t: e.date, h: e.home, a: e.away,
+      hl: (e.homeLogo || "").replace(LOGO_BASE, ""), al: (e.awayLogo || "").replace(LOGO_BASE, ""),
+      x: e.sh, y: e.sa, c: e.completed ? 1 : 0,
+      v: /POSTPONED|CANCEL|ABANDON|SUSPEND/.test(e.statusName) ? 1 : 0,
+    };
+  },
+
+  /* Tous les matchs d'un mois, en version compacte. Les mois passés sont gardés sur l'appareil. */
+  async month(lgId, ym, maxAge = 30 * 60000) {
+    const key = lgId + ":" + ym, T = Date.now();
+    const m = this.mem[key];
+    if (m && (m.final || T - m.t < maxAge)) return m.list;
+    const sk = Store.ns + "mo." + key;
+    let st = null;
+    try { st = JSON.parse(localStorage.getItem(sk)); } catch (e) { }
+    if (st && (st.final || T - st.t < maxAge)) { this.mem[key] = st; return st.list; }
+    const L = LEAGUE[lgId];
+    const j = await Sports.get(`${Sports.base}${L.sport}/${L.id}/scoreboard?dates=${ym}&limit=500`);
+    const seen = new Set();
+    const list = (j.events || []).map(e => this.compact(Sports.parse(e))).filter(x => !seen.has(x.i) && seen.add(x.i));
+    const rec = { t: T, final: ym < this.curYm(), list };
+    this.mem[key] = rec;
+    this.save(sk, rec);
+    return list;
+  },
+
+  save(k, v) {
+    const s = JSON.stringify(v);
+    try { localStorage.setItem(k, s); }
+    catch (e) {
+      // Stockage plein : on vide le cache des matchs et on réessaie une fois
+      try {
+        for (const key of Object.keys(localStorage)) if (key.startsWith(Store.ns + "mo.")) localStorage.removeItem(key);
+        localStorage.setItem(k, s);
+      } catch (e2) { }
+    }
+  },
+
+  /* Classement Elo et forme des équipes, d'après les matchs terminés avant `before` */
+  ratings(list, before, sport) {
+    const soccer = sport === "soccer";
+    const K = soccer ? 24 : 14, H = soccer ? 55 : 60;
+    const R = {}, form = {};
+    const done = list.filter(m => m.c && !m.v && m.x != null && m.t < before).sort((a, b) => a.t - b.t);
+    for (const m of done) {
+      const rh = R[m.h] ?? 1500, ra = R[m.a] ?? 1500;
+      const E = 1 / (1 + Math.pow(10, (ra - (rh + H)) / 400));
+      const S = m.x > m.y ? 1 : m.x < m.y ? 0 : 0.5;
+      const gd = Math.abs(m.x - m.y);
+      const mult = soccer ? (gd <= 1 ? 1 : gd === 2 ? 1.5 : (11 + gd) / 8) : Math.min(2, 0.6 + Math.log(gd + 1) / 3);
+      const d = K * mult * (S - E);
+      R[m.h] = rh + d;
+      R[m.a] = ra - d;
+      (form[m.h] = form[m.h] || []).push(S === 1 ? "W" : S === 0 ? "L" : "D");
+      (form[m.a] = form[m.a] || []).push(S === 0 ? "W" : S === 1 ? "L" : "D");
+    }
+    return { R, form, H };
+  },
+
+  /* Cotes 1N2 avec une marge de 7 %, comme un bookmaker raisonnable */
+  price(rt, h, a, draw) {
+    const rh = rt.R[h] ?? 1500, ra = rt.R[a] ?? 1500;
+    const E = 1 / (1 + Math.pow(10, (ra - (rh + rt.H)) / 400));
+    let p;
+    if (draw) {
+      const pd = Math.max(0.14, Math.min(0.29, 0.29 - Math.abs(rh + rt.H - ra) / 1600));
+      p = { h: E - pd / 2, d: pd, a: 1 - E - pd / 2 };
+    } else p = { h: E, a: 1 - E };
+    for (const k in p) p[k] = Math.max(0.05, p[k]);
+    const s = Object.values(p).reduce((x, y) => x + y, 0);
+    const o = {};
+    for (const k in p) o[k] = Math.max(1.05, Math.round(100 / ((p[k] / s) * 1.07)) / 100);
+    return o;
+  },
+
+  game(m, lgId, rt) {
+    return {
+      id: m.i, lg: lgId, t: m.t, h: m.h, a: m.a, hl: m.hl, al: m.al,
+      odds: this.price(rt, m.h, m.a, LEAGUE[lgId].draw),
+      fh: (rt.form[m.h] || []).slice(-5).join(""), fa: (rt.form[m.a] || []).slice(-5).join(""),
+      x: m.x, y: m.y, c: m.c, v: m.v,
+    };
+  },
+
+  /* Une étape de Parcours : 5 matchs d'une même « journée » d'une saison passée */
+  async retroStage(lgId, r) {
+    const L = LEAGUE[lgId], soccer = L.sport === "soccer";
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const y = this.SEASONS[Math.floor(r() * this.SEASONS.length)];
+      const first = soccer ? y + "08" : y + "10";
+      const valid = soccer
+        ? [y + "10", y + "11", y + "12", (y + 1) + "01", (y + 1) + "02", (y + 1) + "03", (y + 1) + "04"]
+        : [y + "12", (y + 1) + "01", (y + 1) + "02", (y + 1) + "03"];
+      const ym = valid[Math.floor(r() * valid.length)];
+      if (ym >= this.curYm()) continue;
+      const months = [];
+      for (let k = 3; k >= 0; k--) { const mm = this.addMonths(ym, -k); if (mm >= first) months.push(mm); }
+      const lists = await Promise.all(months.map(mm => this.month(lgId, mm)));
+      const all = lists.flat();
+      const cur = lists[lists.length - 1].filter(m => m.c && !m.v && m.x != null);
+      if (cur.length < 6) continue;
+      const days = shuffle([...new Set(cur.map(m => startOfDay(m.t)))], r);
+      for (const d of days) {
+        const win = cur.filter(m => m.t >= d && m.t < d + 3 * 86400000);
+        if (win.length < 4) continue;
+        const rt = this.ratings(all, d, L.sport);
+        const pick = shuffle(win, r).slice(0, 5).sort((a, b) => a.t - b.t);
+        return { lg: lgId, season: y, games: pick.map(m => this.game(m, lgId, rt)) };
+      }
+    }
+    throw new Error("no-stage");
+  },
+
+  /* Le Défi du jour : jusqu'à 6 vrais matchs des 48 prochaines heures, les mêmes pour tous */
+  async daily(day, dayStartTs) {
+    const r = rng(hashStr("daily" + day));
+    const end = dayStartTs + 48 * 3600000;
+    const months = [...new Set([Sports.ym(dayStartTs), Sports.ym(end)])];
+    const pool = [], seen = new Set();
+    const collect = async lg => {
+      let lists;
+      try { lists = await Promise.all(months.map(m => this.month(lg, m, 10 * 60000))); } catch (e) { return; }
+      for (const m of lists.flat()) if (m.t >= dayStartTs && m.t < end && !m.v && !seen.has(m.i)) { seen.add(m.i); pool.push({ m, lg }); }
+    };
+    for (const lg of shuffle(this.DAILY, r)) { await collect(lg); if (pool.length >= 10) break; }
+    if (pool.length < 4) await collect("nba");
+    if (!pool.length) return [];
+    const sel = shuffle(pool, r).slice(0, 6).sort((a, b) => a.m.t - b.m.t);
+    const rts = {};
+    const base = Sports.ym(dayStartTs);
+    for (const { lg } of sel) {
+      if (rts[lg]) continue;
+      const ms = [this.addMonths(base, -2), this.addMonths(base, -1), base];
+      const lists = await Promise.all(ms.map(mm => this.month(lg, mm).catch(() => [])));
+      rts[lg] = this.ratings(lists.flat(), dayStartTs, LEAGUE[lg].sport);
+    }
+    return sel.map(({ m, lg }) => Object.assign(this.game(m, lg, rts[lg]), { x: null, y: null, c: 0, v: 0 }));
+  },
+};
+
+/* ===== solo.js ===== */
+/* Pronohub — mode solo : Parcours (roguelite sur des matchs passés) et Défi du jour (vrais matchs à venir) */
+
+const SOLO_START = 100;
+const OBJ = [130, 180, 250, 340, 460, 620, 830, 1100];
+const BOSS_AT = [3, 7];
+const LEVELS = [0, 80, 200, 380, 620, 920, 1300, 1750, 2300, 3000];
+const TITLES = ["Rookie", "Regular", "Tipster", "Connoisseur", "Sleuth", "Analyst", "Strategist", "Expert", "Prediction master", "Legend"];
+const LEAGUE_UNLOCK = { 1: ["bel.1", "eng.1"], 2: ["fra.1"], 3: ["esp.1"], 4: ["ita.1"], 5: ["ger.1"], 6: ["nba"] };
+const AVATAR_UNLOCK = { 3: "🧠", 5: "💎", 7: "🦅", 9: "👑", 10: "🏆" };
+const PRICE = { 1: 4, 2: 6, 3: 8 };
+const RARITY = { 1: "Common", 2: "Rare", 3: "Legendary" };
+
+const ATOUTS = [
+  { id: "feu", e: "🔥", name: "On fire", desc: "+10% winnings per ticket won in a row. The streak resets at the first loss.", r: 1, lvl: 1 },
+  { id: "filet", e: "🪂", name: "Safety net", desc: "Your first losing ticket of each stage is half refunded.", r: 1, lvl: 1 },
+  { id: "nul", e: "🤝", name: "Draw lover", desc: "Draw odds are multiplied by 1.5.", r: 1, lvl: 1 },
+  { id: "domicile", e: "🏟️", name: "Twelfth man", desc: "Home wins pay 20% more.", r: 1, lvl: 1 },
+  { id: "favori", e: "🛡️", name: "Safe bet", desc: "Odds below 1.70 gain 0.25.", r: 1, lvl: 1 },
+  { id: "prime", e: "🏅", name: "Stage bonus", desc: "+2 chips for each stage cleared.", r: 1, lvl: 1 },
+  { id: "outsider", e: "🎯", name: "Underdog hunter", desc: "A winning ticket containing odds of 3 or more pays 50% more.", r: 2, lvl: 2 },
+  { id: "accu", e: "🧱", name: "Accumulator", desc: "Odds of parlays with 3 or more matches are multiplied by 1.3.", r: 2, lvl: 2 },
+  { id: "tirelire", e: "🐷", name: "Piggy bank", desc: "At the end of a stage, +10% on the tokens you didn't stake (50 at most).", r: 1, lvl: 3 },
+  { id: "collection", e: "🗂️", name: "Collector", desc: "+1 extra chip per winning ticket.", r: 1, lvl: 3 },
+  { id: "assurance", e: "☂️", name: "Parlay insurance", desc: "A parlay that misses only one match is refunded.", r: 2, lvl: 4 },
+  { id: "remontada", e: "✈️", name: "Comeback", desc: "Away wins pay 30% more.", r: 2, lvl: 4 },
+  { id: "ticket", e: "🎫", name: "Bonus ticket", desc: "A fourth ticket at every stage.", r: 2, lvl: 5 },
+  { id: "relance", e: "♻️", name: "Second chance", desc: "If you miss a target, you carry on anyway. The perk is then used up.", r: 3, lvl: 6 },
+  { id: "double", e: "💥", name: "Double up", desc: "The biggest win of each stage is doubled.", r: 3, lvl: 7 },
+];
+const ATOUT = Object.fromEntries(ATOUTS.map(a => [a.id, a]));
+
+const BOSSES = [
+  { id: "simple", e: "🚫", name: "No parlays", desc: "Each ticket holds a single match." },
+  { id: "outsider", e: "🐺", name: "Underdogs only", desc: "Every pick must have odds of at least 2.20." },
+  { id: "one", e: "☝️", name: "One ticket only", desc: "You only get one ticket for this stage." },
+  { id: "allin", e: "🎲", name: "All or nothing", desc: "Each ticket must stake at least half your tokens." },
+];
+const BOSS = Object.fromEntries(BOSSES.map(b => [b.id, b]));
+
+const SOLO_TROPHIES = [
+  { id: "run1", e: "🎒", name: "First Run", desc: "Finish a Run" },
+  { id: "half", e: "⛰️", name: "Halfway", desc: "Clear 4 stages in one Run" },
+  { id: "perfect", e: "🏆", name: "Perfect run", desc: "Clear all 8 stages" },
+  { id: "poker", e: "🚀", name: "Stroke of genius", desc: "Win a ticket at odds of 5 or more" },
+  { id: "combo4", e: "🧩", name: "Royal parlay", desc: "Win a 4-match parlay" },
+  { id: "streak5", e: "⚡", name: "Untouchable", desc: "Win 5 tickets in a row" },
+  { id: "rich", e: "💰", name: "Jackpot", desc: "Reach 2,000 tokens in a Run" },
+  { id: "full", e: "🗃️", name: "Full set", desc: "Hold 4 perks at once" },
+  { id: "daily1", e: "📅", name: "First challenge", desc: "Finish a daily challenge" },
+  { id: "daily7", e: "🗓️", name: "Loyal", desc: "Finish 7 daily challenges" },
+  { id: "days7", e: "🌟", name: "Week on fire", desc: "Play 7 days in a row" },
+];
+
+/* ---------- Progression et sauvegarde ---------- */
+const Solo = {
+  st: null,
+  s() { if (!this.st) this.load(); return this.st; },
+  load() {
+    const d = Store.get("solo", {}) || {};
+    this.st = Object.assign({ rep: 0, runs: 0, best: 0, wins: 0, trophies: {}, streak: { last: "", n: 0 }, dailyCount: 0, run: null, daily: {} }, d);
+    if (this.st.run) this.st.run.loading = false;
+  },
+  save() { Store.saveSoon("solo", this.st); this.syncSoon(); },
+  level(rep = this.s().rep) { let l = 1; LEVELS.forEach((v, i) => { if (rep >= v) l = i + 1; }); return l; },
+  title(l = this.level()) { return TITLES[l - 1]; },
+  leagues(l = this.level()) { const out = []; for (let i = 1; i <= l; i++) out.push(...(LEAGUE_UNLOCK[i] || [])); return out; },
+  pool(l = this.level()) { return ATOUTS.filter(a => a.lvl <= l); },
+  avatars(l = this.level()) { return Object.entries(AVATAR_UNLOCK).filter(([k]) => +k <= l).map(([, v]) => v); },
+  today(t = Date.now()) {
+    const d = new Date(t);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  },
+  streakOn() { const s = this.s().streak; return s.n > 1 && s.last >= this.today(Date.now() - 86400000) ? s.n : 0; },
+  played() {
+    const st = this.s(), t = this.today();
+    if (st.streak.last === t) return;
+    const y = this.today(Date.now() - 86400000);
+    st.streak = { last: t, n: st.streak.last === y ? st.streak.n + 1 : 1 };
+    if (st.streak.n >= 7) this.award("days7");
+  },
+  award(id) {
+    const st = this.s();
+    if (st.trophies[id]) return;
+    st.trophies[id] = now();
+    const t = SOLO_TROPHIES.find(x => x.id === id);
+    if (t) setTimeout(() => toast(`Trophy unlocked: ${t.name}`, "good"), 600);
+  },
+  addRep(n) { const before = this.level(); this.s().rep += n; return { before, after: this.level() }; },
+  unlocksAt(l) {
+    const out = [];
+    (LEAGUE_UNLOCK[l] || []).forEach(id => out.push(`${CAT[LEAGUE[id].cat].e} ${LEAGUE[id].name}`));
+    ATOUTS.filter(a => a.lvl === l).forEach(a => out.push(`${a.e} ${a.name}`));
+    if (AVATAR_UNLOCK[l]) out.push(`${AVATAR_UNLOCK[l]} New avatar`);
+    out.push(`🏷️ ${TITLES[l - 1]}`);
+    return out;
+  },
+
+  /* Ce que voient les amis dans les cercles */
+  summary() {
+    const st = this.s(), d = st.daily[this.today()];
+    const played = d && d.tickets.length;
+    return { day: played ? d.day : "", bank: played ? d.bank : 0, done: played ? !!d.done : false, n: played ? d.tickets.length : 0, level: this.level(), best: st.best, rep: st.rep };
+  },
+  syncSoon: debounce(function () { Solo.sync(); }, 1500),
+  async sync() {
+    if (!FB.ok || !FB.uid) return;
+    const st = this.s();
+    const meta = { rep: st.rep, runs: st.runs, best: st.best, wins: st.wins, trophies: st.trophies, dailyCount: st.dailyCount, streak: st.streak };
+    const mj = JSON.stringify(meta);
+    if (mj !== this._meta) { this._meta = mj; try { await FB.userDoc().set({ solo: meta }, { merge: true }); } catch (e) { this._meta = ""; } }
+    const sum = this.summary(), sj = JSON.stringify(sum);
+    if (sj === this._sum) return;
+    this._sum = sj;
+    for (const c of MyCircles.list().filter(c => !c.local)) {
+      try { await FB.sub(c.code, "members").doc(FB.uid).set({ solo: sum }, { merge: true }); } catch (e) { }
+    }
+  },
+  mergeRemote(r) {
+    if (!r) return;
+    const st = this.s();
+    if ((r.rep || 0) > st.rep) Object.assign(st, { rep: r.rep, runs: r.runs || 0, best: r.best || 0, wins: r.wins || 0, dailyCount: r.dailyCount || 0 });
+    st.trophies = Object.assign({}, r.trophies || {}, st.trophies);
+    if (r.streak && r.streak.last > st.streak.last) st.streak = r.streak;
+    this._meta = "";
+    this.save();
+  },
+};
+
+function allAvatars() { return AVATARS.concat(Solo.avatars()); }
+
+/* ---------- Cotes, tickets ---------- */
+function effOdd(base, o, atouts = []) {
+  let x = base;
+  const has = id => atouts.includes(id);
+  if (o === "d" && has("nul")) x *= 1.5;
+  if (o === "h" && has("domicile")) x *= 1.2;
+  if (o === "a" && has("remontada")) x *= 1.3;
+  if (base < 1.7 && has("favori")) x += 0.25;
+  return Math.round(x * 100) / 100;
+}
+function ticketOdd(sel, ctx) {
+  let x = 1;
+  for (const s of sel) { const g = ctx.gmap[s.g]; x *= ctx.eff(g.odds[s.o], s.o); }
+  if (ctx.accu && sel.length >= 3) x *= 1.3;
+  return Math.round(x * 100) / 100;
+}
+function selLabel(g, o) { return o === "h" ? g.h : o === "a" ? g.a : `Draw ${g.h}–${g.a}`; }
+
+function runCtx(run) {
+  const has = id => run.atouts.includes(id);
+  const staked = run.tickets.reduce((s, t) => s + t.stake, 0);
+  return {
+    kind: "run", games: run.data.games, gmap: Object.fromEntries(run.data.games.map(g => [g.id, g])), tickets: run.tickets,
+    max: run.boss === "one" ? 1 : has("ticket") ? 4 : 3, available: run.bank - staked,
+    eff: (b, o) => effOdd(b, o, run.atouts), accu: has("accu"),
+    minStake: run.boss === "allin" ? Math.ceil(run.startBank / 2) : 1, simple: run.boss === "simple", minOdd: run.boss === "outsider" ? 2.2 : 0,
+    locked: () => false,
+  };
+}
+function dailyCtx(d) {
+  const staked = d.tickets.reduce((s, t) => s + t.stake, 0);
+  return {
+    kind: "daily", games: d.games, gmap: Object.fromEntries(d.games.map(g => [g.id, g])), tickets: d.tickets, max: 3,
+    available: SOLO_START - staked, eff: b => b, accu: false, minStake: 1, simple: false, minOdd: 0,
+    locked: g => g.t <= Date.now() + 60000,
+  };
+}
+function curCtx() {
+  const st = Solo.s();
+  if (S.soloView === "run" && st.run && st.run.phase === "bet" && st.run.data) return runCtx(st.run);
+  if (S.soloView === "daily" && Daily.cur()) return dailyCtx(Daily.cur());
+  return null;
+}
+
+/* ---------- Parcours ---------- */
+function bossFor(run, idx) { return BOSS_AT.includes(idx) ? BOSSES[Math.floor(rng(run.seed * 7 + idx)() * BOSSES.length)].id : null; }
+
+async function stageGen(run, idx, retry = 0) {
+  const r = rng(run.seed + idx * 977 + retry * 31);
+  const lgs = Solo.leagues();
+  return Odds.retroStage(lgs[Math.floor(r() * lgs.length)], r);
+}
+
+function newRun() {
+  const st = Solo.s();
+  const seed = (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
+  const r = rng(seed);
+  st.run = {
+    seed, stage: 0, bank: SOLO_START, startBank: SOLO_START, fiches: 0, atouts: [], streak: 0, phase: "draft", tickets: [],
+    offer: shuffle(Solo.pool().filter(a => a.r === 1), r).slice(0, 3).map(a => a.id), rerolls: 0,
+    stats: { won: 0, bestOdd: 0, maxBank: SOLO_START, cleared: 0 }, startedAt: now(),
+  };
+  Solo.save();
+  stageGen(st.run, 0).then(data => { if (st.run && st.run.stage === 0 && !st.run.data) { st.run.next = { idx: 0, data }; Solo.save(); } }).catch(() => { });
+}
+
+async function loadStage() {
+  const run = Solo.s().run;
+  if (!run || run.loading) return;
+  run.phase = "loading"; run.loadErr = false;
+  if (run.next && run.next.idx === run.stage) {
+    run.data = run.next.data; run.next = null;
+  } else {
+    run.loading = true; render();
+    try { run.data = await stageGen(run, run.stage, run.retry || 0); }
+    catch (e) { run.loadErr = true; run.retry = (run.retry || 0) + 1; run.loading = false; render(); return; }
+    run.loading = false;
+  }
+  run.boss = bossFor(run, run.stage);
+  run.tickets = []; run.startBank = run.bank; run.phase = "bet"; run.last = null;
+  S.draft = null;
+  Solo.save();
+  render();
+  window.scrollTo(0, 0);
+}
+
+async function prepareNext() {
+  const run = Solo.s().run;
+  const idx = run.stage + 1;
+  if (idx >= OBJ.length || (run.next && run.next.idx === idx) || run.preparing) return;
+  run.preparing = true;
+  try { run.next = { idx, data: await stageGen(run, idx) }; Solo.save(); } catch (e) { }
+  run.preparing = false;
+}
+
+function playStage() {
+  const run = Solo.s().run, has = id => run.atouts.includes(id);
+  const gmap = Object.fromEntries(run.data.games.map(g => [g.id, g]));
+  const staked = run.tickets.reduce((s, t) => s + t.stake, 0);
+  let streak = run.streak, filetUsed = false, won = 0;
+  const res = run.tickets.map(t => {
+    const wrong = t.sel.filter(s => gameResult(gmap[s.g]) !== s.o).length;
+    let pay = 0, note = "";
+    if (!wrong) {
+      let gain = t.stake * t.odd - t.stake, mult = 1;
+      if (has("outsider") && t.sel.some(s => s.base >= 3)) { mult *= 1.5; note = "outsider"; }
+      if (has("feu") && streak) mult *= 1 + 0.1 * streak;
+      gain = Math.floor(gain * mult);
+      pay = t.stake + gain; streak++; won++;
+      run.stats.bestOdd = Math.max(run.stats.bestOdd, t.odd);
+      if (t.odd >= 5) Solo.award("poker");
+      if (t.sel.length >= 4) Solo.award("combo4");
+    } else {
+      streak = 0;
+      if (has("assurance") && t.sel.length >= 2 && wrong === 1) { pay = t.stake; note = "assurance"; }
+      else if (has("filet") && !filetUsed) { pay = Math.floor(t.stake / 2); filetUsed = true; note = "filet"; }
+    }
+    return { pay, won: !wrong, note };
+  });
+  if (has("double")) {
+    let bi = -1, bg = 0;
+    res.forEach((r, i) => { const g = r.pay - run.tickets[i].stake; if (r.won && g > bg) { bg = g; bi = i; } });
+    if (bi >= 0) { res[bi].pay += bg; res[bi].note = "double"; }
+  }
+  const before = run.bank;
+  const tirelire = has("tirelire") ? Math.min(50, Math.floor((before - staked) * 0.1)) : 0;
+  run.bank = before - staked + res.reduce((s, r) => s + r.pay, 0) + tirelire;
+  run.streak = streak;
+  run.stats.won += won;
+  run.stats.maxBank = Math.max(run.stats.maxBank, run.bank);
+  if (streak >= 5) Solo.award("streak5");
+  if (run.bank >= 2000) Solo.award("rich");
+  const obj = OBJ[run.stage];
+  let cleared = run.bank >= obj, second = false;
+  if (!cleared && has("relance") && run.bank > 0) { cleared = true; second = true; run.atouts = run.atouts.filter(a => a !== "relance"); }
+  const fiches = [];
+  if (cleared) {
+    fiches.push(["Stage cleared", 3]);
+    if (run.boss) fiches.push(["Boss stage", 3]);
+    if (won) fiches.push([`${won} ${pl(won, "ticket won", "tickets won")}`, won * (has("collection") ? 2 : 1)]);
+    const surplus = Math.min(3, Math.floor((run.bank / obj - 1) / 0.25));
+    if (surplus > 0) fiches.push(["Target beaten", surplus]);
+    if (has("prime")) fiches.push(["Stage bonus", 2]);
+    run.fiches += fiches.reduce((s, f) => s + f[1], 0);
+    run.stats.cleared++;
+    if (run.stats.cleared >= 4) Solo.award("half");
+  }
+  run.last = { before, after: run.bank, obj, res, tirelire, cleared, second, fiches };
+  run.phase = "reveal";
+  Solo.played();
+  Solo.save();
+  S.soloAnim = true;
+  setTimeout(() => { S.soloAnim = false; }, 4000);
+}
+
+function shopOffer(run) {
+  const r = rng(run.seed + run.stage * 131 + run.rerolls * 17);
+  const pool = Solo.pool().filter(a => !run.atouts.includes(a.id));
+  const bag = [];
+  for (const a of pool) for (let k = 0; k < 4 - a.r; k++) bag.push(a.id);
+  const out = [];
+  for (const id of shuffle(bag, r)) { if (!out.includes(id)) out.push(id); if (out.length === 3) break; }
+  return out;
+}
+
+function endRun(won) {
+  const st = Solo.s(), run = st.run;
+  const gain = run.stats.cleared * 15 + (won ? 60 : 0) + run.stats.won * 2 + (run.stats.bestOdd >= 5 ? 10 : 0);
+  const lv = Solo.addRep(gain);
+  st.runs++;
+  st.best = Math.max(st.best, run.stats.cleared);
+  if (won) st.wins++;
+  Solo.award("run1");
+  if (won) Solo.award("perfect");
+  const unlocks = [];
+  for (let l = lv.before + 1; l <= lv.after; l++) unlocks.push(...Solo.unlocksAt(l));
+  run.phase = "end";
+  run.result = { won, gain, before: lv.before, after: lv.after, unlocks };
+  run.next = null;
+  Solo.save();
+}
+
+/* ---------- Défi du jour ---------- */
+const Daily = {
+  busy: false, err: false, board: null, boardAt: 0, refAt: 0,
+  cur() { return Solo.s().daily[Solo.today()]; },
+  async prepare() {
+    const st = Solo.s(), day = Solo.today();
+    if (st.daily[day] || this.busy) return;
+    this.busy = true; this.err = false; queueRender();
+    try {
+      const games = await Odds.daily(day, startOfDay(Date.now()));
+      st.daily[day] = { day, games, tickets: [], bank: SOLO_START, done: false };
+      const old = Solo.today(Date.now() - 7 * 86400000);
+      for (const k of Object.keys(st.daily)) if (k < old) delete st.daily[k];
+      Solo.save();
+    } catch (e) { this.err = true; }
+    this.busy = false;
+    queueRender();
+  },
+  async refresh(force) {
+    const d = this.cur();
+    if (!d || d.done) return;
+    if (!force && Date.now() - this.refAt < 60000) return;
+    this.refAt = Date.now();
+    const T = Date.now();
+    const need = d.games.filter(g => !g.c && !g.v && g.t < T - 100 * 60000);
+    for (const k of [...new Set(need.map(g => g.lg + "|" + Sports.ym(g.t)))]) {
+      const [lg, ym] = k.split("|");
+      try {
+        const list = await Odds.month(lg, ym, 5 * 60000);
+        for (const g of need) {
+          const m = list.find(x => x.i === g.id);
+          if (!m) continue;
+          if (m.v) g.v = 1;
+          else if (m.c) { g.x = m.x; g.y = m.y; g.c = 1; }
+        }
+      } catch (e) { }
+    }
+    this.settle();
+    queueRender();
+  },
+  settle() {
+    const d = this.cur();
+    if (!d) return;
+    const gmap = Object.fromEntries(d.games.map(g => [g.id, g]));
+    let changed = false;
+    for (const t of d.tickets) {
+      if (t.res) continue;
+      const rs = t.sel.map(s => gameResult(gmap[s.g]));
+      if (rs.some(x => x === null)) continue;
+      let odd = 1, wrong = 0;
+      t.sel.forEach((s, i) => { if (rs[i] === "void") return; if (rs[i] === s.o) odd *= s.odd; else wrong++; });
+      t.res = wrong ? "lost" : "won";
+      t.pay = wrong ? 0 : Math.floor(t.stake * odd);
+      changed = true;
+      if (!wrong) { Solo.addRep(5); if (odd >= 5) Solo.award("poker"); }
+    }
+    const staked = d.tickets.reduce((s, t) => s + t.stake, 0);
+    d.bank = SOLO_START - staked + d.tickets.reduce((s, t) => s + (t.pay || 0), 0);
+    const T = Date.now();
+    const canStill = d.tickets.length < 3 && SOLO_START - staked > 0 && d.games.some(g => g.t > T + 60000);
+    if (!d.done && d.tickets.length && d.tickets.every(t => t.res) && !canStill) {
+      d.done = true; changed = true;
+      const st = Solo.s();
+      st.dailyCount++;
+      Solo.addRep(10);
+      Solo.award("daily1");
+      if (st.dailyCount >= 7) Solo.award("daily7");
+    }
+    if (changed) Solo.save();
+  },
+  pending(d) { return d.tickets.filter(t => !t.res).reduce((s, t) => s + t.stake, 0); },
+  async loadBoard() {
+    if (!FB.ok || !FB.uid || Date.now() - this.boardAt < 60000) return;
+    this.boardAt = Date.now();
+    const seen = {}, day = Solo.today();
+    for (const c of MyCircles.list().filter(c => !c.local)) {
+      try {
+        const snap = await FB.sub(c.code, "members").get();
+        snap.forEach(doc => { const m = doc.data(); if (m.solo && m.solo.day === day) seen[doc.id] = Object.assign({ uid: doc.id, name: m.name, avatar: m.avatar }, m.solo); });
+      } catch (e) { }
+    }
+    this.board = Object.values(seen).sort((a, b) => b.bank - a.bank);
+    queueRender();
+  },
+};
+
+/* ---------- Composants ---------- */
+function formLabel(f) {
+  const n = { W: 0, D: 0, L: 0 };
+  for (const c of f) n[c]++;
+  return `Form: ${n.W} ${pl(n.W, "win", "wins")}, ${n.D} ${pl(n.D, "draw", "draws")}, ${n.L} ${pl(n.L, "loss", "losses")}`;
+}
+function formDots(f) {
+  if (!f) return "";
+  return `<span class="form" role="img" aria-label="${esc(formLabel(f))}">${[...f].map(c => `<i class="f${c}"></i>`).join("")}</span>`;
+}
+
+function gameCard(g, o) {
+  const L = LEAGUE[g.lg];
+  const res = gameResult(g);
+  const keys = L.draw ? ["h", "d", "a"] : ["h", "a"];
+  const lab = { h: "1", d: "X", a: "2" };
+  const locked = o.locked && o.locked(g);
+  let right = "";
+  if ((o.show || locked) && g.c && g.x != null) right = `<b class="g-score" style="--i:${o.i || 0}">${g.x}–${g.y}</b>`;
+  else if (g.v) right = `<span class="tag">Cancelled</span>`;
+  else if (locked) right = `<span class="tag">Started</span>`;
+  return `<article class="gcard ${locked ? "locked" : ""} ${o.picked ? "has-pick" : ""}">
+    <div class="g-top"><span>${o.league ? `${CAT[L.cat].e} ${esc(L.name)}, ` : ""}${fmtDate(g.t)}</span>${right}</div>
+    <div class="g-team">${teamLogo(Odds.logo(g.hl), g.h)}<b>${esc(g.h)}</b>${formDots(g.fh)}</div>
+    <div class="g-team">${teamLogo(Odds.logo(g.al), g.a)}<b>${esc(g.a)}</b>${formDots(g.fa)}</div>
+    <div class="g-odds n${keys.length}">${keys.map(k => {
+      const cls = [o.picked === k ? "on" : "", o.placed && o.placed.has(k) ? "placed" : "", (o.show || locked) && res === k ? "win" : "", o.show && res && res !== k && o.placed && o.placed.has(k) ? "miss" : ""].join(" ");
+      const odd = o.eff ? o.eff(g.odds[k], k) : g.odds[k];
+      const boosted = odd !== g.odds[k];
+      return `<button class="odd ${cls}" data-a="pick" data-g="${esc(g.id)}" data-o="${k}" ${o.show || locked ? "disabled" : ""} aria-pressed="${o.picked === k}"><span>${lab[k]}</span><b class="${boosted ? "boost" : ""}">${oddsFmt(odd)}</b></button>`;
+    }).join("")}</div>
+  </article>`;
+}
+
+function gameList(ctx, extra = {}) {
+  const draft = S.draft && S.draft.kind === ctx.kind ? S.draft : null;
+  return `<div class="glist">${ctx.games.map((g, i) => {
+    const placed = new Set(ctx.tickets.flatMap(t => t.sel.filter(s => s.g === g.id).map(s => s.o)));
+    const p = draft && draft.sel.find(s => s.g === g.id);
+    return gameCard(g, Object.assign({ picked: p ? p.o : null, placed, eff: ctx.eff, locked: ctx.locked, i }, extra));
+  }).join("")}</div>`;
+}
+
+function slipView(ctx) {
+  const d = S.draft;
+  if (!d || d.kind !== ctx.kind || !d.sel.length) return "";
+  const odd = ticketOdd(d.sel, ctx), avail = Math.max(0, ctx.available);
+  const stake = Math.max(Math.min(ctx.minStake, avail), Math.min(avail, d.stake != null ? d.stake : Math.max(1, Math.round(avail / 4))));
+  return `<form class="slip" data-f="ticket">
+    <div class="slip-sel">${d.sel.map(s => {
+      const g = ctx.gmap[s.g];
+      return `<span class="sel">${esc(selLabel(g, s.o))} <b>${oddsFmt(ctx.eff(g.odds[s.o], s.o))}</b><button type="button" class="x" data-a="unpick" data-g="${esc(s.g)}" aria-label="Remove this pick">${ICON.x}</button></span>`;
+    }).join("")}</div>
+    <div class="slip-row">
+      <span class="slip-odd"><small>${d.sel.length > 1 ? `Parlay of ${d.sel.length}` : "Single"}${ctx.accu && d.sel.length >= 3 ? ", accumulator" : ""}</small><b>${oddsFmt(odd)}</b></span>
+      <label class="slip-stake"><small>Stake</small><input name="slipStake" type="number" inputmode="numeric" min="${ctx.minStake}" max="${avail}" value="${stake}" data-odd="${odd}"></label>
+    </div>
+    <div class="chips">${[0.1, 0.25, 0.5].map(f => `<button type="button" class="chip" data-a="slipFrac" data-v="${f}">${Math.round(f * 100)} %</button>`).join("")}<button type="button" class="chip hot" data-a="slipFrac" data-v="1">All (${nf(avail)})</button></div>
+    <button class="btn primary wide big" ${avail < 1 ? "disabled" : ""}>Place ticket, payout <span id="slipGain">${nf(Math.floor(stake * odd))}</span></button>
+  </form>`;
+}
+
+function updateSlip() {
+  const inp = $('form[data-f="ticket"] input[name="slipStake"]'), out = $("#slipGain");
+  if (!inp || !out) return;
+  const v = Math.max(0, parseInt(inp.value, 10) || 0);
+  if (S.draft) S.draft.stake = v;
+  out.textContent = nf(Math.floor(v * parseFloat(inp.dataset.odd)));
+}
+
+function ticketsList(ctx, opts = {}) {
+  if (!ctx.tickets.length) return "";
+  return `<div class="tlist">${ctx.tickets.map((t, i) => {
+    const r = opts.res && opts.res[i];
+    const pay = r ? r.pay : t.res ? t.pay : null;
+    let stamp = "";
+    if (r || t.res) {
+      const g = pay - t.stake;
+      const won = r ? r.won : t.res === "won";
+      stamp = won ? `<span class="stamp win">+${nf(g)}</span>` : pay > 0 ? `<span class="stamp void">${nf(pay)} rendus</span>` : `<span class="stamp lose">Lost</span>`;
+    }
+    const note = r && r.note ? { outsider: "🎯 Underdog hunter", assurance: "☂️ Parlay insurance", filet: "🪂 Safety net", double: "💥 Double up" }[r.note] : "";
+    return `<article class="tk ${r || t.res ? (pay > t.stake ? "won" : "lost") : ""}">
+      <div class="tk-head"><b>${t.sel.length > 1 ? `Parlay of ${t.sel.length}` : "Single"}, odds ${oddsFmt(t.odd)}</b>${stamp}</div>
+      <ul>${t.sel.map(s => { const g = ctx.gmap[s.g], res = gameResult(g); return `<li class="${res && res !== "void" ? (res === s.o ? "ok" : "ko") : ""}"><span>${esc(selLabel(g, s.o))}</span><small>${esc(g.h)} – ${esc(g.a)}</small></li>`; }).join("")}</ul>
+      <div class="tk-foot"><span>Stake ${nf(t.stake)}</span><span>${pay != null ? `Back ${nf(pay)}` : `Possible payout ${nf(Math.floor(t.stake * t.odd))}`}</span>${opts.canDel && opts.canDel(t) ? `<button class="btn tiny ghost" data-a="delTicket" data-i="${i}">Remove</button>` : ""}</div>
+      ${note ? `<p class="tk-note">${note}</p>` : ""}
+    </article>`;
+  }).join("")}</div>`;
+}
+
+function atoutCard(id, act = "") {
+  const a = ATOUT[id];
+  return `<div class="acard r${a.r}"><span class="a-emo" aria-hidden="true">${a.e}</span><b>${esc(a.name)}</b><small>${esc(a.desc)}</small>${act}</div>`;
+}
+
+/* ---------- Vues ---------- */
+function soloView() {
+  const v = S.soloView || "hub";
+  if (v === "run") return runView();
+  if (v === "daily") return dailyView();
+  return soloHub();
+}
+
+function levelCard() {
+  const st = Solo.s(), l = Solo.level(), cur = LEVELS[l - 1], nx = LEVELS[l];
+  const pct = nx ? Math.round(100 * (st.rep - cur) / (nx - cur)) : 100;
+  const p = Profile.get(), streak = Solo.streakOn();
+  return `<div class="lvl-card">
+    ${avatar({ uid: p.id, name: p.name, avatar: p.avatar }, "lg")}
+    <div class="grow"><b>${esc(Solo.title())}</b><span>Level ${l}, ${nf(st.rep)}${nx ? ` on ${nf(nx)}` : ""} reputation</span>
+      <i class="bar" aria-hidden="true"><i style="width:${pct}%"></i></i></div>
+    ${streak ? `<span class="flame" aria-label="${streak} jours d'affilée">🔥 ${streak}</span>` : ""}
+  </div>`;
+}
+
+function soloHub() {
+  const st = Solo.s(), run = st.run, d = Daily.cur(), l = Solo.level();
+  const active = run && run.phase !== "end";
+  const dStatus = !d || !d.tickets.length ? "To play today" : d.done ? `Finished with ${nf(d.bank)} tokens` : `In progress, ${nf(d.bank)} tokens so far`;
+  const next = l < LEVELS.length ? Solo.unlocksAt(l + 1) : [];
+  return `<section class="page narrow solo-hub">
+    <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Back">${ICON.back}</button><h1>Solo</h1></div>
+    ${levelCard()}
+    <div class="mode-card">
+      <div class="mode-top"><span class="mode-emo" aria-hidden="true">🧗</span><div><h2>Run</h2>
+        <p>8 stages on real past matches with hidden results. Reach each stage's target, collect perks and go as far as you can.</p></div></div>
+      ${active ? `<p class="run-mini">Stage ${run.stage + 1} of 8, ${nf(run.bank)} tokens, ${run.atouts.length} ${pl(run.atouts.length, "perk", "perks")}</p>
+        <button class="btn primary big wide" data-a="soloRun">Resume the Run</button>`
+      : `<button class="btn primary big wide" data-a="soloNewRun">New Run</button>`}
+      <p class="mode-foot">Best: ${st.best ? `${st.best} ${pl(st.best, "stage cleared", "stages cleared")}` : "none yet"}. ${st.runs} ${pl(st.runs, "Run played", "Runs played")}, ${st.wins} ${pl(st.wins, "complete", "complete")}.</p>
+    </div>
+    <div class="mode-card daily">
+      <div class="mode-top"><span class="mode-emo" aria-hidden="true">📅</span><div><h2>Daily challenge</h2>
+        <p>The same real matches for all your friends, 100 tokens and 3 tickets. Results come in as matches end.</p></div></div>
+      <p class="run-mini">${dStatus}</p>
+      <button class="btn big wide" data-a="soloDaily">${d && d.tickets.length ? "See my challenge" : "Play the challenge"}</button>
+    </div>
+    <h3>Trophies <small>${Object.keys(st.trophies).length}/${SOLO_TROPHIES.length}</small></h3>
+    <div class="badges">${SOLO_TROPHIES.map(t => `<div class="badge ${st.trophies[t.id] ? "got" : ""}"><span class="b-emo" aria-hidden="true">${t.e}</span><b>${t.name}</b><small>${t.desc}</small></div>`).join("")}</div>
+    ${next.length ? `<h3>At level ${l + 1}</h3><ul class="unlocks">${next.map(u => `<li>${esc(u)}</li>`).join("")}</ul>` : ""}
+    <h3>Unlocked competitions</h3>
+    <p class="muted">${Solo.leagues().map(id => `${CAT[LEAGUE[id].cat].e} ${esc(LEAGUE[id].name)}`).join(", ")}</p>
+    <p class="source">Matches and scores: ESPN (unofficial public source). Solo odds are calculated by Pronohub from team form.</p>
+  </section>`;
+}
+
+function runHead(run, bank = run.bank, shop = false) {
+  const obj = OBJ[shop ? run.stage + 1 : run.stage];
+  return `<div class="run-head">
+    <div class="row between"><button class="icon-btn" data-a="back" aria-label="Back">${ICON.back}</button>
+      <b class="run-title">${shop ? `Before stage ${run.stage + 2}` : `Stage ${run.stage + 1} of 8`}</b>
+      <button class="btn tiny ghost" data-a="abandonRun">Give up</button></div>
+    <div class="track" aria-hidden="true">${OBJ.map((o, i) => `<i class="${i < run.stage ? "done" : i === run.stage ? "cur" : ""} ${BOSS_AT.includes(i) ? "boss" : ""}"></i>`).join("")}</div>
+    <div class="run-stats">
+      <span><small>Tokens</small><b>${ICON.coin}${nf(bank)}</b></span>
+      <span><small>Target</small><b>${nf(obj)}</b></span>
+      <span><small>Chips</small><b>💠 ${run.fiches}</b></span>
+    </div>
+    <div class="goal" aria-hidden="true"><i style="width:${Math.min(100, Math.round(100 * bank / obj))}%"></i></div>
+    ${run.atouts.length ? `<div class="atout-row">${run.atouts.map(id => `<details class="achip"><summary>${ATOUT[id].e} ${esc(ATOUT[id].name)}</summary><p>${esc(ATOUT[id].desc)}</p></details>`).join("")}</div>` : ""}
+  </div>`;
+}
+
+function stageLabel(data) {
+  const L = LEAGUE[data.lg];
+  const when = new Date(data.games[0].t).toLocaleDateString(LOCALE, { month: "long", year: "numeric" });
+  return `${CAT[L.cat].e} ${esc(L.name)}, season ${data.season}-${data.season + 1}, ${when}`;
+}
+
+function runView() {
+  const run = Solo.s().run;
+  if (!run) { S.soloView = "hub"; return soloHub(); }
+  if (run.phase === "draft") {
+    return `<section class="page narrow solo-run">
+      <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Back">${ICON.back}</button><h1>New Run</h1></div>
+      <p class="lead-s">Pick your starting perk. It bends the rules in your favour for the whole Run.</p>
+      <div class="shop-grid">${run.offer.map(id => atoutCard(id, `<button class="btn primary small" data-a="draftPick" data-id="${id}">Pick</button>`)).join("")}</div>
+      <p class="hint">You start with ${SOLO_START} tokens. Each stage has a token target to reach; stages 4 and 8 add a special rule.</p>
+    </section>`;
+  }
+  if (run.phase === "loading") {
+    if (!run.loading && !run.loadErr) setTimeout(loadStage, 0);
+    return `<section class="page narrow solo-run">${runHead(run)}
+      <div class="state-box center">${run.loadErr
+        ? `<h2>Can't load the stage</h2><p class="muted">The match source isn't responding. Check your connection.</p><button class="btn primary" data-a="retryStage">Try again</button>`
+        : `<div class="spinner" aria-hidden="true"></div><p>Preparing the stage: travelling back in time…</p>`}</div></section>`;
+  }
+  if (run.phase === "end") return endView(run);
+  if (run.phase === "shop") return shopView(run);
+  if (run.phase === "reveal") return revealView(run);
+
+  const ctx = runCtx(run);
+  const boss = run.boss ? BOSS[run.boss] : null;
+  const left = ctx.max - run.tickets.length;
+  return `<section class="page narrow solo-run">
+    ${runHead(run)}
+    ${boss ? `<div class="boss-banner"><span aria-hidden="true">${boss.e}</span><div><b>Boss stage: ${esc(boss.name)}</b><small>${esc(boss.desc)}</small></div></div>` : ""}
+    <p class="stage-label">${stageLabel(run.data)}</p>
+    ${gameList(ctx)}
+    <div class="sec-head"><h2>Your tickets <small>${run.tickets.length}/${ctx.max}</small></h2></div>
+    ${run.tickets.length ? ticketsList(ctx, { canDel: () => true }) : `<p class="muted">Tap an odd to build a ticket: one match for a single, up to 4 for a parlay.</p>`}
+    <div class="play-box">
+      <p>Unstaked tokens: <b>${nf(ctx.available)}</b>. You need <b>${nf(OBJ[run.stage])}</b> at the end of the stage.</p>
+      <button class="btn primary big wide" data-a="playStage">Play the stage${left > 0 && run.tickets.length ? ` (${left} ${pl(left, "ticket left", "tickets left")})` : ""}</button>
+    </div>
+    ${S.draft && S.draft.kind === "run" && S.draft.sel.length ? `<div class="slip-space"></div>` : ""}
+  </section>${slipView(ctx)}`;
+}
+
+function revealView(run) {
+  const L = run.last;
+  const ctx = { kind: "run", games: run.data.games, gmap: Object.fromEntries(run.data.games.map(g => [g.id, g])), tickets: run.tickets, eff: (b, o) => effOdd(b, o, run.atouts) };
+  const last = run.stage === OBJ.length - 1;
+  return `<section class="page narrow solo-run ${S.soloAnim ? "anim" : ""}">
+    ${runHead(run, L.after)}
+    <div class="verdict ${L.cleared ? "ok" : "ko"}">
+      <b>${L.second ? "Second chance!" : L.cleared ? (last ? "Run complete!" : "Stage cleared") : "Target missed"}</b>
+      <span>${nf(L.before)} → ${nf(L.after)} tokens, target ${nf(L.obj)}${L.tirelire ? `, incl. ${nf(L.tirelire)} from the piggy bank` : ""}</span>
+    </div>
+    <p class="stage-label">${stageLabel(run.data)}</p>
+    ${gameList(ctx, { show: true })}
+    ${run.tickets.length ? `<div class="sec-head"><h2>Your tickets</h2></div>${ticketsList(ctx, { res: L.res })}` : ""}
+    ${L.fiches.length ? `<div class="panel"><h3>Chips earned</h3><ul class="fiches">${L.fiches.map(([l, n]) => `<li><span>${esc(l)}</span><b>+${n} 💠</b></li>`).join("")}</ul></div>` : ""}
+    <button class="btn primary big wide" data-a="${L.cleared && !last ? "toShop" : "toEnd"}">${L.cleared && !last ? "Go to the shop" : "See the summary"}</button>
+  </section>`;
+}
+
+function shopView(run) {
+  const nextIdx = run.stage + 1;
+  const boss = bossFor(run, nextIdx);
+  const reroll = 2 + run.rerolls;
+  return `<section class="page narrow solo-run">
+    ${runHead(run, run.bank, true)}
+    <div class="sec-head"><h2>Shop</h2><span class="fiche-count">💠 ${run.fiches} ${pl(run.fiches, "chip", "chips")}</span></div>
+    ${run.offer.length ? `<div class="shop-grid">${run.offer.map(id => {
+      const a = ATOUT[id], price = PRICE[a.r];
+      return atoutCard(id, `<span class="rarity">${RARITY[a.r]}</span><button class="btn small ${run.fiches >= price ? "primary" : ""}" data-a="shopBuy" data-id="${id}" ${run.fiches < price ? "disabled" : ""}>Buy, ${price} 💠</button>`);
+    }).join("")}</div>` : `<p class="muted">You bought the whole offer.</p>`}
+    <button class="btn small ghost" data-a="shopReroll" ${run.fiches < reroll ? "disabled" : ""}>New offer, ${reroll} 💠</button>
+    <h3>Your perks <small>${run.atouts.length}/4</small></h3>
+    ${run.atouts.length ? `<div class="shop-grid owned">${run.atouts.map(id => atoutCard(id, `<button class="btn tiny ghost" data-a="shopSell" data-id="${id}">Sell, +${Math.floor(PRICE[ATOUT[id].r] / 2)} 💠</button>`)).join("")}</div>` : `<p class="muted">No perks yet.</p>`}
+    <div class="play-box">
+      <p>Next stage: target <b>${nf(OBJ[nextIdx])}</b> tokens${boss ? `, boss stage “ ${esc(BOSS[boss].name)} » : ${esc(BOSS[boss].desc)}` : "."}</p>
+      <button class="btn primary big wide" data-a="nextStage">Start stage ${nextIdx + 1}</button>
+    </div>
+  </section>`;
+}
+
+function endView(run) {
+  const R = run.result, s = run.stats, l = Solo.level(), cur = LEVELS[l - 1], nx = LEVELS[l];
+  const pct = nx ? Math.round(100 * (Solo.s().rep - cur) / (nx - cur)) : 100;
+  return `<section class="page narrow solo-run end">
+    <div class="end-hero"><span class="end-emo" aria-hidden="true">${R.won ? "🏆" : s.cleared >= 4 ? "⛰️" : "🧗"}</span>
+      <h1 class="display small">${R.won ? "Run complete!" : "Run over"}</h1>
+      <p>${s.cleared} ${pl(s.cleared, "stage cleared", "stages cleared")} of 8.${Solo.s().best === s.cleared && s.cleared ? " New record!" : ""}</p></div>
+    <div class="stats">
+      <div class="stat"><b>${s.cleared}</b><span>stages</span></div>
+      <div class="stat"><b>${s.won}</b><span>tickets won</span></div>
+      <div class="stat"><b>${s.bestOdd ? oddsFmt(s.bestOdd) : "—"}</b><span>best odds</span></div>
+      <div class="stat"><b>${nf(s.maxBank)}</b><span>peak tokens</span></div>
+    </div>
+    <div class="panel rep-panel">
+      <p><b>+${nf(R.gain)}</b> reputation</p>
+      <p class="muted">${esc(Solo.title())}, level ${l}</p>
+      <i class="bar" aria-hidden="true"><i style="width:${pct}%"></i></i>
+      ${R.after > R.before ? `<h3>Level ${R.after} reached!</h3><ul class="unlocks">${R.unlocks.map(u => `<li>${esc(u)}</li>`).join("")}</ul>` : ""}
+    </div>
+    <div class="row wrap center"><button class="btn primary big" data-a="soloNewRun">New Run</button><button class="btn big" data-a="soloHub">Back</button></div>
+  </section>`;
+}
+
+function dailyView() {
+  const d = Daily.cur();
+  const head = `<div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Back">${ICON.back}</button><h1>Daily challenge</h1></div>`;
+  if (!d) {
+    if (!Daily.busy && !Daily.err) setTimeout(() => Daily.prepare(), 0);
+    return `<section class="page narrow">${head}<div class="state-box center">${Daily.err
+      ? `<h2>Challenge unavailable</h2><p class="muted">The match source isn't responding. Check your connection.</p><button class="btn primary" data-a="dailyRetry">Try again</button>`
+      : `<div class="spinner" aria-hidden="true"></div><p>Preparing today's matches…</p>`}</div></section>`;
+  }
+  if (Date.now() - Daily.refAt > 60000) setTimeout(() => Daily.refresh(), 0);
+  if (FB.ok && Date.now() - Daily.boardAt > 60000) setTimeout(() => Daily.loadBoard(), 0);
+  const day = new Date(startOfDay(Date.now())).toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
+  if (!d.games.length) return `<section class="page narrow">${head}<div class="empty"><p class="empty-big">No matches today.</p><p>No followed competition plays in the next 48 hours. Come back tomorrow!</p></div></section>`;
+  const ctx = dailyCtx(d);
+  const pend = Daily.pending(d);
+  const me = Profile.get();
+  const board = Daily.board;
+  return `<section class="page narrow solo-daily">
+    ${head}
+    <p class="lead-s">${day.charAt(0).toUpperCase() + day.slice(1)}. 100 tokens, up to 3 tickets, the same matches for everyone. You can bet until kick-off.</p>
+    <div class="daily-score">
+      <span><small>${d.done ? "Final score" : "Provisional score"}</small><b>${ICON.coin}${nf(d.bank)}</b></span>
+      ${pend ? `<span><small>At stake</small><b>${nf(pend)}</b></span>` : ""}
+      <span><small>Tickets</small><b>${d.tickets.length}/3</b></span>
+    </div>
+    ${gameList(ctx, { league: true })}
+    ${d.tickets.length ? `<div class="sec-head"><h2>Your tickets</h2></div>${ticketsList(ctx, { canDel: t => !t.res && t.sel.every(s => !ctx.locked(ctx.gmap[s.g])) })}` : `<p class="muted">Tap an odd to build a ticket.</p>`}
+    <div class="sec-head"><h2>Your friends today</h2></div>
+    ${!FB.ok ? `<p class="muted">Friends' standings need online circles.</p>`
+      : !board ? `<p class="muted">Loading…</p>`
+      : !board.length ? `<p class="muted">Nobody in your circles has played today. Go first, then dare them to beat you.</p>`
+      : `<ol class="ranking">${board.map((m, i) => `<li class="${m.uid === FB.uid ? "me" : ""}"><button tabindex="-1"><span class="rk">${i + 1}</span>${avatar(m)}<span class="grow"><b>${esc(m.name)}</b><small>${m.done ? "Finished" : "Open"}, ${m.n} ${pl(m.n, "ticket", "tickets")}</small></span><span class="bal">${nf(m.bank)}</span></button></li>`).join("")}</ol>`}
+    ${S.draft && S.draft.kind === "daily" && S.draft.sel.length ? `<div class="slip-space"></div>` : ""}
+  </section>${slipView(ctx)}`;
+}
+
+/* Carte « Mode solo » de l'accueil */
+function soloHomeCard() {
+  const st = Solo.s(), run = st.run, d = Daily.cur();
+  const active = run && run.phase !== "end";
+  const streak = Solo.streakOn();
+  return `<div class="solo-card">
+    <button class="solo-head" data-a="soloHub"><span><small>Solo mode</small><b>${esc(Solo.title())}, level ${Solo.level()}</b></span>${streak ? `<span class="flame">🔥 ${streak}</span>` : ""}${ICON.chev}</button>
+    <div class="solo-acts">
+      <button class="solo-btn" data-a="soloRun"><span class="sb-e" aria-hidden="true">🧗</span><span><b>${active ? `Run, stage ${run.stage + 1}` : "Run"}</b><small>${active ? `${nf(run.bank)} tokens, target ${nf(OBJ[run.stage])}` : "8 stages on past matches"}</small></span></button>
+      <button class="solo-btn" data-a="soloDaily"><span class="sb-e" aria-hidden="true">📅</span><span><b>Daily challenge</b><small>${!d || !d.tickets.length ? "To play" : d.done ? `Finished, ${nf(d.bank)} tokens` : `In progress, ${nf(d.bank)} tokens`}</small></span></button>
+    </div>
+  </div>`;
+}
+
+/* Défi du jour dans l'onglet Classement d'un cercle */
+function circleDailyPanel(cc) {
+  if (cc.local) return "";
+  const day = Solo.today();
+  const list = visibleMembers(cc).filter(m => m.solo && m.solo.day === day).sort((a, b) => (b.solo.bank || 0) - (a.solo.bank || 0));
+  const mine = list.some(m => m.uid === myId(cc));
+  return `<div class="sec-head"><h2>Daily challenge</h2><button class="btn small ${mine ? "ghost" : "primary"}" data-a="soloDaily">${mine ? "My challenge" : "Play"}</button></div>
+    ${list.length ? `<ol class="mini-rank daily-rank">${list.map((m, i) => `<li class="${m.uid === myId(cc) ? "me" : ""}"><span class="rk">${i + 1}</span>${avatar(m, "sm")}<span class="grow">${esc(m.name)}${m.solo.done ? "" : ` <small class="tag">in progress</small>`}</span><b>${nf(m.solo.bank)}</b></li>`).join("")}</ol>`
+      : `<p class="muted">Nobody has played the challenge today.</p>`}`;
+}
+
+/* ---------- Actions ---------- */
+function soloAct(a, d) {
+  const st = Solo.s(), run = st.run;
+  switch (a) {
+    case "soloHub": go("solo", { soloView: "hub" }); return "keep";
+    case "soloNewRun": newRun(); S.draft = null; if (S.view === "solo") { S.soloView = "run"; window.scrollTo(0, 0); return true; } go("solo", { soloView: "run" }); return "keep";
+    case "soloRun":
+      if (!run || run.phase === "end") newRun();
+      go("solo", { soloView: "run" }); return "keep";
+    case "soloDaily": go("solo", { soloView: "daily" }); return "keep";
+    case "dailyRetry": Daily.err = false; Daily.prepare(); return true;
+    case "retryStage": run.loadErr = false; loadStage(); return true;
+    case "draftPick": run.atouts = [d.id]; loadStage(); return true;
+    case "abandonRun":
+      ask("Give up this Run? You keep the reputation from the stages already cleared.", "Give up", true).then(ok => {
+        if (!ok) return;
+        if (run.stage === 0 && !run.stats.cleared && run.phase !== "reveal") { st.run = null; Solo.save(); S.soloView = "hub"; }
+        else endRun(false);
+        render();
+      });
+      return true;
+    case "pick": {
+      const ctx = curCtx();
+      if (!ctx) return true;
+      const g = ctx.gmap[d.g];
+      if (!g || ctx.locked(g)) return true;
+      if (ctx.tickets.length >= ctx.max) { toast("You've placed all your tickets"); return true; }
+      if (ctx.minOdd && g.odds[d.o] < ctx.minOdd) { toast("Boss stage: minimum odds 2.20"); return true; }
+      if (!S.draft || S.draft.kind !== ctx.kind) S.draft = { kind: ctx.kind, sel: [], stake: null };
+      const sel = S.draft.sel, i = sel.findIndex(s => s.g === d.g);
+      if (i >= 0 && sel[i].o === d.o) sel.splice(i, 1);
+      else if (i >= 0) sel[i].o = d.o;
+      else {
+        if (ctx.simple) sel.length = 0;
+        if (sel.length >= 4) { toast("4 matches at most per ticket"); return true; }
+        sel.push({ g: d.g, o: d.o });
+      }
+      return true;
+    }
+    case "unpick": if (S.draft) S.draft.sel = S.draft.sel.filter(s => s.g !== d.g); return true;
+    case "slipFrac": {
+      const ctx = curCtx(), inp = $('form[data-f="ticket"] input[name="slipStake"]');
+      if (!ctx || !inp) return "keep";
+      inp.value = Math.max(ctx.minStake, Math.min(ctx.available, Math.round(ctx.available * parseFloat(d.v))));
+      updateSlip();
+      return "keep";
+    }
+    case "delTicket": {
+      const ctx = curCtx();
+      if (!ctx) return true;
+      ctx.tickets.splice(+d.i, 1);
+      Solo.save();
+      return true;
+    }
+    case "playStage": {
+      const go2 = () => { playStage(); window.scrollTo(0, 0); render(); };
+      if (!run.tickets.length) ask("Play the stage with no ticket? Your tokens won't change.", "Play anyway").then(ok => ok && go2());
+      else if (S.draft && S.draft.sel.length) ask("Your current ticket isn't placed. Play the stage anyway?", "Play the stage").then(ok => { if (ok) { S.draft = null; go2(); } });
+      else go2();
+      return "keep";
+    }
+    case "toShop":
+      run.phase = "shop"; run.rerolls = 0; run.offer = shopOffer(run); Solo.save();
+      prepareNext();
+      window.scrollTo(0, 0);
+      return true;
+    case "toEnd": endRun(run.last && run.last.cleared); window.scrollTo(0, 0); return true;
+    case "shopBuy": {
+      const at = ATOUT[d.id], price = PRICE[at.r];
+      if (run.atouts.length >= 4) { toast("4 perks at most: sell one first", "bad"); return true; }
+      if (run.fiches < price) return true;
+      run.fiches -= price; run.atouts.push(d.id); run.offer = run.offer.filter(x => x !== d.id);
+      if (run.atouts.length >= 4) Solo.award("full");
+      toast(`${at.e} ${at.name} joins your hand`, "good");
+      Solo.save();
+      return true;
+    }
+    case "shopSell": run.fiches += Math.floor(PRICE[ATOUT[d.id].r] / 2); run.atouts = run.atouts.filter(x => x !== d.id); Solo.save(); return true;
+    case "shopReroll": {
+      const cost = 2 + run.rerolls;
+      if (run.fiches < cost) return true;
+      run.fiches -= cost; run.rerolls++; run.offer = shopOffer(run); Solo.save();
+      return true;
+    }
+    case "nextStage": run.stage++; run.phase = "loading"; S.draft = null; loadStage(); return true;
+  }
+  return false;
+}
+
+function soloSubmit(f, fd) {
+  if (f.dataset.f !== "ticket") return false;
+  const ctx = curCtx();
+  if (!ctx || !S.draft || !S.draft.sel.length) return true;
+  const stake = parseInt(fd.get("slipStake"), 10);
+  if (!(stake >= 1)) { toast("Stake at least 1 token", "bad"); return true; }
+  if (stake < ctx.minStake) { toast(`Boss stage: stake at least ${nf(ctx.minStake)} tokens`, "bad"); return true; }
+  if (stake > ctx.available) { toast(`You only have ${nf(ctx.available)} tokens`, "bad"); return true; }
+  if (S.draft.sel.some(s => ctx.locked(ctx.gmap[s.g]))) { toast("One of the matches has already started", "bad"); return true; }
+  const sel = S.draft.sel.map(s => { const g = ctx.gmap[s.g]; return { g: s.g, o: s.o, base: g.odds[s.o], odd: ctx.eff(g.odds[s.o], s.o) }; });
+  ctx.tickets.push({ sel, stake, odd: ticketOdd(S.draft.sel, ctx), at: now() });
+  S.draft = null;
+  if (ctx.kind === "daily") { Solo.played(); Daily.settle(); }
+  Solo.save();
+  toast("Ticket placed", "good");
+  return true;
+}
+
 /* ===== app.js ===== */
 /* Pronohub — état, rendu, navigation, actions */
 
@@ -3484,6 +4690,7 @@ function render() {
   let view = S.view;
   const cc = DB.cur();
   if (view === "settings") main = settingsView();
+  else if (view === "solo") main = soloView();
   else if (!S.code || view === "home") { view = "home"; main = homeView(); }
   else if (!cc || cc.status !== "ok" || !cc.circle) { view = "state"; main = circleStateView(cc); }
   else {
@@ -3609,7 +4816,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -3627,13 +4834,14 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 
 document.addEventListener("input", e => {
   const t = e.target;
   if (t.name === "amt" && t.closest('form[data-f="wager"]')) updatePotential();
+  if (t.name === "slipStake") updateSlip();
   if (t.classList.contains("code-input")) {
     const v = t.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
     t.value = v.length > 3 ? v.slice(0, 3) + "-" + v.slice(3) : v;
@@ -3658,6 +4866,7 @@ document.addEventListener("keydown", e => {
 
 /* ---------- Démarrage ---------- */
 function boot() {
+  Solo.load();
   applyTheme();
   FB.onAuth(() => Account.onAuth());
   FB.onAuth(() => {
@@ -3684,6 +4893,7 @@ function boot() {
 
   setInterval(() => { if (!S.modal) liveRender(); }, 30000);
   setInterval(() => Sports.autoSettle(), 60000);
+  setInterval(() => { if (S.view === "solo" && S.soloView === "daily") Daily.refresh(); }, 120000);
   setTimeout(() => Sports.autoSettle(), 4000);
 
   // Service worker et mises à jour

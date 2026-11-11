@@ -47,5 +47,9 @@
  "&limit=500",
  "(display-mode: standalone)",
  "MacIntel",
- "m:"
+ "m:",
+ "W",
+ "L",
+ "D",
+ "form[data-f=\"ticket\"] input[name=\"slipStake\"]"
 ]

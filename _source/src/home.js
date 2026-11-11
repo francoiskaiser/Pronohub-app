@@ -158,6 +158,7 @@ function homeView() {
       </div>
     </div>
     ${installCard()}
+    ${soloHomeCard()}
     <div class="home-grid">
       <div class="home-main">
         <div class="sec-head"><h2>Mes cercles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Créer</button>` : ""}</div>

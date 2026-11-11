@@ -20,6 +20,7 @@ function rankTab(cc, a) {
       <span class="rk">${s.rank}</span>${avatar(s)}<span class="grow"><b>${esc(s.name)}</b><small>${s.wins} ${pl(s.wins, "victoire", "victoires")} pour ${s.wins + s.losses} ${pl(s.wins + s.losses, "pari", "paris")}${s.locked ? `, ${nf(s.locked)} en jeu` : ""}</small></span>
       <span class="bal">${nf(s.bal)}</span></button></li>`).join("")}</ol>
     <p class="hint">Le classement se fait au solde de jetons. Les mises en cours sont déduites jusqu'au résultat.</p>
+    ${circleDailyPanel(cc)}
     ${seasons.length ? `<h3>Palmarès</h3><ul class="honours">${seasons.map(s => `<li><span class="h-season">Saison ${s.n}</span>${(s.standings || []).slice(0, 3).map((x, i) => `<span class="h-place">${["🥇", "🥈", "🥉"][i]} ${esc(x.name)} <small>${nf(x.bal)}</small></span>`).join("")}</li>`).join("")}</ul>` : ""}
   </section>`;
 }
@@ -36,7 +37,8 @@ function playerCard(cc, a, uid, self) {
   return `<div class="profile-head">
       ${avatar(m, "xl")}
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
-        <p class="muted">${s.rank ? `Rang ${s.rank} / ${a.standings.length}` : ""}</p></div>
+        <p class="muted">${s.rank ? `Rang ${s.rank} / ${a.standings.length}` : ""}</p>
+        ${m.solo && m.solo.level ? `<p class="solo-line">${esc(TITLES[m.solo.level - 1] || "")}, niveau ${m.solo.level} en solo${m.solo.best ? `, record ${m.solo.best} ${pl(m.solo.best, "étape", "étapes")}` : ""}</p>` : ""}</div>
       ${self ? `<button class="btn small ghost" data-a="editProfile">Modifier</button>` : ""}
     </div>
     <div class="balance-card"><span>Solde</span><b>${nf(s.bal || 0)}</b><small>${p.locked ? `dont ${nf(p.locked)} en jeu` : "jetons"}</small></div>
@@ -69,6 +71,7 @@ function meTab(cc, a) {
     ${playerCard(cc, a, me, !cc.local || me === Profile.get().id)}
     <div class="row wrap me-actions">
       <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
+      <button class="btn ghost" data-a="soloHub">Mode solo</button>
       <button class="btn ghost" data-a="circleInfo">Le cercle</button>
       <button class="btn ghost" data-a="settings">Réglages</button>
     </div>
@@ -89,7 +92,7 @@ function editProfileModal() {
     <form data-f="editProfile" class="stack">
       <label class="fld"><span>Pseudo</span><input name="name" maxlength="24" required value="${esc(p.name)}"></label>
       <fieldset class="fld"><legend>Avatar</legend>
-        <div class="emoji-grid">${AVATARS.map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
+        <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary">Enregistrer</button></div>
     </form>`;
