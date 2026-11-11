@@ -127,7 +127,7 @@ function circleModal() {
         <div class="emoji-grid small">${CIRCLE_EMOJIS.map(e => `<label class="emo ${e === c.emoji ? "on" : ""}"><input type="radio" name="emoji" value="${e}" ${e === c.emoji ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <div class="grid2">
-        ${numField("daily", "Bonus quotidien", c.daily, 0, 10000)}
+        ${numField("daily", "Bonus quotidien pour tous", c.daily, 0, 10000)}
         ${numField("rescue", "Renflouement si à sec", c.rescue, 0, 10000)}
         ${numField("bonus", "Bonus score exact", c.bonus, 0, 10000)}
         ${numField("seed", "Mise de la banque par choix", c.seed, 0, 10000)}
@@ -198,7 +198,7 @@ async function newSeason() {
   const standings = a.standings.map(s => ({ uid: s.uid, name: s.name, avatar: s.avatar || "", bal: s.bal }));
   for (const x of Object.values(a.bets)) if (x.state === "open" || x.state === "closed") await DB.put("bets", x.id, { status: "void", settledAt: now(), settledBy: myId(cc) }, true);
   await DB.putSeason(c.season, { n: c.season, endedAt: now(), standings });
-  await DB.setCircle({ season: c.season + 1 });
+  await DB.setCircle({ season: c.season + 1, seasonAt: now() });
   S.modal = null;
   S.tab = "rank";
   toast(`Saison ${c.season + 1} lancée : bonne chance à tous !`, "good");

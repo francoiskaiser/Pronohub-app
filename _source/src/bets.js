@@ -13,9 +13,6 @@ function bonusCard(cc, a) {
   const day = dayNum();
   const c = cc.circle;
   const out = [];
-  if (c.daily > 0 && !cc.ledger[`${me}_daily_${day}`]) {
-    out.push(`<div class="gift"><span class="gift-coin" aria-hidden="true">🪙</span><span class="grow"><b>Bonus du jour</b><small>+${nf(c.daily)} jetons t'attendent</small></span><button class="btn primary small" data-a="claimDaily">Récupérer</button></div>`);
-  }
   if (c.rescue > 0 && p.bal < 10 && !cc.ledger[`${me}_rescue_${day}`]) {
     out.push(`<div class="gift broke"><span class="gift-coin" aria-hidden="true">💸</span><span class="grow"><b>À sec ?</b><small>La banque te renfloue de ${nf(c.rescue)} jetons. Ça comptera comme une faillite…</small></span><button class="btn small" data-a="claimRescue">Me renflouer</button></div>`);
   }

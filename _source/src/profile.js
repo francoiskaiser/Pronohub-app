@@ -19,7 +19,7 @@ function rankTab(cc, a) {
     <ol class="ranking">${st.map(s => `<li class="${s.uid === me ? "me" : ""}"><button data-a="player" data-uid="${esc(s.uid)}">
       <span class="rk">${s.rank}</span>${avatar(s)}<span class="grow"><b>${esc(s.name)}</b><small>${s.wins} ${pl(s.wins, "victoire", "victoires")} pour ${s.wins + s.losses} ${pl(s.wins + s.losses, "pari", "paris")}${s.locked ? `, ${nf(s.locked)} en jeu` : ""}</small></span>
       <span class="bal">${nf(s.bal)}</span></button></li>`).join("")}</ol>
-    <p class="hint">Le classement se fait au solde de jetons. Les mises en cours sont déduites jusqu'au résultat.</p>
+    <p class="hint">Le classement se fait au solde de jetons. Tout le monde part de ${nf(cc.circle.start)} jetons et reçoit automatiquement ${nf(cc.circle.daily)} jetons par jour, même en rejoignant en cours de saison. Les mises en cours sont déduites jusqu'au résultat.</p>
     ${circleDailyPanel(cc)}
     ${seasons.length ? `<h3>Palmarès</h3><ul class="honours">${seasons.map(s => `<li><span class="h-season">Saison ${s.n}</span>${(s.standings || []).slice(0, 3).map((x, i) => `<span class="h-place">${["🥇", "🥈", "🥉"][i]} ${esc(x.name)} <small>${nf(x.bal)}</small></span>`).join("")}</li>`).join("")}</ul>` : ""}
   </section>`;

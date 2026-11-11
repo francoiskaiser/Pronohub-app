@@ -46,7 +46,7 @@ with sync_playwright() as pw:
     p.click(".sheet [data-a=close] >> nth=-1")
     shot(p, "05-empty-bets")
     # Bonus du jour
-    p.click("[data-a=claimDaily]")
+    pass
     # Pari oui/non
     p.click(".fab")
     shot(p, "06-kinds")

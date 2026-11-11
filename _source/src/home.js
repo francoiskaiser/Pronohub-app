@@ -101,7 +101,6 @@ function updateSnap(cc, a) {
     bal: s.bal, rank: s.rank, n: a.standings.length,
     open: bets.filter(x => x.state === "open").length,
     todo: bets.filter(x => (x.state === "closed" || x.state === "contested") && canManage(cc, x.b, me)).length,
-    bonus: cc.circle.daily > 0 && !cc.ledger[`${me}_daily_${dayNum()}`],
     faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "" })),
   };
   const meta = MyCircles.list().find(c => c.code === cc.code);
@@ -114,13 +113,11 @@ function homeView() {
   if (!p.name) return welcomeView();
   const list = MyCircles.list();
   const snaps = list.map(c => c.snap).filter(Boolean);
-  const bonus = snaps.filter(s => s.bonus).length;
   const open = snaps.reduce((t, s) => t + s.open, 0);
   const todo = snaps.reduce((t, s) => t + s.todo, 0);
   let headline;
   if (!list.length) headline = "Crée ton premier cercle";
   else if (todo) headline = todo > 1 ? `${todo} résultats à saisir` : "Un résultat à saisir";
-  else if (bonus) headline = "Ton bonus du jour t'attend";
   else if (open) headline = open > 1 ? `${open} paris en cours` : "Un pari en cours";
   else headline = "Lance le prochain pari";
 
@@ -131,7 +128,6 @@ function homeView() {
       tags.push(`<span class="tag">${s.rank === 1 ? "En tête" : `Rang ${s.rank} / ${s.n}`}</span>`);
       if (s.open) tags.push(`<span class="tag">${s.open} ${pl(s.open, "pari ouvert", "paris ouverts")}</span>`);
       if (s.todo) tags.push(`<span class="tag warn">${s.todo} à régler</span>`);
-      if (s.bonus) tags.push(`<span class="tag gold">Bonus dispo</span>`);
     } else tags.push(`<span class="tag">${c.local ? "Sur cet appareil" : "Code " + esc(c.code)}</span>`);
     return `<button class="circle-card rich" data-a="openCircle" data-code="${esc(c.code)}">
       <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>

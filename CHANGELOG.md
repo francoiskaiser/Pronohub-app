@@ -1,5 +1,10 @@
 # Journal des versions de Pronohub
 
+## 1.2.2 — 11 novembre 2026
+
+- Le bonus quotidien est maintenant automatique et identique pour tous les membres d'un cercle, même pour ceux qui rejoignent en cours de saison. Fini les écarts de jetons parce qu'un joueur a oublié de le récupérer.
+- Les bonus déjà récupérés à la main ne sont plus comptés : tout le monde repart à égalité.
+
 ## 1.2.1 — 11 novembre 2026
 
 - Correction : rejoindre le cercle d'un ami avec son code affichait « Accès refusé ».

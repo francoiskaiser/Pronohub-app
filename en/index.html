@@ -1523,15 +1523,18 @@ function compute(cc) {
   for (const f of Object.values(cc.flags)) (flagsByBet[f.bet] = flagsByBet[f.bet] || []).push(f);
 
   const players = {};
+  // Bonus quotidien automatique et identique pour tous, depuis le début de la saison
+  const days = cc.circle.daily > 0 ? Math.max(0, dayNum(T) - dayNum(cc.circle.seasonAt || cc.circle.createdAt || T)) : 0;
+  const base = cc.circle.start + days * cc.circle.daily;
   const P = uid => players[uid] || (players[uid] = {
-    uid, bal: cc.circle.start, locked: 0, staked: 0, won: 0, bets: 0, wins: 0, losses: 0,
+    uid, bal: base, locked: 0, staked: 0, won: 0, bets: 0, wins: 0, losses: 0,
     exact: 0, duelWins: 0, best: 0, bestOdds: 0, streak: 0, maxStreak: 0, lossStreak: 0, maxLoss: 0,
     created: 0, comments: 0, rescues: 0, biggest: 0, history: [],
   });
   for (const m of visibleMembers(cc)) P(m.uid);
 
   for (const l of Object.values(cc.ledger)) {
-    if ((l.season || 1) !== season) continue;
+    if ((l.season || 1) !== season || l.type === "daily") continue;
     const p = P(U(l.uid));
     p.bal += l.amt;
     if (l.type === "rescue") p.rescues++;
@@ -1624,7 +1627,7 @@ function compute(cc) {
     .sort((a, b) => b.bal - a.bal || a.name.localeCompare(b.name));
   standings.forEach((s, i) => { s.rank = i > 0 && s.bal === standings[i - 1].bal ? standings[i - 1].rank : i + 1; });
 
-  return { bets, players, standings, season, U };
+  return { bets, players, standings, season, U, daysBonus: days * cc.circle.daily };
 }
 
 /* Mémoïsation simple : un calcul par rendu */
@@ -2003,7 +2006,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.2.1";
+const APP_VERSION = "1.2.2";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2284,7 +2287,7 @@ function circleModal() {
         <div class="emoji-grid small">${CIRCLE_EMOJIS.map(e => `<label class="emo ${e === c.emoji ? "on" : ""}"><input type="radio" name="emoji" value="${e}" ${e === c.emoji ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
       <div class="grid2">
-        ${numField("daily", "Daily bonus", c.daily, 0, 10000)}
+        ${numField("daily", "Daily bonus for everyone", c.daily, 0, 10000)}
         ${numField("rescue", "Bail-out when broke", c.rescue, 0, 10000)}
         ${numField("bonus", "Exact score bonus", c.bonus, 0, 10000)}
         ${numField("seed", "Bank stake per choice", c.seed, 0, 10000)}
@@ -2355,7 +2358,7 @@ async function newSeason() {
   const standings = a.standings.map(s => ({ uid: s.uid, name: s.name, avatar: s.avatar || "", bal: s.bal }));
   for (const x of Object.values(a.bets)) if (x.state === "open" || x.state === "closed") await DB.put("bets", x.id, { status: "void", settledAt: now(), settledBy: myId(cc) }, true);
   await DB.putSeason(c.season, { n: c.season, endedAt: now(), standings });
-  await DB.setCircle({ season: c.season + 1 });
+  await DB.setCircle({ season: c.season + 1, seasonAt: now() });
   S.modal = null;
   S.tab = "rank";
   toast(`Season ${c.season + 1} is on: good luck everyone!`, "good");
@@ -2484,9 +2487,6 @@ function bonusCard(cc, a) {
   const day = dayNum();
   const c = cc.circle;
   const out = [];
-  if (c.daily > 0 && !cc.ledger[`${me}_daily_${day}`]) {
-    out.push(`<div class="gift"><span class="gift-coin" aria-hidden="true">🪙</span><span class="grow"><b>Daily bonus</b><small>+${nf(c.daily)} tokens waiting for you</small></span><button class="btn primary small" data-a="claimDaily">Claim</button></div>`);
-  }
   if (c.rescue > 0 && p.bal < 10 && !cc.ledger[`${me}_rescue_${day}`]) {
     out.push(`<div class="gift broke"><span class="gift-coin" aria-hidden="true">💸</span><span class="grow"><b>Broke?</b><small>The bank bails you out with ${nf(c.rescue)} tokens. It'll count as a bankruptcy…</small></span><button class="btn small" data-a="claimRescue">Bail me out</button></div>`);
   }
@@ -3149,7 +3149,7 @@ function rankTab(cc, a) {
     <ol class="ranking">${st.map(s => `<li class="${s.uid === me ? "me" : ""}"><button data-a="player" data-uid="${esc(s.uid)}">
       <span class="rk">${s.rank}</span>${avatar(s)}<span class="grow"><b>${esc(s.name)}</b><small>${s.wins} ${pl(s.wins, "win", "wins")} from ${s.wins + s.losses} ${pl(s.wins + s.losses, "bet", "bets")}${s.locked ? `, ${nf(s.locked)} at stake` : ""}</small></span>
       <span class="bal">${nf(s.bal)}</span></button></li>`).join("")}</ol>
-    <p class="hint">Standings are by token balance. Open stakes are deducted until the result.</p>
+    <p class="hint">Standings are by token balance. Everyone starts with ${nf(cc.circle.start)} tokens and automatically gets ${nf(cc.circle.daily)} tokens a day, even when joining mid-season. Open stakes are deducted until the result.</p>
     ${circleDailyPanel(cc)}
     ${seasons.length ? `<h3>Hall of fame</h3><ul class="honours">${seasons.map(s => `<li><span class="h-season">Season ${s.n}</span>${(s.standings || []).slice(0, 3).map((x, i) => `<span class="h-place">${["🥇", "🥈", "🥉"][i]} ${esc(x.name)} <small>${nf(x.bal)}</small></span>`).join("")}</li>`).join("")}</ul>` : ""}
   </section>`;
@@ -3358,7 +3358,6 @@ function updateSnap(cc, a) {
     bal: s.bal, rank: s.rank, n: a.standings.length,
     open: bets.filter(x => x.state === "open").length,
     todo: bets.filter(x => (x.state === "closed" || x.state === "contested") && canManage(cc, x.b, me)).length,
-    bonus: cc.circle.daily > 0 && !cc.ledger[`${me}_daily_${dayNum()}`],
     faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "" })),
   };
   const meta = MyCircles.list().find(c => c.code === cc.code);
@@ -3371,13 +3370,11 @@ function homeView() {
   if (!p.name) return welcomeView();
   const list = MyCircles.list();
   const snaps = list.map(c => c.snap).filter(Boolean);
-  const bonus = snaps.filter(s => s.bonus).length;
   const open = snaps.reduce((t, s) => t + s.open, 0);
   const todo = snaps.reduce((t, s) => t + s.todo, 0);
   let headline;
   if (!list.length) headline = "Create your first circle";
   else if (todo) headline = todo > 1 ? `${todo} results to enter` : "One result to enter";
-  else if (bonus) headline = "Your daily bonus is waiting";
   else if (open) headline = open > 1 ? `${open} open bets` : "One open bet";
   else headline = "Start the next bet";
 
@@ -3388,7 +3385,6 @@ function homeView() {
       tags.push(`<span class="tag">${s.rank === 1 ? "Leading" : `Rank ${s.rank} / ${s.n}`}</span>`);
       if (s.open) tags.push(`<span class="tag">${s.open} ${pl(s.open, "open bet", "open bets")}</span>`);
       if (s.todo) tags.push(`<span class="tag warn">${s.todo} to settle</span>`);
-      if (s.bonus) tags.push(`<span class="tag gold">Bonus ready</span>`);
     } else tags.push(`<span class="tag">${c.local ? "On this device" : "Code " + esc(c.code)}</span>`);
     return `<button class="circle-card rich" data-a="openCircle" data-code="${esc(c.code)}">
       <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>

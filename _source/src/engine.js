@@ -49,15 +49,18 @@ function compute(cc) {
   for (const f of Object.values(cc.flags)) (flagsByBet[f.bet] = flagsByBet[f.bet] || []).push(f);
 
   const players = {};
+  // Bonus quotidien automatique et identique pour tous, depuis le début de la saison
+  const days = cc.circle.daily > 0 ? Math.max(0, dayNum(T) - dayNum(cc.circle.seasonAt || cc.circle.createdAt || T)) : 0;
+  const base = cc.circle.start + days * cc.circle.daily;
   const P = uid => players[uid] || (players[uid] = {
-    uid, bal: cc.circle.start, locked: 0, staked: 0, won: 0, bets: 0, wins: 0, losses: 0,
+    uid, bal: base, locked: 0, staked: 0, won: 0, bets: 0, wins: 0, losses: 0,
     exact: 0, duelWins: 0, best: 0, bestOdds: 0, streak: 0, maxStreak: 0, lossStreak: 0, maxLoss: 0,
     created: 0, comments: 0, rescues: 0, biggest: 0, history: [],
   });
   for (const m of visibleMembers(cc)) P(m.uid);
 
   for (const l of Object.values(cc.ledger)) {
-    if ((l.season || 1) !== season) continue;
+    if ((l.season || 1) !== season || l.type === "daily") continue;
     const p = P(U(l.uid));
     p.bal += l.amt;
     if (l.type === "rescue") p.rescues++;
@@ -150,7 +153,7 @@ function compute(cc) {
     .sort((a, b) => b.bal - a.bal || a.name.localeCompare(b.name));
   standings.forEach((s, i) => { s.rank = i > 0 && s.bal === standings[i - 1].bal ? standings[i - 1].rank : i + 1; });
 
-  return { bets, players, standings, season, U };
+  return { bets, players, standings, season, U, daysBonus: days * cc.circle.daily };
 }
 
 /* Mémoïsation simple : un calcul par rendu */
