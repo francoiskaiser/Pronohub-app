@@ -1,5 +1,12 @@
 # Journal des versions de Pronohub
 
+## 1.4.0 — 12 novembre 2026
+
+- Notifications : active-les dans Réglages (ou depuis la carte de l'accueil) pour être prévenu quand un ami lance un pari dans un de tes cercles, et quand un pari sur lequel tu as misé a un résultat. Toucher la notification ouvre directement le pari.
+- Tu choisis ce que tu reçois (nouveaux paris, résultats) et tu peux couper un seul cercle dans « Gérer ce cercle ».
+- Les paris lancés par les autres depuis ta dernière visite portent l'étiquette « Nouveau ».
+- Sur iPhone, les notifications demandent d'installer d'abord Pronohub sur l'écran d'accueil.
+
 ## 1.3.1 — 11 novembre 2026
 
 - Les réglages d'un cercle sont plus faciles à trouver : touche le nom du cercle en haut, puis « Gérer ce cercle ». On y trouve les règles, les membres et la suppression du cercle.

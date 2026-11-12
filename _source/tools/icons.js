@@ -21,5 +21,10 @@ const svg = (bg, s, radius) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/s
   await sharp(any).resize(192).png().toFile(path.join(out, "icon-192.png"));
   await sharp(mask).resize(512).png().toFile(path.join(out, "icon-maskable.png"));
   await sharp(svg("#3b32e0", 0.9, 0)).resize(180).png().toFile(path.join(out, "apple-touch-icon.png"));
+  // Petite icône monochrome de la barre d'état Android (notifications)
+  const badge = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 512 512">
+    <defs><mask id="m"><rect x="-200" y="-200" width="900" height="900" fill="#fff"/><circle cx="130" cy="110" r="44" fill="#000"/></mask></defs>
+    <g mask="url(#m)" transform="translate(256 262) rotate(-10) scale(1.25) translate(-180 -110)"><path d="M24 0h312a24 24 0 0 1 24 24v58a28 28 0 0 0 0 56v58a24 24 0 0 1-24 24H24A24 24 0 0 1 0 196v-58a28 28 0 0 0 0-56V24A24 24 0 0 1 24 0z" fill="#fff"/></g></svg>`);
+  await sharp(badge).resize(96).png().toFile(path.join(out, "badge-96.png"));
   console.log("icônes générées");
 })();

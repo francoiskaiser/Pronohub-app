@@ -70,12 +70,19 @@
     async set(data, opt) {
       if (window.__mockOffline) throw err("unavailable");
       const d = load();
-      const base = opt && opt.merge ? Object.assign({}, d[this.path] || {}) : {};
-      for (const [k, v] of Object.entries(data)) { if (v && v.__del) delete base[k]; else base[k] = v; }
+      // Comme Firestore : set(…, {merge}) fusionne aussi les sous-objets ; update() accepte « a.b.c »
+      const deep = (dst, src) => { for (const [k, v] of Object.entries(src)) { if (v && v.__del) delete dst[k]; else if (v && typeof v === "object" && !Array.isArray(v) && dst[k] && typeof dst[k] === "object" && !Array.isArray(dst[k])) deep(dst[k], v); else dst[k] = v; } };
+      const base = opt && opt.merge ? JSON.parse(JSON.stringify(d[this.path] || {})) : {};
+      if (opt && opt.merge) deep(base, data); else for (const [k, v] of Object.entries(data)) base[k] = v;
+      if (opt && opt.dotted) for (const [k, v] of Object.entries(data)) if (k.includes(".")) {
+        delete base[k]; const ks = k.split("."); let o = base;
+        for (const x of ks.slice(0, -1)) o = o[x] = o[x] || {};
+        if (v && v.__del) delete o[ks.at(-1)]; else o[ks.at(-1)] = v;
+      }
       d[this.path] = JSON.parse(JSON.stringify(base));
       save(d); notify();
     }
-    async update(data) { if (!load()[this.path]) throw err("not-found"); return this.set(data, { merge: true }); }
+    async update(data) { if (!load()[this.path]) throw err("not-found"); return this.set(data, { merge: true, dotted: true }); }
     async delete() { const d = load(); delete d[this.path]; save(d); notify(); }
     onSnapshot(cb) {
       let prev = null, first = true;
@@ -110,6 +117,7 @@
         return { user: this };
       },
       async reload() { },
+      async getIdToken() { return "mock." + this.uid; },
       async delete() { const us = users(); for (const [k, v] of Object.entries(us)) if (v.uid === this.uid) delete us[k]; saveUsers(us); setUser(null); },
     };
   }

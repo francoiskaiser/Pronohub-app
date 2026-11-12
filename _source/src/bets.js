@@ -47,7 +47,7 @@ function ticket(cc, a, info) {
   const title = b.kind === "match" && b.home ? matchTitle(b) : esc(b.title);
   const duelLine = b.kind === "duel" && b.duel ? `<p class="t-sub">${esc(memberOf(cc, b.createdBy).name)} contre ${esc(memberOf(cc, b.duel.to).name)}, ${nf(b.duel.stake)} jetons chacun</p>` : "";
   return `<article class="ticket st-${info.state} ${mine ? "has-mine" : ""}">
-    <div class="t-top"><span class="t-cat">${cat.e} ${L ? esc(L.name) : esc(cat.label)}</span>${time}</div>
+    <div class="t-top"><span class="t-cat">${info.state === "open" && Seen.isNew(cc, b) ? `<span class="tag new">Nouveau</span> ` : ""}${cat.e} ${L ? esc(L.name) : esc(cat.label)}</span>${time}</div>
     <h3 class="t-title">${title}</h3>
     ${duelLine}
     <div class="t-opts n${Math.min(b.options.length, 4)}">${opts}</div>

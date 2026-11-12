@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.3.1";
+const APP_VERSION = "1.4.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -39,6 +39,8 @@ function settingsView() {
         <button class="seg ${LANG === "en" ? "on" : ""}" data-a="lang" data-v="en">English</button>
       </div>
     </div>
+
+    ${pushPanel()}
 
     ${Install.standalone() ? "" : `<div class="panel">
       <h3>Installer l'app</h3>
@@ -101,6 +103,7 @@ function legalModal() {
       <p><b>E-mail.</b> Si tu crées un compte e-mail ou Google, l'adresse sert seulement à te connecter. Elle n'est jamais montrée aux autres joueurs.</p>
       <p><b>Suppression.</b> Tu peux supprimer ton compte à tout moment depuis Compte. Tes mises passées restent dans l'historique des cercles sous le nom « Ancien membre ».</p>
       <p><b>Résultats sportifs.</b> Les matchs importés viennent de l'API publique d'ESPN, utilisée sans garantie. En cas d'erreur, le pari peut être contesté ou corrigé à la main.</p>
+      <p><b>Notifications.</b> Seulement si tu les actives. L'adresse d'abonnement de ton appareil est enregistrée dans ton profil et sert uniquement à t'envoyer les nouveaux paris de tes cercles et les résultats de tes paris, via Firebase Cloud Messaging (Google) et un relais Cloudflare qui ne garde rien. Tu peux les couper à tout moment dans Réglages.</p>
       <p><b>Mesure d'audience.</b> Aucune publicité, aucun traceur.</p>
     </div>
     <div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;

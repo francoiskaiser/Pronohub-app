@@ -15,7 +15,7 @@ BUILD = os.path.join(TOOLS, "build")
 
 FILES = [
     "util.js", "data.js", "store.js", "fb.js", "db.js", "engine.js", "sports.js",
-    "account.js", "settings.js", "circles.js", "bets.js", "feed.js", "profile.js", "home.js", "odds.js", "solo.js", "app.js",
+    "account.js", "settings.js", "circles.js", "bets.js", "feed.js", "profile.js", "home.js", "odds.js", "solo.js", "push.js", "app.js",
 ]
 FIREBASE_VERSION = "10.12.2"
 FONTS = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"

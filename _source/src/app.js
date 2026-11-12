@@ -271,7 +271,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -324,6 +324,7 @@ function boot() {
   Solo.load();
   applyTheme();
   FB.onAuth(() => Account.onAuth());
+  FB.onAuth(() => { Push.onAuth(); });
   FB.onAuth(() => {
     const cc = DB.cur();
     if (S.code && (!cc || !cc.local) && (!cc || cc.status !== "ok")) { const c = S.code; DB.close(); DB.open(c); }
@@ -338,15 +339,22 @@ function boot() {
     if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
     else S.pendingJoin = join;
   }
+  // Ouverture depuis une notification : ?c=CODE&b=PARI
+  const nc = normCode(q.get("c")), nb = q.get("b");
+  if (nc) {
+    history.replaceState(null, "", location.pathname);
+    if (MyCircles.has(nc)) { S.code = nc; S.view = nb ? "bet" : "circle"; S.betId = nb || null; S.tab = "bets"; Store.set("last", nc); }
+  }
   const last = Store.get("last");
   if (!S.code && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
-  if (S.code) DB.open(S.code);
+  if (S.code) { DB.open(S.code); Seen.mark(S.code); }
   if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
   if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }
   // L'accueil sert de première page : le retour depuis un cercle y ramène avant de quitter l'app
   try {
     history.replaceState({ view: "home" }, "");
-    if (S.code) history.pushState(navState("circle", { tab: "bets" }), "");
+    if (S.code) history.pushState(navState("circle", { tab: "bets", view: "circle" }), "");
+    if (S.code && S.view === "bet") history.pushState(navState("bet"), "");
   } catch (e) { }
   render();
   $("#splash") && $("#splash").remove();

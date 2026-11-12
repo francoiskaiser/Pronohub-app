@@ -146,6 +146,8 @@ function circleModal() {
       <input name="name" maxlength="24" required placeholder="Ajouter un joueur" aria-label="Nom du joueur">
       <button class="btn">Ajouter</button></form>` : ""}
 
+    ${pushCircleRow(cc)}
+
     ${owner ? `<h3>Saison</h3>
       <p class="muted">Clôture la saison ${c.season} : le classement est archivé, les trois premiers reçoivent un trophée et tout le monde repart avec ${nf(c.start)} jetons.</p>
       <button class="btn" data-a="newSeason">Démarrer la saison ${c.season + 1}</button>` : ""}
@@ -182,7 +184,15 @@ function actorModal() {
 
 /* ---------- Actions ---------- */
 
+/* Paris « nouveaux » : lancés par un autre depuis ta dernière visite du cercle */
+const Seen = {
+  at: {},
+  mark(code) { this.at[code] = Store.get("seen." + code) || now(); Store.set("seen." + code, now()); },
+  isNew(cc, b) { return b.createdBy !== myId(cc) && b.createdAt > (this.at[cc.code] || Infinity); },
+};
+
 async function openCircle(code) {
+  Seen.mark(code);
   if (S.pendingMatch && !S.pendingMatch.code) S.pendingMatch.code = code;
   S.code = code;
   S.view = "circle";

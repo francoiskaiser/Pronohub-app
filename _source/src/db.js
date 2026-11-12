@@ -155,7 +155,11 @@ const DB = {
       queueRender();
       return true;
     }
-    try { await FB.sub(cc.code, coll).doc(id).set(data, { merge }); return true; }
+    try {
+      await FB.sub(cc.code, coll).doc(id).set(data, { merge });
+      if (coll === "bets") Push.onBetWrite(cc.code, id, data, merge);
+      return true;
+    }
     catch (e) { toast(fbErr(e), "bad"); return false; }
   },
 

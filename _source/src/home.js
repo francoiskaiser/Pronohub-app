@@ -154,6 +154,7 @@ function homeView() {
       </div>
     </div>
     ${installCard()}
+    ${pushHomeCard()}
     ${soloHomeCard()}
     <div class="home-grid">
       <div class="home-main">
