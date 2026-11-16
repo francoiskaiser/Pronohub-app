@@ -88,6 +88,7 @@ def setup(ctx, mockfb=False, espn_result=None):
     """Interceptions réseau d'un contexte Playwright."""
     mock_js = open(os.path.join(HERE, "mockfb.js"), encoding="utf-8").read() if mockfb else ""
 
+
     def handle(route):
         url = route.request.url
         if mockfb and url.startswith("http://localhost") and url.split("?")[0].endswith("firebase-config.js"):
@@ -111,6 +112,9 @@ def setup(ctx, mockfb=False, espn_result=None):
                                  headers={"access-control-allow-origin": "*"})
         return route.abort()
     ctx.route("**/*", handle)
+    # Relais de notifications : jamais le vrai pendant les tests
+    ctx.route("https://*.workers.dev/**", lambda r: r.fulfill(status=200 if r.request.method != "OPTIONS" else 204, content_type="application/json",
+        headers={"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "POST"}, body='{"ok":true,"sent":0}'))
 
 
 def watch(page, errors, tag=""):

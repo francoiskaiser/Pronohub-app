@@ -195,7 +195,7 @@ with sync_playwright() as pw:
     b = pw.chromium.launch()
     ctx = b.new_context(viewport={"width": 390, "height": 844}, locale="fr-BE", service_workers="block")
     setup(ctx, mockfb=True)
-    D = ctx.new_page(); watch(D, errors, "D")
+    D = ctx.new_page(); D.add_init_script("window.PRONOHUB_PUSH = { vapidKey: '', worker: '' };"); watch(D, errors, "D")
     D.goto(URL); D.wait_for_selector("form[data-f=profile]")
     ok(D.evaluate("Push.state()") == "hidden", "sans configuration : notifications masquées")
     b.close()

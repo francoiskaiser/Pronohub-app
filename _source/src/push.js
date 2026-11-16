@@ -4,7 +4,7 @@
 "use strict";
 
 // Clé publique « Web Push » de Firebase et adresse du relais (ni l'une ni l'autre n'est secrète)
-const PUSH_CFG = Object.assign({ vapidKey: "", worker: "" }, window.PRONOHUB_PUSH || {});
+const PUSH_CFG = Object.assign({ vapidKey: "BABQKSbUwKzKEwna_QhUnlKMz0ni7CGLqYnIU14_ror-DxdaVS4IRENrcuSvDif3otxdRrljAlh7GAUU3IyHYi0", worker: "https://pronohub-notify.francois-kaiser89.workers.dev/" }, window.PRONOHUB_PUSH || {});
 const FCM_SDK = "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js";
 
 const Push = {
