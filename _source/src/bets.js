@@ -202,6 +202,7 @@ function betView(cc, a) {
     ${people}
     ${commentsBlock(cc, info.id)}
     ${b.src ? `<p class="source">Matchs et scores : ESPN (source publique non officielle).</p>` : ""}
+    ${!cc.local && FB.ok && b.createdBy !== me && !b.src ? `<p class="report-line"><button class="link subtle" data-a="report" data-type="bet" data-id="${esc(info.id)}">Signaler ce pari</button></p>` : ""}
   </section>`;
 }
 

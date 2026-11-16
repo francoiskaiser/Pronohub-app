@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.10.0";
+const APP_VERSION = "1.11.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -63,6 +63,8 @@ function settingsView() {
       </div>
     </div>
 
+    ${blockedPanel()}
+
     <div class="panel">
       <h3>Une idée, un bug ?</h3>
       <p class="muted">Dis-nous ce qui coince ou ce qui manque.</p>
@@ -104,6 +106,7 @@ function legalModal() {
       <p><b>Suppression.</b> Tu peux supprimer ton compte à tout moment depuis Compte. Tes mises passées restent dans l'historique des cercles sous le nom « Ancien membre ».</p>
       <p><b>Résultats sportifs.</b> Les matchs importés viennent de l'API publique d'ESPN, utilisée sans garantie. En cas d'erreur, le pari peut être contesté ou corrigé à la main.</p>
       <p><b>Notifications.</b> Seulement si tu les actives. L'adresse d'abonnement de ton appareil est enregistrée dans ton profil et sert uniquement à t'envoyer les nouveaux paris de tes cercles et les résultats de tes paris, via Firebase Cloud Messaging (Google) et un relais Cloudflare qui ne garde rien. Tu peux les couper à tout moment dans Réglages.</p>
+      <p><b>Signalements.</b> Tu peux signaler un commentaire, un pari ou un joueur, et bloquer un joueur. Un signalement transmet le contenu concerné au développeur de l'app, qui peut supprimer un contenu ou un compte abusif.</p>
       <p><b>Mesure d'audience.</b> Aucune publicité, aucun traceur.</p>
     </div>
     <div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;

@@ -14,7 +14,7 @@ function reactionsBar(cc, betId) {
 }
 
 function commentsBlock(cc, betId) {
-  const list = Object.entries(cc.comments).filter(([, c]) => c.bet === betId).sort((a, b) => a[1].at - b[1].at);
+  const list = Object.entries(cc.comments).filter(([id, c]) => c.bet === betId && commentShown(id, c)).sort((a, b) => a[1].at - b[1].at);
   return `<div class="comments">
     <h3>Commentaires${list.length ? ` <small>${list.length}</small>` : ""}</h3>
     ${list.length ? `<ul class="clist">${list.map(([id, c]) => commentItem(cc, id, c)).join("")}</ul>` : `<p class="muted">Personne n'a encore chambré. Lance-toi.</p>`}
@@ -25,6 +25,7 @@ function commentsBlock(cc, betId) {
 function commentItem(cc, id, c) {
   const m = memberOf(cc, c.uid), me = myId(cc);
   return `<li class="cmt">${avatar(m, "sm")}<div class="bubble"><span class="who">${esc(m.name)} <time>${rel(c.at)}</time></span><p>${esc(c.text)}</p></div>
+    ${c.uid !== me && !cc.local ? reportButton("comment", id, "Signaler ce commentaire") : ""}
     ${c.uid === me || isOwner(cc) ? `<button class="icon-btn tiny" data-a="delComment" data-id="${esc(id)}" aria-label="Supprimer le commentaire">${ICON.x}</button>` : ""}</li>`;
 }
 
@@ -41,6 +42,7 @@ function feedEvents(cc, a, limit = 80) {
   const name = uid => esc(memberOf(cc, uid).name);
   const betLink = (id, b) => `<button class="link" data-a="openBet" data-id="${esc(id)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button>`;
   for (const [id, c] of Object.entries(cc.comments)) {
+    if (!commentShown(id, c)) continue;
     const b = c.bet && cc.bets[c.bet];
     ev.push({ at: c.at, uid: c.uid, kind: "comment", id, html: `<b>${name(c.uid)}</b>${b ? ` sur ${betLink(c.bet, b)}` : ""}`, text: c.text, bet: c.bet });
   }
@@ -89,6 +91,7 @@ function feedItem(cc, e) {
   return `<li class="ev ev-${e.kind}">
     <span class="ev-ico">${who && e.kind === "comment" ? avatar(who, "sm") : `<span class="ev-emo" aria-hidden="true">${FEED_ICON[e.kind]}</span>`}</span>
     <div class="ev-body"><p>${e.html}</p>${e.text ? `<p class="ev-text">${esc(e.text)}</p>` : ""}<time>${rel(e.at)}</time></div>
+    ${e.kind === "comment" && e.uid !== myId(cc) && !cc.local ? reportButton("comment", e.id, "Signaler ce commentaire") : ""}
   </li>`;
 }
 

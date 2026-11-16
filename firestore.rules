@@ -67,7 +67,9 @@ service cloud.firestore {
     match /handles/{h} {
       allow get: if signedIn();
       allow list: if false;
-      allow create: if signedIn() && h.matches('^[a-z0-9_]{3,20}$') && d().uid == me()
+      // Réservé aux vrais comptes (Google ou e-mail), pour limiter les abus
+      allow create: if signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && h.matches('^[a-z0-9_]{3,20}$') && d().uid == me()
         && str(d().name, 24) && d().keys().hasOnly(['uid', 'name', 'avatar', 'at']);
       allow update: if signedIn() && resource.data.uid == me() && d().uid == me()
         && str(d().name, 24) && d().keys().hasOnly(['uid', 'name', 'avatar', 'at']);
@@ -99,6 +101,15 @@ service cloud.firestore {
         && d().createdBy is string && d().closesAt is int
         && d().keys().hasOnly(['code', 'bet', 'closesAt', 'createdBy', 'at', 'src']);
       allow delete: if signedIn() && isMember(resource.data.code);
+    }
+
+    // ----- Signalements (commentaire, pari, joueur) : création seule, lus par le développeur -----
+    match /reports/{id} {
+      allow create: if signedIn() && d().from == me()
+        && d().type in ['comment', 'bet', 'player'] && d().reason in ['insult', 'shock', 'spam', 'other']
+        && str(d().code, 16) && str(d().target, 64) && str(d().uid, 64) && str(d().name, 24)
+        && str(d().text, 400) && str(d().note, 500)
+        && d().keys().hasOnly(['type', 'code', 'target', 'uid', 'name', 'text', 'reason', 'note', 'from', 'at', 'v', 'lang']);
     }
 
     // ----- Retours utilisateurs : création seule -----

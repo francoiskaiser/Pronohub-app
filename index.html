@@ -943,6 +943,16 @@ button.fr-main { cursor: pointer; }
 .find-user input { flex: 1; min-width: 0; }
 .sheet h3 { margin-top: 1.1rem; }
 
+/* ---------- 1.11.0 : signaler, bloquer, protéger son compte ---------- */
+.report-btn { color: var(--ink-3); flex: none; }
+.report-btn svg { width: 16px; height: 16px; }
+.report-quote { background: var(--paper-2); border-radius: 12px; padding: .6em .8em; margin: 0 0 .8rem; overflow-wrap: anywhere; }
+.report-line { margin: 1.2rem 0 0; text-align: center; }
+.link.subtle { color: var(--ink-3); font-weight: 500; font-size: .86rem; }
+.safety-row { margin-top: 1.4rem; justify-content: center; }
+.blocked-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.blocked-list li { display: flex; align-items: center; gap: 12px; }
+
 </style>
 </head>
 <body data-view="home">
@@ -1927,6 +1937,7 @@ const Account = {
         const d = s.data();
         if (d.name && !p.name) Profile.set({ name: d.name, avatar: d.avatar || "" });
         if (d.handle) Store.set("handle", d.handle); else Store.del("handle");
+        if (d.blocked) Store.set("blocked", d.blocked);
         for (const c of d.circles || []) if (!MyCircles.has(c.code)) MyCircles.add(Object.assign({}, c, { local: false }));
       }
       this.syncCircles();
@@ -2024,7 +2035,7 @@ const Account = {
   async signOut() {
     if (!(await ask("Te déconnecter ? Sur cet appareil, tu repartiras avec une identité anonyme vierge.", "Se déconnecter"))) return;
     DB.close();
-    Store.del("handle");
+    Store.del("handle"); Store.del("blocked");
     await FB.auth.signOut();
     MyCircles.save(MyCircles.list().filter(c => c.local));
     S.code = null; S.view = "home"; S.modal = null;
@@ -2115,7 +2126,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.10.0";
+const APP_VERSION = "1.11.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2177,6 +2188,8 @@ function settingsView() {
       </div>
     </div>
 
+    ${blockedPanel()}
+
     <div class="panel">
       <h3>Une idée, un bug ?</h3>
       <p class="muted">Dis-nous ce qui coince ou ce qui manque.</p>
@@ -2218,6 +2231,7 @@ function legalModal() {
       <p><b>Suppression.</b> Tu peux supprimer ton compte à tout moment depuis Compte. Tes mises passées restent dans l'historique des cercles sous le nom « Ancien membre ».</p>
       <p><b>Résultats sportifs.</b> Les matchs importés viennent de l'API publique d'ESPN, utilisée sans garantie. En cas d'erreur, le pari peut être contesté ou corrigé à la main.</p>
       <p><b>Notifications.</b> Seulement si tu les actives. L'adresse d'abonnement de ton appareil est enregistrée dans ton profil et sert uniquement à t'envoyer les nouveaux paris de tes cercles et les résultats de tes paris, via Firebase Cloud Messaging (Google) et un relais Cloudflare qui ne garde rien. Tu peux les couper à tout moment dans Réglages.</p>
+      <p><b>Signalements.</b> Tu peux signaler un commentaire, un pari ou un joueur, et bloquer un joueur. Un signalement transmet le contenu concerné au développeur de l'app, qui peut supprimer un contenu ou un compte abusif.</p>
       <p><b>Mesure d'audience.</b> Aucune publicité, aucun traceur.</p>
     </div>
     <div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;
@@ -2831,6 +2845,7 @@ function betView(cc, a) {
     ${people}
     ${commentsBlock(cc, info.id)}
     ${b.src ? `<p class="source">Matchs et scores : ESPN (source publique non officielle).</p>` : ""}
+    ${!cc.local && FB.ok && b.createdBy !== me && !b.src ? `<p class="report-line"><button class="link subtle" data-a="report" data-type="bet" data-id="${esc(info.id)}">Signaler ce pari</button></p>` : ""}
   </section>`;
 }
 
@@ -3193,7 +3208,7 @@ function reactionsBar(cc, betId) {
 }
 
 function commentsBlock(cc, betId) {
-  const list = Object.entries(cc.comments).filter(([, c]) => c.bet === betId).sort((a, b) => a[1].at - b[1].at);
+  const list = Object.entries(cc.comments).filter(([id, c]) => c.bet === betId && commentShown(id, c)).sort((a, b) => a[1].at - b[1].at);
   return `<div class="comments">
     <h3>Commentaires${list.length ? ` <small>${list.length}</small>` : ""}</h3>
     ${list.length ? `<ul class="clist">${list.map(([id, c]) => commentItem(cc, id, c)).join("")}</ul>` : `<p class="muted">Personne n'a encore chambré. Lance-toi.</p>`}
@@ -3204,6 +3219,7 @@ function commentsBlock(cc, betId) {
 function commentItem(cc, id, c) {
   const m = memberOf(cc, c.uid), me = myId(cc);
   return `<li class="cmt">${avatar(m, "sm")}<div class="bubble"><span class="who">${esc(m.name)} <time>${rel(c.at)}</time></span><p>${esc(c.text)}</p></div>
+    ${c.uid !== me && !cc.local ? reportButton("comment", id, "Signaler ce commentaire") : ""}
     ${c.uid === me || isOwner(cc) ? `<button class="icon-btn tiny" data-a="delComment" data-id="${esc(id)}" aria-label="Supprimer le commentaire">${ICON.x}</button>` : ""}</li>`;
 }
 
@@ -3220,6 +3236,7 @@ function feedEvents(cc, a, limit = 80) {
   const name = uid => esc(memberOf(cc, uid).name);
   const betLink = (id, b) => `<button class="link" data-a="openBet" data-id="${esc(id)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button>`;
   for (const [id, c] of Object.entries(cc.comments)) {
+    if (!commentShown(id, c)) continue;
     const b = c.bet && cc.bets[c.bet];
     ev.push({ at: c.at, uid: c.uid, kind: "comment", id, html: `<b>${name(c.uid)}</b>${b ? ` sur ${betLink(c.bet, b)}` : ""}`, text: c.text, bet: c.bet });
   }
@@ -3268,6 +3285,7 @@ function feedItem(cc, e) {
   return `<li class="ev ev-${e.kind}">
     <span class="ev-ico">${who && e.kind === "comment" ? avatar(who, "sm") : `<span class="ev-emo" aria-hidden="true">${FEED_ICON[e.kind]}</span>`}</span>
     <div class="ev-body"><p>${e.html}</p>${e.text ? `<p class="ev-text">${esc(e.text)}</p>` : ""}<time>${rel(e.at)}</time></div>
+    ${e.kind === "comment" && e.uid !== myId(cc) && !cc.local ? reportButton("comment", e.id, "Signaler ce commentaire") : ""}
   </li>`;
 }
 
@@ -3392,6 +3410,7 @@ function playerView(cc, a) {
   return `<section class="page narrow">
     <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button></div>
     ${playerCard(cc, a, S.playerId, S.playerId === myId(cc) && (!cc.local || S.playerId === Profile.get().id))}
+    ${playerSafety(cc, S.playerId)}
   </section>`;
 }
 
@@ -3401,8 +3420,10 @@ function editProfileModal() {
   return `<h2>Mon profil</h2>
     <form data-f="editProfile" class="stack">
       <label class="fld"><span>Pseudo</span><input name="name" maxlength="24" required value="${esc(p.name)}"></label>
-      ${FB.ok && FB.uid ? `<label class="fld"><span>Nom d'utilisateur (facultatif)</span><input name="handle" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ex. fanfan_89" value="${esc(S.modal.handle != null ? S.modal.handle : Handle.get())}">
-        <small class="hint">Unique : tes amis te trouvent en le cherchant. 3 à 20 lettres, chiffres ou _. Laisse vide pour ne pas être trouvable.</small></label>` : ""}
+      ${!FB.ok || !FB.uid ? "" : FB.provider() === "anon" ? `<div class="fld"><span>Nom d'utilisateur</span>
+        <p class="hint">Crée un compte pour choisir un nom d'utilisateur : il reste ainsi rattaché à toi. <button type="button" class="link" data-a="account">Créer un compte</button></p></div>`
+      : `<label class="fld"><span>Nom d'utilisateur (facultatif)</span><input name="handle" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ex. fanfan_89" value="${esc(S.modal.handle != null ? S.modal.handle : Handle.get())}">
+        <small class="hint">Unique : tes amis te trouvent en le cherchant. 3 à 20 lettres, chiffres ou _. Laisse vide pour ne pas être trouvable.</small></label>`}
       <fieldset class="fld"><legend>Avatar</legend>
         <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
@@ -3433,7 +3454,7 @@ function profileSubmit(f, fd) {
   Account.pushProfile();
   const done = () => { S.modal = null; toast("Profil mis à jour", "good"); render(); };
   const raw = fd.get("handle");
-  if (raw == null || !FB.ok || !FB.uid) { done(); return true; }
+  if (raw == null || !FB.ok || !FB.uid || FB.provider() === "anon") { done(); return true; }
   const h = Handle.norm(raw);
   if (h && !Handle.valid(h)) { S.modal.handle = String(raw); toast("Un nom d'utilisateur fait 3 à 20 caractères : lettres, chiffres ou _", "bad"); render(); return true; }
   if (h === Handle.get()) { Handle.refresh(); done(); return true; }
@@ -3599,7 +3620,7 @@ function homeView() {
         <h1 class="display">${headline}</h1>
       </div>
     </div>
-    ${pushHomeCard() || installCard()}
+    ${pushHomeCard() || secureCard() || installCard()}
     <div class="home-grid">
       <div class="home-main">
         <div class="sec-head"><h2>Mes cercles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Créer</button>` : ""}</div>
@@ -4794,7 +4815,7 @@ const Friends = {
   person(f) { const uid = this.other(f); return { uid, name: this.nameOf(f, uid), avatar: this.avOf(f, uid) }; },
   list() { return Object.entries(this.all).map(([id, f]) => Object.assign({ id }, f)); },
   ok() { return this.list().filter(f => f.status === "ok").sort((a, b) => this.nameOf(a).localeCompare(this.nameOf(b))); },
-  incoming() { return this.list().filter(f => f.status === "pending" && f.from !== FB.uid); },
+  incoming() { return this.list().filter(f => f.status === "pending" && f.from !== FB.uid && !Block.has(f.from)); },
   outgoing() { return this.list().filter(f => f.status === "pending" && f.from === FB.uid); },
   byUid(uid) { return FB.uid && uid ? this.all[this.pair(FB.uid, uid)] : null; },
   stateOf(uid) {
@@ -5036,6 +5057,7 @@ const Handle = {
   /* Réserve (ou libère, si h est vide) mon nom. Renvoie "" si tout va bien, sinon le message d'erreur. */
   async claim(h) {
     const cur = this.get(), me = Friends.me();
+    if (h && FB.provider() === "anon") return "Crée un compte pour choisir un nom d'utilisateur";
     try {
       if (h) {
         const s = await this.ref(h).get();
@@ -5089,7 +5111,7 @@ function shareButtons(text, url, subject) {
 /* ---------- Accueil : section « Mes amis » ---------- */
 function friendsSection() {
   if (!FB.ok) return "";
-  const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code));
+  const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code) && !Block.has(x.from));
   const inc = Friends.incoming(), out = Friends.outgoing(), ok = Friends.ok();
   const links = MyCircles.list().filter(c => c.duo && !c.friend);
   // open = [action, attribut, valeur, libellé] : la ligne entière ouvre alors le face-à-face
@@ -5129,8 +5151,8 @@ function friendsModal(cc) {
         <input name="q" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Nom d'utilisateur" aria-label="Nom d'utilisateur" value="${esc(m.q || "")}">
         <button class="btn" ${m.searching ? "disabled" : ""}>Chercher</button>
       </form>
-      ${m.searching ? `<p class="muted">Recherche…</p>` : found ? `<ul class="friend-list"><li class="friend-row">${avatar(found)}<span class="grow"><b>${esc(found.name)}</b><small>@${esc(found.handle)}</small></span><span class="fr-acts">${found.uid === FB.uid ? `<span class="tag">C'est toi</span>` : st === "friend" ? `<span class="tag">Déjà ami</span>` : st === "sent" ? `<span class="tag">Demande envoyée</span>` : `<button class="btn small primary" data-a="friendAdd" data-uid="${esc(found.uid)}" data-name="${esc(found.name)}" data-avatar="${esc(found.avatar || "")}">Ajouter</button>`}</span></li></ul>` : m.q ? `<p class="muted">Aucun joueur ne porte ce nom d'utilisateur. Vérifie l'orthographe : il faut le nom exact.</p>` : ""}
-      <p class="hint">${h ? `Ton nom d'utilisateur : <b>@${esc(h)}</b>` : `Tu n'as pas encore de nom d'utilisateur.`} <button class="link" data-a="editProfile">${h ? "Modifier" : "En choisir un"}</button></p>
+      ${m.searching ? `<p class="muted">Recherche…</p>` : found ? `<ul class="friend-list"><li class="friend-row">${avatar(found)}<span class="grow"><b>${esc(found.name)}</b><small>@${esc(found.handle)}</small></span><span class="fr-acts">${found.uid === FB.uid ? `<span class="tag">C'est toi</span>` : Block.has(found.uid) ? `<span class="tag">Bloqué</span>` : st === "friend" ? `<span class="tag">Déjà ami</span>` : st === "sent" ? `<span class="tag">Demande envoyée</span>` : `<button class="btn small primary" data-a="friendAdd" data-uid="${esc(found.uid)}" data-name="${esc(found.name)}" data-avatar="${esc(found.avatar || "")}">Ajouter</button>`}</span></li></ul>` : m.q ? `<p class="muted">Aucun joueur ne porte ce nom d'utilisateur. Vérifie l'orthographe : il faut le nom exact.</p>` : ""}
+      <p class="hint">${h ? `Ton nom d'utilisateur : <b>@${esc(h)}</b>` : `Tu n'as pas encore de nom d'utilisateur.`} ${FB.provider() === "anon" ? `<button class="link" data-a="account">Crée un compte pour en choisir un</button>` : `<button class="link" data-a="editProfile">${h ? "Modifier" : "En choisir un"}</button>`}</p>
       <h3>Inviter quelqu'un qui n'a pas encore l'app</h3>
       <p class="muted">Envoie ton lien : ton ami installe Pronohub, choisit son pseudo et t'ajoute en un toucher.</p>
       ${m.url ? shareButtons(`${Friends.me().name} t'invite sur Pronohub, pour se lancer des défis entre amis (jetons fictifs) :`, m.url, "Rejoins-moi sur Pronohub") : m.err ? `<p class="err">Le lien n'a pas pu être préparé (${esc(m.err)}).</p><button class="btn" data-a="addFriend">Réessayer</button>` : `<p class="muted">Préparation du lien…</p>`}
@@ -5175,7 +5197,7 @@ function friendsModal(cc) {
 function friendSuggestions(cc) {
   const seen = {}, out = [];
   const addP = (p, circle) => {
-    if (!p || !p.uid || p.uid === FB.uid || seen[p.uid] || Friends.byUid(p.uid) || /^p_|^me_/.test(p.uid)) return;
+    if (!p || !p.uid || p.uid === FB.uid || seen[p.uid] || Friends.byUid(p.uid) || Block.has(p.uid) || /^p_|^me_/.test(p.uid)) return;
     seen[p.uid] = 1; out.push({ uid: p.uid, name: p.name, avatar: p.avatar || "", circle });
   };
   if (cc && !cc.local && cc.circle && !cc.circle.duo) for (const m of visibleMembers(cc)) addP(m, cc.circle.name);
@@ -5268,6 +5290,137 @@ function friendsSubmit(f, fd) {
 
 const WA_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.7-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>`;
 const MAIL_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
+
+/* ===== safety.js ===== */
+/* Pronohub — signaler un contenu, bloquer un joueur, protéger son compte.
+
+   Un signalement = une fiche reports/{id} (création seule), lue par le développeur.
+   Les joueurs bloqués sont rangés dans le profil (users/{uid}.blocked) et sur l'appareil :
+   leurs commentaires sont masqués, leurs demandes d'ami et invitations ignorées. */
+
+const Block = {
+  all() { return Store.get("blocked") || {}; },
+  has(uid) { return !!uid && Object.prototype.hasOwnProperty.call(this.all(), uid); },
+  add(uid, name) {
+    if (!uid || uid === FB.uid) return;
+    const map = this.all(); map[uid] = String(name || "Joueur").slice(0, 24);
+    Store.set("blocked", map);
+    if (FB.ok && FB.uid) FB.userDoc().set({ blocked: { [uid]: map[uid] } }, { merge: true }).catch(() => { });
+    const f = Friends.byUid(uid);
+    if (f) Friends.remove(Object.assign({ id: Friends.pair(FB.uid, uid) }, f));
+  },
+  remove(uid) {
+    const map = this.all(); delete map[uid];
+    Store.set("blocked", map);
+    if (FB.ok && FB.uid) FB.userDoc().update({ [`blocked.${uid}`]: firebase.firestore.FieldValue.delete() }).catch(() => { });
+  },
+};
+
+/* Commentaires que j'ai signalés : masqués chez moi tout de suite */
+const Hidden = {
+  has(id) { return !!(Store.get("hiddenC") || {})[id]; },
+  add(id) { const m = Store.get("hiddenC") || {}; m[id] = 1; Store.set("hiddenC", m); },
+};
+const commentShown = (id, c) => !Block.has(c.uid) && !Hidden.has(id);
+
+const REPORT_REASONS = [["insult", "Insultes ou harcèlement"], ["shock", "Contenu choquant ou haineux"], ["spam", "Spam ou arnaque"], ["other", "Autre"]];
+
+function reportButton(type, id, label) {
+  if (!FB.ok || !FB.uid) return "";
+  return `<button class="icon-btn tiny report-btn" data-a="report" data-type="${type}" data-id="${esc(id)}" aria-label="${label}">${ICON.flag}</button>`;
+}
+
+function reportModal() {
+  const m = S.modal;
+  if (m.sent) return `<h2>Merci</h2>
+    <p>Ton signalement est bien envoyé.${m.blocked ? ` ${esc(m.name)} est bloqué : tu ne verras plus ses commentaires.` : ""}</p>
+    <div class="row end"><button class="btn primary" data-a="close">Fermer</button></div>`;
+  const what = m.type === "comment" ? "Signaler ce commentaire" : m.type === "bet" ? "Signaler ce pari" : "Signaler ce joueur";
+  return `<h2>${what}</h2>
+    ${m.text ? `<p class="report-quote">${esc(m.text)}</p>` : ""}
+    <form data-f="report" class="stack">
+      <fieldset class="fld"><legend>Quel est le problème ?</legend>
+        ${REPORT_REASONS.map(([v, l], i) => `<label class="choice"><input type="radio" name="reason" value="${v}" ${i === 0 ? "checked" : ""}><span>${l}</span></label>`).join("")}
+      </fieldset>
+      <label class="fld"><span>Précisions (facultatif)</span><textarea name="note" rows="2" maxlength="500"></textarea></label>
+      ${m.uid && m.uid !== FB.uid && !Block.has(m.uid) ? `<label class="check"><input type="checkbox" name="block" checked><span>Bloquer aussi ${esc(m.name)}</span></label>` : ""}
+      <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary" ${m.busy ? "disabled" : ""}>Envoyer le signalement</button></div>
+    </form>`;
+}
+
+/* Carte d'accueil : un joueur anonyme risque de tout perdre en changeant d'appareil */
+function secureCard() {
+  if (!FB.ok || !FB.uid || FB.provider() !== "anon") return "";
+  if (!MyCircles.list().some(c => !c.local)) return "";
+  const t = Store.get("secureHide");
+  if (t && Date.now() - t < 14 * 86400000) return "";
+  return `<div class="install secure-card">
+    <span class="install-icon bell" aria-hidden="true">${ICON.user}</span>
+    <span class="grow"><b>Protège ton compte</b>
+      <small>Sans compte, tu perds tes cercles et tes amis si tu changes de téléphone.</small></span>
+    <span class="install-acts">
+      <button class="btn primary small" data-a="account">Protéger</button>
+      <button class="icon-btn tiny" data-a="secureHide" aria-label="Masquer pendant deux semaines">${ICON.x}</button>
+    </span>
+  </div>`;
+}
+
+/* Réglages : liste des joueurs bloqués */
+function blockedPanel() {
+  const list = Object.entries(Block.all());
+  if (!list.length) return "";
+  return `<div class="panel">
+      <h3>Joueurs bloqués</h3>
+      <ul class="blocked-list">${list.map(([uid, name]) => `<li><span class="grow">${esc(name)}</span><button class="btn small" data-a="unblock" data-uid="${esc(uid)}">Débloquer</button></li>`).join("")}</ul>
+    </div>`;
+}
+
+/* Fiche d'un autre joueur : bloquer, signaler */
+function playerSafety(cc, uid) {
+  if (!FB.ok || !FB.uid || cc.local || uid === FB.uid || /^p_|^me_/.test(uid)) return "";
+  const m = memberOf(cc, uid);
+  return `<div class="row wrap safety-row">
+    ${Block.has(uid) ? `<button class="btn small" data-a="unblock" data-uid="${esc(uid)}">Débloquer</button>` : `<button class="btn small ghost" data-a="block" data-uid="${esc(uid)}" data-name="${esc(m.name)}">Bloquer</button>`}
+    <button class="btn small ghost" data-a="report" data-type="player" data-id="${esc(uid)}">Signaler</button>
+  </div>`;
+}
+
+function safetyAct(a, d) {
+  const cc = DB.cur();
+  switch (a) {
+    case "report": {
+      const m = { k: "report", type: d.type, id: d.id, code: cc ? cc.code : "" };
+      if (d.type === "comment" && cc) { const c = cc.comments[d.id]; if (!c) return true; Object.assign(m, { uid: c.uid, name: memberOf(cc, c.uid).name, text: c.text }); }
+      else if (d.type === "bet" && cc) { const b = cc.bets[d.id]; if (!b) return true; Object.assign(m, { uid: b.createdBy, name: memberOf(cc, b.createdBy).name, text: b.title }); }
+      else if (d.type === "player" && cc) Object.assign(m, { uid: d.id, name: memberOf(cc, d.id).name, text: "" });
+      S.modal = m;
+      return true;
+    }
+    case "block":
+      ask(`Bloquer ${d.name} ? Tu ne verras plus ses commentaires, ses demandes d'ami ni ses invitations. Vos paris communs restent visibles.`, "Bloquer", true)
+        .then(ok => { if (ok) { Block.add(d.uid, d.name); toast(`${d.name} est bloqué`); render(); } });
+      return true;
+    case "unblock": Block.remove(d.uid); toast("Joueur débloqué"); return true;
+    case "secureHide": Store.set("secureHide", Date.now()); toast("Tu peux créer ton compte à tout moment dans les Réglages"); return true;
+  }
+  return false;
+}
+
+function safetySubmit(f, fd) {
+  if (f.dataset.f !== "report") return false;
+  const m = S.modal;
+  const rep = { type: m.type, code: m.code || "", target: m.id || "", uid: m.uid || "", name: String(m.name || "").slice(0, 24), text: String(m.text || "").slice(0, 400),
+    reason: String(fd.get("reason") || "other"), note: String(fd.get("note") || "").slice(0, 500), from: FB.uid, at: now(), v: APP_VERSION, lang: LANG };
+  const block = !!fd.get("block");
+  m.busy = true; render();
+  FB.db.collection("reports").add(rep).then(() => {
+    if (m.type === "comment") Hidden.add(m.id);
+    if (block) Block.add(m.uid, m.name);
+    S.modal = { k: "report", sent: true, blocked: block, name: m.name };
+    render();
+  }).catch(e => { m.busy = false; toast(fbErr(e), "bad"); render(); });
+  return true;
+}
 
 /* ===== push.js ===== */
 /* Pronohub — notifications : nouveaux paris dans tes cercles, résultats de tes paris.
@@ -5532,6 +5685,7 @@ const ICON = {
   user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
   send: svg('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>'),
   coin: `<span class="coin" aria-hidden="true"></span>`,
+  flag: svg('<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>'),
   users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
 };
 
@@ -5694,6 +5848,7 @@ function renderModal() {
     case "ask": html = askModal(); break;
     case "install": html = installModal(); break;
     case "pickCircle": html = pickCircleModal(); break;
+    case "report": html = reportModal(); break;
     default: html = friendsModal(cc);
   }
   if (!html) { S.modal = null; return renderModal(); }
@@ -5776,7 +5931,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || friendsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || safetyAct(a, d) || friendsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -5794,7 +5949,7 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || safetySubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 

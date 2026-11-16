@@ -105,6 +105,7 @@ Pronohub is a game between friends for adults only. It offers no real-money bett
 | Santé | Aucune. |
 | Application d'actualités | Non. |
 | Jeux d'argent réel | Non : aucune mise, aucun achat, aucun gain réel. |
+| Contenus créés par les utilisateurs | Oui (commentaires, titres de paris, pseudos), visibles des membres d'un cercle privé uniquement. L'app permet de signaler un commentaire, un pari ou un joueur, et de bloquer un joueur. Le créateur d'un cercle peut supprimer les commentaires. |
 
 ### Classification du contenu (questionnaire IARC)
 

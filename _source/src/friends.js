@@ -19,7 +19,7 @@ const Friends = {
   person(f) { const uid = this.other(f); return { uid, name: this.nameOf(f, uid), avatar: this.avOf(f, uid) }; },
   list() { return Object.entries(this.all).map(([id, f]) => Object.assign({ id }, f)); },
   ok() { return this.list().filter(f => f.status === "ok").sort((a, b) => this.nameOf(a).localeCompare(this.nameOf(b))); },
-  incoming() { return this.list().filter(f => f.status === "pending" && f.from !== FB.uid); },
+  incoming() { return this.list().filter(f => f.status === "pending" && f.from !== FB.uid && !Block.has(f.from)); },
   outgoing() { return this.list().filter(f => f.status === "pending" && f.from === FB.uid); },
   byUid(uid) { return FB.uid && uid ? this.all[this.pair(FB.uid, uid)] : null; },
   stateOf(uid) {
@@ -261,6 +261,7 @@ const Handle = {
   /* Réserve (ou libère, si h est vide) mon nom. Renvoie "" si tout va bien, sinon le message d'erreur. */
   async claim(h) {
     const cur = this.get(), me = Friends.me();
+    if (h && FB.provider() === "anon") return "Crée un compte pour choisir un nom d'utilisateur";
     try {
       if (h) {
         const s = await this.ref(h).get();
@@ -314,7 +315,7 @@ function shareButtons(text, url, subject) {
 /* ---------- Accueil : section « Mes amis » ---------- */
 function friendsSection() {
   if (!FB.ok) return "";
-  const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code));
+  const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code) && !Block.has(x.from));
   const inc = Friends.incoming(), out = Friends.outgoing(), ok = Friends.ok();
   const links = MyCircles.list().filter(c => c.duo && !c.friend);
   // open = [action, attribut, valeur, libellé] : la ligne entière ouvre alors le face-à-face
@@ -354,8 +355,8 @@ function friendsModal(cc) {
         <input name="q" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Nom d'utilisateur" aria-label="Nom d'utilisateur" value="${esc(m.q || "")}">
         <button class="btn" ${m.searching ? "disabled" : ""}>Chercher</button>
       </form>
-      ${m.searching ? `<p class="muted">Recherche…</p>` : found ? `<ul class="friend-list"><li class="friend-row">${avatar(found)}<span class="grow"><b>${esc(found.name)}</b><small>@${esc(found.handle)}</small></span><span class="fr-acts">${found.uid === FB.uid ? `<span class="tag">C'est toi</span>` : st === "friend" ? `<span class="tag">Déjà ami</span>` : st === "sent" ? `<span class="tag">Demande envoyée</span>` : `<button class="btn small primary" data-a="friendAdd" data-uid="${esc(found.uid)}" data-name="${esc(found.name)}" data-avatar="${esc(found.avatar || "")}">Ajouter</button>`}</span></li></ul>` : m.q ? `<p class="muted">Aucun joueur ne porte ce nom d'utilisateur. Vérifie l'orthographe : il faut le nom exact.</p>` : ""}
-      <p class="hint">${h ? `Ton nom d'utilisateur : <b>@${esc(h)}</b>` : `Tu n'as pas encore de nom d'utilisateur.`} <button class="link" data-a="editProfile">${h ? "Modifier" : "En choisir un"}</button></p>
+      ${m.searching ? `<p class="muted">Recherche…</p>` : found ? `<ul class="friend-list"><li class="friend-row">${avatar(found)}<span class="grow"><b>${esc(found.name)}</b><small>@${esc(found.handle)}</small></span><span class="fr-acts">${found.uid === FB.uid ? `<span class="tag">C'est toi</span>` : Block.has(found.uid) ? `<span class="tag">Bloqué</span>` : st === "friend" ? `<span class="tag">Déjà ami</span>` : st === "sent" ? `<span class="tag">Demande envoyée</span>` : `<button class="btn small primary" data-a="friendAdd" data-uid="${esc(found.uid)}" data-name="${esc(found.name)}" data-avatar="${esc(found.avatar || "")}">Ajouter</button>`}</span></li></ul>` : m.q ? `<p class="muted">Aucun joueur ne porte ce nom d'utilisateur. Vérifie l'orthographe : il faut le nom exact.</p>` : ""}
+      <p class="hint">${h ? `Ton nom d'utilisateur : <b>@${esc(h)}</b>` : `Tu n'as pas encore de nom d'utilisateur.`} ${FB.provider() === "anon" ? `<button class="link" data-a="account">Crée un compte pour en choisir un</button>` : `<button class="link" data-a="editProfile">${h ? "Modifier" : "En choisir un"}</button>`}</p>
       <h3>Inviter quelqu'un qui n'a pas encore l'app</h3>
       <p class="muted">Envoie ton lien : ton ami installe Pronohub, choisit son pseudo et t'ajoute en un toucher.</p>
       ${m.url ? shareButtons(`${Friends.me().name} t'invite sur Pronohub, pour se lancer des défis entre amis (jetons fictifs) :`, m.url, "Rejoins-moi sur Pronohub") : m.err ? `<p class="err">Le lien n'a pas pu être préparé (${esc(m.err)}).</p><button class="btn" data-a="addFriend">Réessayer</button>` : `<p class="muted">Préparation du lien…</p>`}
@@ -400,7 +401,7 @@ function friendsModal(cc) {
 function friendSuggestions(cc) {
   const seen = {}, out = [];
   const addP = (p, circle) => {
-    if (!p || !p.uid || p.uid === FB.uid || seen[p.uid] || Friends.byUid(p.uid) || /^p_|^me_/.test(p.uid)) return;
+    if (!p || !p.uid || p.uid === FB.uid || seen[p.uid] || Friends.byUid(p.uid) || Block.has(p.uid) || /^p_|^me_/.test(p.uid)) return;
     seen[p.uid] = 1; out.push({ uid: p.uid, name: p.name, avatar: p.avatar || "", circle });
   };
   if (cc && !cc.local && cc.circle && !cc.circle.duo) for (const m of visibleMembers(cc)) addP(m, cc.circle.name);

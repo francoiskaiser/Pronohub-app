@@ -12,6 +12,7 @@ const Account = {
         const d = s.data();
         if (d.name && !p.name) Profile.set({ name: d.name, avatar: d.avatar || "" });
         if (d.handle) Store.set("handle", d.handle); else Store.del("handle");
+        if (d.blocked) Store.set("blocked", d.blocked);
         for (const c of d.circles || []) if (!MyCircles.has(c.code)) MyCircles.add(Object.assign({}, c, { local: false }));
       }
       this.syncCircles();
@@ -109,7 +110,7 @@ const Account = {
   async signOut() {
     if (!(await ask("Te déconnecter ? Sur cet appareil, tu repartiras avec une identité anonyme vierge.", "Se déconnecter"))) return;
     DB.close();
-    Store.del("handle");
+    Store.del("handle"); Store.del("blocked");
     await FB.auth.signOut();
     MyCircles.save(MyCircles.list().filter(c => c.local));
     S.code = null; S.view = "home"; S.modal = null;

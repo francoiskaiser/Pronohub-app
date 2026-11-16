@@ -1,5 +1,11 @@
 # Journal des versions de Pronohub
 
+## 1.11.0 — 16 novembre 2026
+
+- Signaler et bloquer : un petit drapeau à côté des commentaires permet de signaler un contenu. Tu peux aussi signaler un pari ou un joueur, et bloquer un joueur pour ne plus voir ses commentaires ni recevoir ses demandes. La liste des joueurs bloqués est dans les Réglages.
+- Protège ton compte : si tu joues sans compte, l'accueil te propose d'en créer un pour ne pas perdre tes cercles en changeant de téléphone.
+- Le nom d'utilisateur est réservé aux joueurs qui ont un compte (Google ou e-mail).
+
 ## 1.10.0 — 16 novembre 2026
 
 - Face-à-face : tu peux maintenant y lancer tous les types de paris, comme dans un cercle. Match à venir, oui ou non, plusieurs choix, élection ou duel : ton adversaire choisit librement son camp.

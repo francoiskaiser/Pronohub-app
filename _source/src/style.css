@@ -922,3 +922,13 @@ button.fr-main { cursor: pointer; }
 .find-user { display: flex; gap: 8px; margin-bottom: 8px; }
 .find-user input { flex: 1; min-width: 0; }
 .sheet h3 { margin-top: 1.1rem; }
+
+/* ---------- 1.11.0 : signaler, bloquer, protéger son compte ---------- */
+.report-btn { color: var(--ink-3); flex: none; }
+.report-btn svg { width: 16px; height: 16px; }
+.report-quote { background: var(--paper-2); border-radius: 12px; padding: .6em .8em; margin: 0 0 .8rem; overflow-wrap: anywhere; }
+.report-line { margin: 1.2rem 0 0; text-align: center; }
+.link.subtle { color: var(--ink-3); font-weight: 500; font-size: .86rem; }
+.safety-row { margin-top: 1.4rem; justify-content: center; }
+.blocked-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.blocked-list li { display: flex; align-items: center; gap: 12px; }

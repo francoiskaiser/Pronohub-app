@@ -30,6 +30,7 @@ const ICON = {
   user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
   send: svg('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>'),
   coin: `<span class="coin" aria-hidden="true"></span>`,
+  flag: svg('<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>'),
   users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
 };
 
@@ -192,6 +193,7 @@ function renderModal() {
     case "ask": html = askModal(); break;
     case "install": html = installModal(); break;
     case "pickCircle": html = pickCircleModal(); break;
+    case "report": html = reportModal(); break;
     default: html = friendsModal(cc);
   }
   if (!html) { S.modal = null; return renderModal(); }
@@ -274,7 +276,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || friendsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || safetyAct(a, d) || friendsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -292,7 +294,7 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || safetySubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 

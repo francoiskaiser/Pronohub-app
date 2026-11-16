@@ -85,6 +85,7 @@ function playerView(cc, a) {
   return `<section class="page narrow">
     <div class="pagehead"><button class="icon-btn" data-a="back" aria-label="Retour">${ICON.back}</button></div>
     ${playerCard(cc, a, S.playerId, S.playerId === myId(cc) && (!cc.local || S.playerId === Profile.get().id))}
+    ${playerSafety(cc, S.playerId)}
   </section>`;
 }
 
@@ -94,8 +95,10 @@ function editProfileModal() {
   return `<h2>Mon profil</h2>
     <form data-f="editProfile" class="stack">
       <label class="fld"><span>Pseudo</span><input name="name" maxlength="24" required value="${esc(p.name)}"></label>
-      ${FB.ok && FB.uid ? `<label class="fld"><span>Nom d'utilisateur (facultatif)</span><input name="handle" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ex. fanfan_89" value="${esc(S.modal.handle != null ? S.modal.handle : Handle.get())}">
-        <small class="hint">Unique : tes amis te trouvent en le cherchant. 3 à 20 lettres, chiffres ou _. Laisse vide pour ne pas être trouvable.</small></label>` : ""}
+      ${!FB.ok || !FB.uid ? "" : FB.provider() === "anon" ? `<div class="fld"><span>Nom d'utilisateur</span>
+        <p class="hint">Crée un compte pour choisir un nom d'utilisateur : il reste ainsi rattaché à toi. <button type="button" class="link" data-a="account">Créer un compte</button></p></div>`
+      : `<label class="fld"><span>Nom d'utilisateur (facultatif)</span><input name="handle" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ex. fanfan_89" value="${esc(S.modal.handle != null ? S.modal.handle : Handle.get())}">
+        <small class="hint">Unique : tes amis te trouvent en le cherchant. 3 à 20 lettres, chiffres ou _. Laisse vide pour ne pas être trouvable.</small></label>`}
       <fieldset class="fld"><legend>Avatar</legend>
         <div class="emoji-grid">${allAvatars().map(e => `<label class="emo ${e === sel ? "on" : ""}"><input type="radio" name="avatar" value="${e}" ${e === sel ? "checked" : ""}><span>${e}</span></label>`).join("")}</div>
       </fieldset>
@@ -126,7 +129,7 @@ function profileSubmit(f, fd) {
   Account.pushProfile();
   const done = () => { S.modal = null; toast("Profil mis à jour", "good"); render(); };
   const raw = fd.get("handle");
-  if (raw == null || !FB.ok || !FB.uid) { done(); return true; }
+  if (raw == null || !FB.ok || !FB.uid || FB.provider() === "anon") { done(); return true; }
   const h = Handle.norm(raw);
   if (h && !Handle.valid(h)) { S.modal.handle = String(raw); toast("Un nom d'utilisateur fait 3 à 20 caractères : lettres, chiffres ou _", "bad"); render(); return true; }
   if (h === Handle.get()) { Handle.refresh(); done(); return true; }
