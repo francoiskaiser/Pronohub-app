@@ -21,7 +21,8 @@ const Account = {
   syncCircles: debounce(async function () {
     if (!FB.ok || !FB.uid) return;
     const p = Profile.get();
-    const circles = MyCircles.list().filter(c => !c.local).map(c => ({ code: c.code, name: c.name, emoji: c.emoji || "🎯" }));
+    const circles = MyCircles.list().filter(c => !c.local).map(c => Object.assign({ code: c.code, name: c.name, emoji: c.emoji || "🎯" },
+      c.duo ? { duo: true, friend: c.friend || "", friendName: c.friendName || "", friendAvatar: c.friendAvatar || "" } : {}));
     try { await FB.userDoc().set({ name: p.name || "", avatar: p.avatar || "", circles, updatedAt: now() }, { merge: true }); }
     catch (e) { }
   }, 800),
@@ -124,6 +125,8 @@ const Account = {
           await FB.sub(c.code, "members").doc(FB.uid).delete();
         } catch (e) { }
       }
+      for (const f of Friends.list()) { try { await FB.db.collection("friends").doc(f.id).delete(); } catch (e) { } }
+      try { const k = Store.get("fkey"); if (k) await FB.db.collection("invites").doc(k).delete(); } catch (e) { }
       await FB.userDoc().delete();
       await FB.auth.currentUser.delete();
       for (const k of Store.keys()) if (!k.startsWith("local.") && k !== "prefs") Store.del(k);

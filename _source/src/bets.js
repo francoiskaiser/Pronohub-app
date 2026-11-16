@@ -78,14 +78,15 @@ function betsTab(cc, a) {
   const list = groups[f];
   const seg = (k, l) => `<button class="seg ${f === k ? "on" : ""}" data-a="filter" data-v="${k}" aria-pressed="${f === k}">${l}<span class="count">${groups[k].length}</span></button>`;
   const empty = {
-    open: `<div class="empty"><p class="empty-big">Aucun pari en cours.</p><p>Lance le premier : un match, une élection ou une question qui fera débat à la pause café.</p><button class="btn primary" data-a="newBet">${ICON.plus} Créer un pari</button></div>`,
+    open: cc.circle.duo ? `<div class="empty"><p class="empty-big">Aucun défi en cours.</p><p>Lance un défi : même mise des deux côtés, le gagnant rafle tout.</p><button class="btn primary" data-a="newBet">${ICON.plus} Lancer un défi</button></div>`
+      : `<div class="empty"><p class="empty-big">Aucun pari en cours.</p><p>Lance le premier : un match, une élection ou une question qui fera débat à la pause café.</p><button class="btn primary" data-a="newBet">${ICON.plus} Créer un pari</button></div>`,
     todo: `<div class="empty"><p class="empty-big">Rien à régler.</p><p>Les paris clôturés attendant un résultat apparaîtront ici.</p></div>`,
     done: `<div class="empty"><p class="empty-big">Pas encore de résultat.</p><p>Les paris terminés et tes gains s'afficheront ici.</p></div>`,
   }[f];
   return `<section class="page">
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filtrer les paris">${seg("open", "En cours")}${seg("todo", "À régler")}${seg("done", "Terminés")}</div>
-    ${f === "open" ? `<div class="sec-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Paris ouverts</h2></div>` : ""}
+    ${f === "open" && !cc.circle.duo ? `<div class="sec-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Paris ouverts</h2></div>` : ""}
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
   </section>`;
 }
@@ -100,7 +101,7 @@ function betView(cc, a) {
   const open = info.state === "open";
   const manage = canManage(cc, b, me);
   const reveal = !open || b.kind === "duel";
-  const isDuelTarget = b.kind === "duel" && b.duel && b.duel.to === me;
+  const isDuelTarget = b.kind === "duel" && b.duel && b.createdBy !== me && (b.duel.to === me || (b.duel.to === "" && cc.circle.duo));
 
   const opts = b.options.map(o => {
     const share = info.pool ? (info.byOpt[o.id] || 0) / info.pool : 0;
@@ -263,7 +264,9 @@ function newBetModal(cc) {
   if (m.kind === "import") return importModal(cc);
   const d = m.draft;
   const kind = KINDS.find(k => k.id === m.kind);
-  const others = visibleMembers(cc).filter(x => x.uid !== myId(cc));
+  let others = visibleMembers(cc).filter(x => x.uid !== myId(cc));
+  const duo = !!cc.circle.duo;
+  if (duo && !others.length && cc.circle.guest) others = [memberOf(cc, cc.circle.guest)];
   const catSel = `<label class="fld"><span>Catégorie</span><select name="cat">${CATS.map(c => `<option value="${c.id}" ${d.cat === c.id ? "selected" : ""}>${c.e} ${c.label}</option>`).join("")}</select></label>`;
   const close = `<label class="fld"><span>${m.kind === "duel" ? "Réponse attendue avant le" : "Fin des mises"}</span><input type="datetime-local" name="closesAt" required value="${esc(d.closesAt)}"></label>`;
   let body = "";
@@ -276,7 +279,7 @@ function newBetModal(cc) {
       <label class="check"><input type="checkbox" name="bonus" ${d.bonus !== false ? "checked" : ""}><span>Bonus score exact (+${nf(cc.circle.bonus)})</span></label>
       ${catSel}${close}`;
   } else if (m.kind === "duel") {
-    body = others.length ? `<label class="fld"><span>Adversaire</span><select name="to" required>${others.map(x => `<option value="${esc(x.uid)}" ${d.to === x.uid ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+    body = others.length ? `${duo ? `<input type="hidden" name="to" value="${esc(others[0].uid)}"><p class="duel-vs">${avatar(memberOf(cc, myId(cc)), "sm")} Toi contre ${avatar(others[0], "sm")} <b>${esc(others[0].name)}</b></p>` : `<label class="fld"><span>Adversaire</span><select name="to" required>${others.map(x => `<option value="${esc(x.uid)}" ${d.to === x.uid ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>`}
       <label class="fld"><span>Je parie que…</span><input name="title" maxlength="120" required value="${esc(d.title || "")}" placeholder="Ex. le Standard gagne le derby"></label>
       <label class="fld"><span>Mise de chacun</span><input name="stake" type="number" inputmode="numeric" min="1" required value="${esc(d.stake || 100)}"></label>
       ${catSel}${close}` : `<p class="muted">Il faut au moins un autre membre dans le cercle pour lancer un duel.</p>`;
@@ -289,9 +292,9 @@ function newBetModal(cc) {
       </fieldset>`}
       ${catSel}${close}`;
   }
-  return `<h2>${kind.e} ${kind.label}</h2>
+  return `<h2>${kind.e} ${duo ? "Nouveau défi" : kind.label}</h2>
     <form data-f="newBet" class="stack">${body}
-      <div class="row between"><button type="button" class="btn ghost" data-a="betKind" data-kind="">Retour</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Lancer le défi" : "Publier le pari"}</button>`}</div>
+      <div class="row between"><button type="button" class="btn ghost" data-a="${duo ? "close" : "betKind"}" data-kind="">${duo ? "Annuler" : "Retour"}</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Lancer le défi" : "Publier le pari"}</button>`}</div>
     </form>`;
 }
 
@@ -371,10 +374,12 @@ function betsAct(a, d) {
     case "openBet": go("bet", { betId: d.id }); return true;
     case "claimDaily": claim("daily"); return true;
     case "claimRescue": claim("rescue"); return true;
-    case "newBet": S.modal = { k: "newBet" }; return true;
+    case "newBet":
+      S.modal = cc.circle.duo ? { k: "newBet", kind: "duel", draft: { closesAt: defaultClose(), cat: "potes", opts: ["", ""], stake: 100 } } : { k: "newBet" };
+      return true;
     case "betKind": {
       syncDraft();
-      if (!d.kind) { S.modal = { k: "newBet" }; return true; }
+      if (!d.kind) { S.modal = cc.circle.duo ? null : { k: "newBet" }; return true; }
       const draft = { closesAt: defaultClose(), cat: d.kind === "vote" ? "vote" : d.kind === "match" ? "foot" : d.kind === "duel" ? "potes" : "potes", opts: ["", ""] };
       if (d.kind === "vote") draft.opts = ["", "", ""];
       S.modal = { k: "newBet", kind: d.kind, draft };
@@ -401,7 +406,7 @@ function betsAct(a, d) {
       const bal = an.players[me] ? an.players[me].bal : 0;
       if (bal < b.duel.stake) { toast("Pas assez de jetons pour relever ce défi", "bad"); return true; }
       DB.put("wagers", `${info.id}_${me}`, { bet: info.id, uid: me, opt: "n", amt: b.duel.stake, season: b.season, at: now() })
-        .then(ok => ok && toast("Défi relevé. Que le meilleur gagne !", "good"));
+        .then(ok => { if (ok) { toast("Défi relevé. Que le meilleur gagne !", "good"); if (!cc.local) Push.event("accept", { code: cc.code, bets: [info.id] }); } });
       return true;
     }
     case "duelDecline":
@@ -428,7 +433,7 @@ function betsAct(a, d) {
       toast("Vérification auprès de la source…");
       Sports.autoSettle().then(() => { const b = DB.cur().bets[info.id]; if (b && b.status === "open") toast("Pas encore de résultat final"); });
       return true;
-    case "flag": DB.put("flags", `${info.id}_${myId(cc)}`, { bet: info.id, uid: myId(cc), result: info.b.result, at: now() }).then(ok => ok && toast("Contestation enregistrée")); return true;
+    case "flag": DB.put("flags", `${info.id}_${myId(cc)}`, { bet: info.id, uid: myId(cc), result: info.b.result, at: now() }).then(ok => { if (ok) { toast("Contestation enregistrée"); if (!cc.local) Push.event("contest", { code: cc.code, bets: [info.id] }); } }); return true;
     case "unflag": DB.del("flags", `${info.id}_${myId(cc)}`); return true;
   }
   return false;
@@ -478,7 +483,7 @@ function betsSubmit(f, fd) {
   }
   if (k === "newBet") {
     syncDraft();
-    const m = S.modal, d = m.draft, me = myId(cc);
+    const m = S.modal, d = m.draft, me = myId(cc), duo = !!cc.circle.duo;
     const closesAt = new Date(d.closesAt).getTime();
     if (!(closesAt > now() + 60000)) { toast("Choisis une fin des mises dans le futur", "bad"); return true; }
     const id = rid(14);
@@ -499,10 +504,10 @@ function betsSubmit(f, fd) {
       const an = analysis(cc), bal = an.players[me] ? an.players[me].bal : 0;
       if (!(stake >= 1)) { toast("Mise d'au moins 1 jeton", "bad"); return true; }
       if (stake > bal) { toast(`Tu n'as que ${nf(bal)} jetons`, "bad"); return true; }
-      const foe = memberOf(cc, d.to);
+      const foe = memberOf(cc, d.to || (duo ? cc.circle.guest : ""));
       bet.title = d.title.trim();
       bet.seed = 0;
-      bet.duel = { to: d.to, stake };
+      bet.duel = { to: d.to || (duo ? cc.circle.guest || "" : ""), stake };
       bet.options = [{ id: "y", label: memberOf(cc, me).name + " a raison" }, { id: "n", label: foe.name + " a raison" }];
     }
     if (!bet.title) { toast("Donne un titre à ton pari", "bad"); return true; }

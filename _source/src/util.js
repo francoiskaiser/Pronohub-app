@@ -133,3 +133,6 @@ function loadScript(src) {
     document.head.appendChild(s);
   });
 }
+
+/* Guillemets selon la langue de l'app */
+function quote(x) { return LANG === "en" ? "“" + x + "”" : "« " + x + " »"; }

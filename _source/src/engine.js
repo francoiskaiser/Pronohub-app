@@ -17,7 +17,14 @@ function aliasMap(cc) {
 }
 
 function memberOf(cc, uid) {
-  return cc.members[uid] || { uid, name: "Ancien membre", avatar: "👻", gone: true };
+  if (cc.members[uid]) return cc.members[uid];
+  if (cc.circle && cc.circle.duo) {
+    // Face-à-face : l'adversaire n'a peut-être pas encore ouvert le duel
+    const meta = MyCircles.list().find(c => c.code === cc.code) || {};
+    if (!uid) return { uid: "", name: "Ton adversaire", avatar: "❔" };
+    if (uid === cc.circle.guest || uid === meta.friend) return { uid, name: meta.friendName || "Ton adversaire", avatar: meta.friendAvatar || "" };
+  }
+  return { uid, name: "Ancien membre", avatar: "👻", gone: true };
 }
 
 /* Membres visibles (sans les identités anonymes fusionnées) */

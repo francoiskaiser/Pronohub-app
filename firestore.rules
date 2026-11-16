@@ -23,6 +23,12 @@ service cloud.firestore {
     function isOwner(c) { return signedIn() && circleOf(c).owner == me(); }
     function betOf(c, b) { return get(/databases/$(database)/documents/circles/$(c)/bets/$(b)).data; }
     function betExists(c, b) { return exists(/databases/$(database)/documents/circles/$(c)/bets/$(b)); }
+    function pairId(a, b) { return a < b ? a + '_' + b : b + '_' + a; }
+    function friendsOk(a, b) {
+      let p = /databases/$(database)/documents/friends/$(pairId(a, b));
+      return exists(p) && get(p).data.status == 'ok';
+    }
+    function inviteOf(k) { return get(/databases/$(database)/documents/invites/$(k)).data; }
 
     function circleValid(x) {
       return str(x.name, 32) && x.name.size() > 0 && str(x.emoji, 16) && x.owner is string
@@ -37,6 +43,51 @@ service cloud.firestore {
     }
     match /claims/{u} {
       allow read, write: if signedIn() && me() == u;
+    }
+
+    // ----- Invitations reçues (cercles) : déposées par un ami, lues par le destinataire seul -----
+    match /users/{u}/inbox/{i} {
+      allow read, delete: if signedIn() && me() == u;
+      allow create, update: if signedIn() && d().from == me() && d().type == 'circle'
+        && i == d().code + '_' + me() && isMember(d().code) && friendsOk(me(), u)
+        && str(d().name, 32) && str(d().fromName, 24) && str(d().emoji, 16)
+        && d().keys().hasOnly(['type', 'code', 'name', 'emoji', 'from', 'fromName', 'fromAvatar', 'at']);
+    }
+
+    // ----- Liens personnels d'invitation (ami ou défi) : lisibles par qui a le lien -----
+    match /invites/{k} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if signedIn() && d().uid == me() && str(d().name, 24)
+        && d().keys().hasOnly(['uid', 'name', 'avatar', 'at', 'duo', 'bet', 'title', 'stake', 'closesAt']);
+      allow delete: if signedIn() && resource.data.uid == me();
+    }
+
+    // ----- Amis : une fiche par paire, visible des deux seulement -----
+    match /friends/{f} {
+      function other() { return d().users[0] == me() ? d().users[1] : d().users[0]; }
+      function viaLink() { return 'via' in d() && d().via is string && inviteOf(d().via).uid == other(); }
+      allow read: if signedIn() && me() in resource.data.users;
+      allow create: if signedIn() && d().users is list && d().users.size() == 2 && me() in d().users
+        && d().users[0] < d().users[1] && f == d().users[0] + '_' + d().users[1] && d().from == me()
+        && d().keys().hasOnly(['users', 'names', 'avatars', 'status', 'from', 'via', 'at', 'duo', 'pushed'])
+        && (d().status == 'pending' || (d().status == 'ok' && viaLink()));
+      allow update: if signedIn() && me() in resource.data.users
+        && d().users == resource.data.users && d().from == resource.data.from
+        && changed().hasOnly(['status', 'names', 'avatars', 'duo', 'at', 'via'])
+        && d().status in ['pending', 'ok']
+        && (d().status == resource.data.status
+            || (resource.data.status == 'pending' && d().status == 'ok' && (resource.data.from != me() || viaLink())));
+      allow delete: if signedIn() && me() in resource.data.users;
+    }
+
+    // ----- Échéances des paris (pour les rappels du relais) : écriture seule -----
+    match /deadlines/{id} {
+      allow read: if false;
+      allow create, update: if signedIn() && id == d().code + '_' + d().bet && isMember(d().code)
+        && d().createdBy is string && d().closesAt is int
+        && d().keys().hasOnly(['code', 'bet', 'closesAt', 'createdBy', 'at', 'src']);
+      allow delete: if signedIn() && isMember(resource.data.code);
     }
 
     // ----- Retours utilisateurs : création seule -----
@@ -76,6 +127,7 @@ service cloud.firestore {
       match /members/{m} {
         allow read: if isMember(c);
         allow create: if signedIn() && m == me() && d().uid == me() && str(d().name, 24)
+          && (!circleOf(c).get('duo', false) || circleOf(c).owner == me() || circleOf(c).get('guest', '') in ['', me()])
           && (!('alias' in d()) || get(/databases/$(database)/documents/claims/$(d().alias)).data.secret == d().aliasKey);
         allow update: if signedIn() && m == me() && d().uid == me() && str(d().name, 24)
           && (!changed().hasAny(['alias', 'aliasKey'])
@@ -92,7 +144,8 @@ service cloud.firestore {
           && str(d().title, 140) && d().options is list && d().options.size() >= 2 && d().options.size() <= 12
           && d().kind in ['yesno', 'multi', 'match', 'vote', 'duel']
           && intIn(d().seed, 0, 10000) && intIn(d().bonus, 0, 10000)
-          && (d().kind != 'duel' || (d().seed == 0 && d().duel.to is string && intIn(d().duel.stake, 1, 1000000)));
+          && (d().kind != 'duel' || (d().seed == 0 && d().duel.to is string && intIn(d().duel.stake, 1, 1000000)
+              && (d().duel.to != '' || circleOf(c).get('duo', false))));
         allow update: if isMember(c) && (
           // Créateur du pari ou propriétaire du cercle : résultat, annulation, clôture anticipée
           ((resource.data.createdBy == me() || circleOf(c).owner == me())
@@ -104,8 +157,14 @@ service cloud.firestore {
             && changed().hasOnly(['status', 'result', 'score', 'settledBy', 'settledAt'])
             && d().settledBy == 'auto' && d().status in ['settled', 'void'])
           ||
+          // Défi lancé par lien : son créateur désigne l'adversaire une fois celui-ci arrivé
+          (resource.data.kind == 'duel' && resource.data.createdBy == me() && resource.data.get('duel', {}).get('to', 'x') == ''
+            && changed().hasOnly(['options', 'duel']) && d().duel.stake == resource.data.duel.stake && d().duel.to is string
+            && d().options.size() == 2)
+          ||
           // Duel : la personne défiée peut refuser
-          (resource.data.kind == 'duel' && resource.data.get('duel', {}).get('to', '') == me() && resource.data.status == 'open'
+          (resource.data.kind == 'duel' && resource.data.status == 'open' && resource.data.createdBy != me()
+            && resource.data.get('duel', {}).get('to', 'x') in ['', me()]
             && changed().hasOnly(['status', 'settledBy', 'settledAt']) && d().status == 'void')
         );
         allow delete: if isMember(c) && (resource.data.createdBy == me() || circleOf(c).owner == me());
@@ -116,7 +175,7 @@ service cloud.firestore {
         return d().uid == me() && intIn(d().amt, 1, 1000000) && str(d().opt, 8)
           && bet.status == 'open' && nowMs() < bet.closesAt && d().season == bet.season
           && (bet.kind != 'duel' || (d().amt == bet.duel.stake
-              && ((me() == bet.createdBy && d().opt == 'y') || (me() == bet.duel.to && d().opt == 'n'))));
+              && ((me() == bet.createdBy && d().opt == 'y') || (me() != bet.createdBy && bet.duel.to in ['', me()] && d().opt == 'n'))));
       }
       match /wagers/{w} {
         allow read: if isMember(c);

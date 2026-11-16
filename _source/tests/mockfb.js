@@ -21,7 +21,7 @@
       if (!p.startsWith(coll + "/")) continue;
       const id = p.slice(coll.length + 1);
       if (id.includes("/")) continue;
-      if (q.where.every(([f, , val]) => v[f] === val)) out.push({ id, data: v });
+      if (q.where.every(([f, op, val]) => op === "array-contains" ? Array.isArray(v[f]) && v[f].includes(val) : v[f] === val)) out.push({ id, data: v });
     }
     if (q.order) out.sort((a, b) => ((a.data[q.order[0]] > b.data[q.order[0]]) ? 1 : -1) * (q.order[1] === "desc" ? -1 : 1));
     return q.lim ? out.slice(0, q.lim) : out;

@@ -39,7 +39,7 @@ function playerCard(cc, a, uid, self) {
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
         <p class="muted">${s.rank ? `Rang ${s.rank} / ${a.standings.length}` : ""}</p>
         ${m.solo && m.solo.level ? `<p class="solo-line">${esc(TITLES[m.solo.level - 1] || "")}, niveau ${m.solo.level} en solo${m.solo.best ? `, record ${m.solo.best} ${pl(m.solo.best, "étape", "étapes")}` : ""}</p>` : ""}</div>
-      ${self ? `<button class="btn small ghost" data-a="editProfile">Modifier</button>` : ""}
+      ${self ? `<button class="btn small ghost" data-a="editProfile">Modifier</button>` : (cc.local ? "" : friendButton(uid, m.name, m.avatar))}
     </div>
     <div class="balance-card"><span>Solde</span><b>${nf(s.bal || 0)}</b><small>${p.locked ? `dont ${nf(p.locked)} en jeu` : "jetons"}</small></div>
     <div class="stats">

@@ -1,6 +1,6 @@
 /* Pronohub — service worker : fonctionnement hors ligne et mises à jour.
    Incrémenter VERSION à chaque publication, sinon les joueurs gardent l'ancienne version. */
-const VERSION = "pronohub-v12";
+const VERSION = "pronohub-v13";
 const CORE = [
   "./", "index.html", "en/", "en/index.html", "manifest.webmanifest",
   "icon-192.png", "icon-512.png", "icon-maskable.png", "apple-touch-icon.png", "firebase-config.js",
@@ -51,14 +51,15 @@ self.addEventListener("push", e => {
   try { j = e.data ? e.data.json() : {}; } catch (x) { j = { data: { body: e.data ? e.data.text() : "" } }; }
   const d = Object.assign({}, j.notification || {}, j.data || {});
   const scope = self.registration.scope;
-  const q = d.code ? "?c=" + encodeURIComponent(d.code) + (d.bet ? "&b=" + encodeURIComponent(d.bet) : "") : "";
+  const q = d.open === "friends" ? "?amis=1" : d.open === "join" && d.code ? "?join=" + encodeURIComponent(d.code)
+    : d.code ? "?c=" + encodeURIComponent(d.code) + (d.bet ? "&b=" + encodeURIComponent(d.bet) : "") : "";
   const url = new URL((d.lang === "en" ? "en/" : "") + q, scope).href;
   e.waitUntil(self.registration.showNotification(d.title || "Pronohub", {
     body: d.body || "",
     icon: new URL("icon-192.png", scope).href,
     badge: new URL("badge-96.png", scope).href,
     tag: d.tag || undefined,
-    data: { url, code: d.code || "", bet: d.bet || "" },
+    data: { url, code: d.code || "", bet: d.bet || "", open: d.open || "" },
   }));
 });
 
@@ -67,7 +68,7 @@ self.addEventListener("notificationclick", e => {
   const d = e.notification.data || {};
   e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
     const w = list.find(c => c.url.startsWith(self.registration.scope));
-    if (w) { w.postMessage({ type: "pronohub-open", code: d.code, bet: d.bet }); return w.focus(); }
+    if (w) { w.postMessage({ type: "pronohub-open", code: d.code, bet: d.bet, open: d.open }); return w.focus(); }
     return self.clients.openWindow(d.url || self.registration.scope);
   }));
 });

@@ -117,7 +117,7 @@ function asideCol(cc, a) {
     <div class="panel">
       <div class="row between"><h3>Classement</h3><button class="link" data-a="tab" data-v="rank">Tout voir</button></div>
       <ol class="mini-rank">${top.map(s => `<li class="${s.uid === me ? "me" : ""}"><span class="rk">${s.rank}</span>${avatar(s, "sm")}<span class="grow">${esc(s.name)}</span><b>${nf(s.bal)}</b></li>`).join("")}</ol>
-      ${cc.local ? "" : `<button class="btn small ghost wide" data-a="invite">${ICON.users} Inviter des amis</button>`}
+      ${cc.local || cc.circle.duo ? "" : `<button class="btn small ghost wide" data-a="invite">${ICON.users} Inviter des amis</button>`}
     </div>
     <div class="panel">
       <div class="row between"><h3>Dernières nouvelles</h3><button class="link" data-a="tab" data-v="feed">Le fil</button></div>
@@ -140,6 +140,7 @@ function render() {
   else {
     const a = analysis(cc);
     updateSnap(cc, a);
+    Friends.fixDuo(cc);
     if (S.pendingMatch) setTimeout(processPendingMatch, 0);
     header = topBar(cc, a);
     tabbar = tabBar();
@@ -149,7 +150,7 @@ function render() {
     else {
       view = "circle";
       main = S.tab === "rank" ? rankTab(cc, a) : S.tab === "feed" ? feedTab(cc, a) : S.tab === "me" ? meTab(cc, a) : betsTab(cc, a);
-      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>Nouveau pari</span></button>`;
+      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>${cc.circle.duo ? "Nouveau défi" : "Nouveau pari"}</span></button>`;
     }
   }
   document.body.dataset.view = view;
@@ -190,6 +191,7 @@ function renderModal() {
     case "ask": html = askModal(); break;
     case "install": html = installModal(); break;
     case "pickCircle": html = pickCircleModal(); break;
+    default: html = friendsModal(cc);
   }
   if (!html) { S.modal = null; return renderModal(); }
   ov.hidden = false;
@@ -271,7 +273,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || friendsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -289,7 +291,7 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 
@@ -320,11 +322,20 @@ document.addEventListener("keydown", e => {
 });
 
 /* ---------- Démarrage ---------- */
+/* Liens en attente (invitation d'ami ou défi) : traités une fois connecté et le pseudo choisi */
+function processPending() {
+  if (S.pendingAmi && FB.ok && FB.uid && Profile.get().name && !S.modal) {
+    const k = S.pendingAmi; S.pendingAmi = null;
+    Friends.openLink(k);
+  }
+}
+
 function boot() {
   Solo.load();
   applyTheme();
   FB.onAuth(() => Account.onAuth());
   FB.onAuth(() => { Push.onAuth(); });
+  FB.onAuth(() => { Friends.listen(); processPending(); });
   FB.onAuth(() => {
     const cc = DB.cur();
     if (S.code && (!cc || !cc.local) && (!cc || cc.status !== "ok")) { const c = S.code; DB.close(); DB.open(c); }
@@ -339,6 +350,10 @@ function boot() {
     if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
     else S.pendingJoin = join;
   }
+  // Lien d'ami ou de défi : ?ami=CLÉ ; notification « amis » : ?amis=1
+  const ami = q.get("ami");
+  if (ami && /^[A-Za-z0-9]{6,20}$/.test(ami)) { history.replaceState(null, "", location.pathname); S.pendingAmi = ami; }
+  if (q.get("amis")) { history.replaceState(null, "", location.pathname); S.view = "home"; S.code = null; Store.del("last"); }
   // Ouverture depuis une notification : ?c=CODE&b=PARI
   const nc = normCode(q.get("c")), nb = q.get("b");
   if (nc) {
@@ -346,7 +361,7 @@ function boot() {
     if (MyCircles.has(nc)) { S.code = nc; S.view = nb ? "bet" : "circle"; S.betId = nb || null; S.tab = "bets"; Store.set("last", nc); }
   }
   const last = Store.get("last");
-  if (!S.code && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
+  if (!S.code && !q.get("amis") && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
   if (S.code) { DB.open(S.code); Seen.mark(S.code); }
   if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
   if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }

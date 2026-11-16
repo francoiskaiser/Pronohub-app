@@ -1,5 +1,13 @@
 # Journal des versions de Pronohub
 
+## 1.5.0 — 16 novembre 2026
+
+- Amis : ajoute tes amis depuis la fiche d'un joueur, ou envoie ton lien d'ami par WhatsApp ou e-mail, même à quelqu'un qui n'a pas encore l'app. Ils apparaissent dans « Mes amis » sur l'accueil.
+- Duels hors cercle : défie un ami en face-à-face. Chaque paire d'amis a son propre compteur, 1 000 jetons chacun au départ, sans toucher à tes cercles ni au solo.
+- Défi par lien : prépare un défi et envoie-le par WhatsApp ou e-mail ; ton adversaire l'ouvre, choisit son pseudo et relève le défi.
+- Inviter ses amis dans un cercle : dans « Inviter », coche les amis à prévenir. Ils reçoivent l'invitation sur l'accueil et en notification.
+- Nouvelles notifications : défi reçu et défi relevé, invitation dans un cercle, demande d'ami, contestation d'un résultat, nouveau membre dans ton cercle, rappel une heure avant la fin des mises si tu n'as pas misé, rappel au créateur d'un pari terminé sans résultat. Chaque type a son interrupteur dans Réglages.
+
 ## 1.4.1 — 16 novembre 2026
 
 - Les notifications sont branchées : active-les dans Réglages ou depuis la carte « Ne rate aucun pari » de l'accueil.

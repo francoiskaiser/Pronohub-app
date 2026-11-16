@@ -84,7 +84,7 @@ function pickCircleModal() {
   const m = S.modal, e = m.e;
   return `<h2>Dans quel cercle ?</h2>
     <p class="muted">${esc(e.home)} – ${esc(e.away)}, ${fmtDate(e.date)}</p>
-    <div class="circle-list compact">${MyCircles.list().map(c => `
+    <div class="circle-list compact">${MyCircles.list().filter(c => !c.duo).map(c => `
       <button class="circle-card" data-a="pickCircle" data-code="${esc(c.code)}">
         <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
         <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "Sur cet appareil" : "Code " + esc(c.code)}</small></span>
@@ -101,7 +101,7 @@ function updateSnap(cc, a) {
     bal: s.bal, rank: s.rank, n: a.standings.length,
     open: bets.filter(x => x.state === "open").length,
     todo: bets.filter(x => (x.state === "closed" || x.state === "contested") && canManage(cc, x.b, me)).length,
-    faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "" })),
+    faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "", bal: x.bal })),
   };
   const meta = MyCircles.list().find(c => c.code === cc.code);
   if (meta && JSON.stringify(meta.snap) !== JSON.stringify(snap)) MyCircles.update(cc.code, { snap });
@@ -111,8 +111,8 @@ function updateSnap(cc, a) {
 function homeView() {
   const p = Profile.get();
   if (!p.name) return welcomeView();
-  const list = MyCircles.list();
-  const snaps = list.map(c => c.snap).filter(Boolean);
+  const all = MyCircles.list(), list = all.filter(c => !c.duo);
+  const snaps = all.map(c => c.snap).filter(Boolean);
   const open = snaps.reduce((t, s) => t + s.open, 0);
   const todo = snaps.reduce((t, s) => t + s.todo, 0);
   let headline;
@@ -168,6 +168,7 @@ function homeView() {
           ${list.length ? "" : `<button class="btn primary big" data-a="newCircle">${ICON.plus} Créer un cercle</button>`}
           <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Rejoindre avec un code</button>
         </div>
+        ${friendsSection()}
         ${FB.ok ? "" : `<p class="note">Les cercles en ligne ne sont pas encore activés sur cette installation : crée un cercle « sur cet appareil » et passez-vous le téléphone.</p>`}
       </div>
       <div class="home-side">

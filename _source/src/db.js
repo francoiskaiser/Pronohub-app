@@ -157,7 +157,7 @@ const DB = {
     }
     try {
       await FB.sub(cc.code, coll).doc(id).set(data, { merge });
-      if (coll === "bets") Push.onBetWrite(cc.code, id, data, merge);
+      if (coll === "bets") { Push.onBetWrite(cc.code, id, data, merge); Deadlines.sync(cc.code, id, data, merge); }
       return true;
     }
     catch (e) { toast(fbErr(e), "bad"); return false; }
@@ -167,7 +167,7 @@ const DB = {
     const cc = this.cur();
     if (!cc) return false;
     if (cc.local) { delete cc[coll][id]; this.saveLocal(cc); queueRender(); return true; }
-    try { await FB.sub(cc.code, coll).doc(id).delete(); return true; }
+    try { await FB.sub(cc.code, coll).doc(id).delete(); if (coll === "bets") Deadlines.drop(cc.code, id); return true; }
     catch (e) { toast(fbErr(e), "bad"); return false; }
   },
 
@@ -223,7 +223,7 @@ const DB = {
     return code;
   },
 
-  async join(code) {
+  async join(code, opt = {}) {
     const p = Profile.get();
     const s = await FB.circle(code).get();
     if (!s.exists || s.data().deleted) throw { code: "not-found" };
@@ -233,7 +233,8 @@ const DB = {
     try { exists = (await ref.get()).exists; }
     catch (e) { if (!/permission/.test(e.code || "")) throw e; }
     if (!exists) await ref.set({ uid: FB.uid, name: p.name || "Joueur", avatar: p.avatar || "", joinedAt: now() });
-    MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false });
+    if (!exists && !opt.silent && !c.duo) Push.event("member", { code });
+    MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false, duo: !!c.duo });
     Account.syncCircles();
     return c;
   },

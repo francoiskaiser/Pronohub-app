@@ -122,6 +122,18 @@ const Push = {
     clearTimeout(this._t);
     this._t = setTimeout(() => this.flush(), 1500);
   },
+  /* Événement ponctuel (défi relevé, contestation, invitation, ami, nouveau membre) */
+  async event(type, payload) {
+    if (!this.configured() || !FB.user) return;
+    try {
+      const tok = await FB.user.getIdToken();
+      await fetch(PUSH_CFG.worker, {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+        body: JSON.stringify(Object.assign({ type }, payload)),
+      });
+    } catch (e) { }
+  },
   async flush() {
     const q = this._q; this._q = {};
     for (const [k, ids] of Object.entries(q)) {
@@ -138,7 +150,9 @@ const Push = {
   },
 
   /* Ouverture depuis une notification */
-  open(code, bet) {
+  open(code, bet, kind) {
+    if (kind === "friends") { if (S.code) circlesAct("home", {}); else go("home"); return; }
+    if (kind === "join" && code && !MyCircles.has(code)) { S.modal = { k: "join", code }; render(); return; }
     if (!code || !MyCircles.has(code)) { if (S.view !== "home") go("home"); return; }
     if (S.code !== code) openCircle(code);
     if (bet) go("bet", { betId: bet });
@@ -149,7 +163,7 @@ Push.load();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => {
   const d = e.data || {};
-  if (d.type === "pronohub-open") Push.open(d.code, d.bet);
+  if (d.type === "pronohub-open") Push.open(d.code, d.bet, d.open);
 });
 
 /* ---------- Écrans ---------- */
@@ -163,6 +177,11 @@ function pushPanel() {
   if (st === "on") body = `<p class="muted">Activées sur cet appareil.</p>
       ${sw("bet", "Nouveaux paris", "Quand quelqu'un lance un pari dans un de tes cercles.")}
       ${sw("settle", "Résultats de mes paris", "Quand un pari sur lequel tu as misé est réglé ou annulé.")}
+      ${sw("social", "Défis, invitations et amis", "Un ami te défie, t'invite dans un cercle ou t'ajoute en ami.")}
+      ${sw("remind", "Rappels avant la fin des mises", "Un pari ferme dans l'heure et tu n'as pas encore misé.")}
+      ${sw("tosettle", "Résultats à saisir", "Un pari que tu as créé est terminé depuis un jour sans résultat.")}
+      ${sw("contest", "Contestations", "Quelqu'un conteste le résultat d'un pari qui te concerne.")}
+      ${sw("member", "Nouveaux membres", "Quelqu'un rejoint un cercle que tu as créé.")}
       <p class="hint">Tu peux aussi couper un seul cercle dans « Gérer ce cercle ».</p>
       <button class="btn ghost" data-a="pushOff" ${Push.busy ? "disabled" : ""}>Désactiver sur cet appareil</button>`;
   else if (st === "off") body = `<p class="muted">Sois prévenu quand tes amis lancent un pari ou quand un de tes paris a un résultat.</p>

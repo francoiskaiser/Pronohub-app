@@ -887,6 +887,26 @@ body[data-view="solo"] { padding-bottom: var(--safe-b); }
 .tag.new { background: var(--brand); color: var(--brand-ink); }
 @media (prefers-reduced-motion: reduce) { .switch, .switch::after { transition: none; } }
 
+/* Amis et face-à-face */
+.friend-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.friend-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); }
+.friend-row .grow { min-width: 0; }
+.friend-row b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.friend-row small { display: block; color: var(--ink-2); font-size: .84rem; }
+.fr-acts { display: flex; align-items: center; gap: 6px; flex: none; }
+.empty-friends { padding: 4px 0 8px; }
+.share-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.share-row .btn { flex: 1 1 140px; justify-content: center; text-decoration: none; }
+.share-row .btn.wa { background: #1fa855; border-color: #1fa855; color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.chips .chip .av { margin-left: -6px; }
+.chips .chip { display: inline-flex; align-items: center; gap: 8px; }
+.pick-list { display: grid; gap: 6px; max-height: 260px; overflow: auto; }
+.pick { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); cursor: pointer; }
+.pick input { width: 20px; height: 20px; accent-color: var(--brand); }
+.big-q { font-size: 1.15rem; font-weight: 700; margin: 0 0 6px; }
+.duel-vs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; }
+
 </style>
 </head>
 <body data-view="home">
@@ -1039,6 +1059,9 @@ function loadScript(src) {
   });
 }
 
+/* Guillemets selon la langue de l'app */
+function quote(x) { return LANG === "en" ? "“" + x + "”" : "« " + x + " »"; }
+
 /* ===== data.js ===== */
 /* Pronohub — données statiques */
 
@@ -1165,7 +1188,9 @@ const MyCircles = {
   save(l) { Store.set("circles", l); },
   add(c) {
     const l = this.list().filter(x => x.code !== c.code);
-    l.unshift({ code: c.code, name: c.name, emoji: c.emoji || "🎯", local: !!c.local });
+    const x = { code: c.code, name: c.name, emoji: c.emoji || "🎯", local: !!c.local };
+    for (const k of ["duo", "friend", "friendName", "friendAvatar"]) if (c[k]) x[k] = c[k];
+    l.unshift(x);
     this.save(l);
   },
   update(code, patch) {
@@ -1413,7 +1438,7 @@ const DB = {
     }
     try {
       await FB.sub(cc.code, coll).doc(id).set(data, { merge });
-      if (coll === "bets") Push.onBetWrite(cc.code, id, data, merge);
+      if (coll === "bets") { Push.onBetWrite(cc.code, id, data, merge); Deadlines.sync(cc.code, id, data, merge); }
       return true;
     }
     catch (e) { toast(fbErr(e), "bad"); return false; }
@@ -1423,7 +1448,7 @@ const DB = {
     const cc = this.cur();
     if (!cc) return false;
     if (cc.local) { delete cc[coll][id]; this.saveLocal(cc); queueRender(); return true; }
-    try { await FB.sub(cc.code, coll).doc(id).delete(); return true; }
+    try { await FB.sub(cc.code, coll).doc(id).delete(); if (coll === "bets") Deadlines.drop(cc.code, id); return true; }
     catch (e) { toast(fbErr(e), "bad"); return false; }
   },
 
@@ -1479,7 +1504,7 @@ const DB = {
     return code;
   },
 
-  async join(code) {
+  async join(code, opt = {}) {
     const p = Profile.get();
     const s = await FB.circle(code).get();
     if (!s.exists || s.data().deleted) throw { code: "not-found" };
@@ -1489,7 +1514,8 @@ const DB = {
     try { exists = (await ref.get()).exists; }
     catch (e) { if (!/permission/.test(e.code || "")) throw e; }
     if (!exists) await ref.set({ uid: FB.uid, name: p.name || "Player", avatar: p.avatar || "", joinedAt: now() });
-    MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false });
+    if (!exists && !opt.silent && !c.duo) Push.event("member", { code });
+    MyCircles.add({ code, name: c.name, emoji: c.emoji, local: false, duo: !!c.duo });
     Account.syncCircles();
     return c;
   },
@@ -1522,7 +1548,14 @@ function aliasMap(cc) {
 }
 
 function memberOf(cc, uid) {
-  return cc.members[uid] || { uid, name: "Former member", avatar: "👻", gone: true };
+  if (cc.members[uid]) return cc.members[uid];
+  if (cc.circle && cc.circle.duo) {
+    // Face-à-face : l'adversaire n'a peut-être pas encore ouvert le duel
+    const meta = MyCircles.list().find(c => c.code === cc.code) || {};
+    if (!uid) return { uid: "", name: "Your opponent", avatar: "❔" };
+    if (uid === cc.circle.guest || uid === meta.friend) return { uid, name: meta.friendName || "Your opponent", avatar: meta.friendAvatar || "" };
+  }
+  return { uid, name: "Former member", avatar: "👻", gone: true };
 }
 
 /* Membres visibles (sans les identités anonymes fusionnées) */
@@ -1864,7 +1897,8 @@ const Account = {
   syncCircles: debounce(async function () {
     if (!FB.ok || !FB.uid) return;
     const p = Profile.get();
-    const circles = MyCircles.list().filter(c => !c.local).map(c => ({ code: c.code, name: c.name, emoji: c.emoji || "🎯" }));
+    const circles = MyCircles.list().filter(c => !c.local).map(c => Object.assign({ code: c.code, name: c.name, emoji: c.emoji || "🎯" },
+      c.duo ? { duo: true, friend: c.friend || "", friendName: c.friendName || "", friendAvatar: c.friendAvatar || "" } : {}));
     try { await FB.userDoc().set({ name: p.name || "", avatar: p.avatar || "", circles, updatedAt: now() }, { merge: true }); }
     catch (e) { }
   }, 800),
@@ -1967,6 +2001,8 @@ const Account = {
           await FB.sub(c.code, "members").doc(FB.uid).delete();
         } catch (e) { }
       }
+      for (const f of Friends.list()) { try { await FB.db.collection("friends").doc(f.id).delete(); } catch (e) { } }
+      try { const k = Store.get("fkey"); if (k) await FB.db.collection("invites").doc(k).delete(); } catch (e) { }
       await FB.userDoc().delete();
       await FB.auth.currentUser.delete();
       for (const k of Store.keys()) if (!k.startsWith("local.") && k !== "prefs") Store.del(k);
@@ -2037,7 +2073,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.4.1";
+const APP_VERSION = "1.5.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2286,16 +2322,14 @@ function inviteModal() {
   return `<h2>Invite friends</h2>
     <p class="muted">Send this code or link: your friends will join “ ${esc(meta.name)} ” in one tap.</p>
     <div class="code-big" aria-label="Circle code">${esc(code)}</div>
-    <div class="row center wrap">
-      ${navigator.share ? `<button class="btn primary" data-a="share" data-url="${esc(url)}">Share the link</button>` : ""}
-      <button class="btn" data-a="copy" data-text="${esc(url)}">Copy the link</button>
-      <button class="btn ghost" data-a="copy" data-text="${esc(code)}">Copy the code</button>
-    </div>
+    ${shareButtons(`Join my circle ${quote(meta.name)} on Pronohub to bet with friends (play tokens):`, url, `Join ${quote(meta.name)} on Pronohub`)}
+    <div class="row center"><button class="btn small ghost" data-a="copy" data-text="${esc(code)}">Copy the code</button></div>
+    ${DB.cur() ? inviteFriendsBlock(DB.cur()) : ""}
     <div class="row end"><button class="btn ghost" data-a="close">Close</button></div>`;
 }
 
 function switcherModal() {
-  const list = MyCircles.list();
+  const list = MyCircles.list().filter(c => !c.duo || c.code === S.code);
   const cur = S.code && list.find(c => c.code === S.code);
   return `<h2>My circles</h2>
     ${cur ? `<button class="btn block circle-manage" data-a="circleInfo">${ICON.gear} Manage this circle</button>` : ""}
@@ -2455,7 +2489,7 @@ function circlesAct(a, d) {
     case "retry": { const c = S.code; DB.close(); DB.open(c); return true; }
     case "forgetCircle": MyCircles.remove(d.code); Account.syncCircles(); circlesAct("home", {}); return true;
     case "rejoin": S.modal = { k: "join", code: d.code }; return true;
-    case "share": navigator.share({ title: "Pronohub", text: "Join my betting circle on Pronohub", url: d.url }).catch(() => { }); return true;
+    case "share": navigator.share({ title: "Pronohub", text: d.text || "Join my betting circle on Pronohub", url: d.url }).catch(() => { }); return true;
     case "copy": copyText(d.text); return true;
     case "showKey":
       FB.sub(cc.code, "private").doc("owner").get().then(s => { S.modal.key = s.exists ? s.data().key : "?"; render(); }).catch(e => toast(fbErr(e), "bad"));
@@ -2497,6 +2531,7 @@ function circlesSubmit(f, fd) {
     Profile.set({ name, avatar: fd.get("avatar") || "" });
     Account.pushProfile();
     if (S.pendingJoin && FB.ok) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
+    else if (S.pendingAmi && FB.ok) { S.modal = null; Store.set("tourDone", 1); render(); processPending(); return true; }
     else if (!Store.get("tourDone")) { S.modal = { k: "tour", step: 0 }; Store.set("tourDone", 1); }
     render();
     return true;
@@ -2630,14 +2665,15 @@ function betsTab(cc, a) {
   const list = groups[f];
   const seg = (k, l) => `<button class="seg ${f === k ? "on" : ""}" data-a="filter" data-v="${k}" aria-pressed="${f === k}">${l}<span class="count">${groups[k].length}</span></button>`;
   const empty = {
-    open: `<div class="empty"><p class="empty-big">No open bets.</p><p>Start the first one: a match, an election or a question for the coffee break.</p><button class="btn primary" data-a="newBet">${ICON.plus} Create a bet</button></div>`,
+    open: cc.circle.duo ? `<div class="empty"><p class="empty-big">No challenge in progress.</p><p>Start a challenge: same stake on both sides, the winner takes it all.</p><button class="btn primary" data-a="newBet">${ICON.plus} Start a challenge</button></div>`
+      : `<div class="empty"><p class="empty-big">No open bets.</p><p>Start the first one: a match, an election or a question for the coffee break.</p><button class="btn primary" data-a="newBet">${ICON.plus} Create a bet</button></div>`,
     todo: `<div class="empty"><p class="empty-big">Nothing to settle.</p><p>Closed bets awaiting a result will show up here.</p></div>`,
     done: `<div class="empty"><p class="empty-big">No results yet.</p><p>Finished bets and your winnings will show up here.</p></div>`,
   }[f];
   return `<section class="page">
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filter bets">${seg("open", "Open")}${seg("todo", "To settle")}${seg("done", "Finished")}</div>
-    ${f === "open" ? `<div class="sec-head"><h2>Upcoming matches</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Other bet</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Open bets</h2></div>` : ""}
+    ${f === "open" && !cc.circle.duo ? `<div class="sec-head"><h2>Upcoming matches</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Other bet</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Open bets</h2></div>` : ""}
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
   </section>`;
 }
@@ -2652,7 +2688,7 @@ function betView(cc, a) {
   const open = info.state === "open";
   const manage = canManage(cc, b, me);
   const reveal = !open || b.kind === "duel";
-  const isDuelTarget = b.kind === "duel" && b.duel && b.duel.to === me;
+  const isDuelTarget = b.kind === "duel" && b.duel && b.createdBy !== me && (b.duel.to === me || (b.duel.to === "" && cc.circle.duo));
 
   const opts = b.options.map(o => {
     const share = info.pool ? (info.byOpt[o.id] || 0) / info.pool : 0;
@@ -2815,7 +2851,9 @@ function newBetModal(cc) {
   if (m.kind === "import") return importModal(cc);
   const d = m.draft;
   const kind = KINDS.find(k => k.id === m.kind);
-  const others = visibleMembers(cc).filter(x => x.uid !== myId(cc));
+  let others = visibleMembers(cc).filter(x => x.uid !== myId(cc));
+  const duo = !!cc.circle.duo;
+  if (duo && !others.length && cc.circle.guest) others = [memberOf(cc, cc.circle.guest)];
   const catSel = `<label class="fld"><span>Category</span><select name="cat">${CATS.map(c => `<option value="${c.id}" ${d.cat === c.id ? "selected" : ""}>${c.e} ${c.label}</option>`).join("")}</select></label>`;
   const close = `<label class="fld"><span>${m.kind === "duel" ? "Answer expected before" : "Betting closes"}</span><input type="datetime-local" name="closesAt" required value="${esc(d.closesAt)}"></label>`;
   let body = "";
@@ -2828,7 +2866,7 @@ function newBetModal(cc) {
       <label class="check"><input type="checkbox" name="bonus" ${d.bonus !== false ? "checked" : ""}><span>Exact score bonus (+${nf(cc.circle.bonus)})</span></label>
       ${catSel}${close}`;
   } else if (m.kind === "duel") {
-    body = others.length ? `<label class="fld"><span>Opponent</span><select name="to" required>${others.map(x => `<option value="${esc(x.uid)}" ${d.to === x.uid ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+    body = others.length ? `${duo ? `<input type="hidden" name="to" value="${esc(others[0].uid)}"><p class="duel-vs">${avatar(memberOf(cc, myId(cc)), "sm")} You vs ${avatar(others[0], "sm")} <b>${esc(others[0].name)}</b></p>` : `<label class="fld"><span>Opponent</span><select name="to" required>${others.map(x => `<option value="${esc(x.uid)}" ${d.to === x.uid ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>`}
       <label class="fld"><span>I bet that…</span><input name="title" maxlength="120" required value="${esc(d.title || "")}" placeholder="E.g. Standard win the derby"></label>
       <label class="fld"><span>Each player's stake</span><input name="stake" type="number" inputmode="numeric" min="1" required value="${esc(d.stake || 100)}"></label>
       ${catSel}${close}` : `<p class="muted">You need at least one other member in the circle to start a duel.</p>`;
@@ -2841,9 +2879,9 @@ function newBetModal(cc) {
       </fieldset>`}
       ${catSel}${close}`;
   }
-  return `<h2>${kind.e} ${kind.label}</h2>
+  return `<h2>${kind.e} ${duo ? "New challenge" : kind.label}</h2>
     <form data-f="newBet" class="stack">${body}
-      <div class="row between"><button type="button" class="btn ghost" data-a="betKind" data-kind="">Back</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Send the challenge" : "Publish the bet"}</button>`}</div>
+      <div class="row between"><button type="button" class="btn ghost" data-a="${duo ? "close" : "betKind"}" data-kind="">${duo ? "Cancel" : "Back"}</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Send the challenge" : "Publish the bet"}</button>`}</div>
     </form>`;
 }
 
@@ -2923,10 +2961,12 @@ function betsAct(a, d) {
     case "openBet": go("bet", { betId: d.id }); return true;
     case "claimDaily": claim("daily"); return true;
     case "claimRescue": claim("rescue"); return true;
-    case "newBet": S.modal = { k: "newBet" }; return true;
+    case "newBet":
+      S.modal = cc.circle.duo ? { k: "newBet", kind: "duel", draft: { closesAt: defaultClose(), cat: "potes", opts: ["", ""], stake: 100 } } : { k: "newBet" };
+      return true;
     case "betKind": {
       syncDraft();
-      if (!d.kind) { S.modal = { k: "newBet" }; return true; }
+      if (!d.kind) { S.modal = cc.circle.duo ? null : { k: "newBet" }; return true; }
       const draft = { closesAt: defaultClose(), cat: d.kind === "vote" ? "vote" : d.kind === "match" ? "foot" : d.kind === "duel" ? "potes" : "potes", opts: ["", ""] };
       if (d.kind === "vote") draft.opts = ["", "", ""];
       S.modal = { k: "newBet", kind: d.kind, draft };
@@ -2953,7 +2993,7 @@ function betsAct(a, d) {
       const bal = an.players[me] ? an.players[me].bal : 0;
       if (bal < b.duel.stake) { toast("Not enough tokens to take this challenge", "bad"); return true; }
       DB.put("wagers", `${info.id}_${me}`, { bet: info.id, uid: me, opt: "n", amt: b.duel.stake, season: b.season, at: now() })
-        .then(ok => ok && toast("Challenge accepted. May the best one win!", "good"));
+        .then(ok => { if (ok) { toast("Challenge accepted. May the best one win!", "good"); if (!cc.local) Push.event("accept", { code: cc.code, bets: [info.id] }); } });
       return true;
     }
     case "duelDecline":
@@ -2980,7 +3020,7 @@ function betsAct(a, d) {
       toast("Checking with the source…");
       Sports.autoSettle().then(() => { const b = DB.cur().bets[info.id]; if (b && b.status === "open") toast("No final result yet"); });
       return true;
-    case "flag": DB.put("flags", `${info.id}_${myId(cc)}`, { bet: info.id, uid: myId(cc), result: info.b.result, at: now() }).then(ok => ok && toast("Dispute recorded")); return true;
+    case "flag": DB.put("flags", `${info.id}_${myId(cc)}`, { bet: info.id, uid: myId(cc), result: info.b.result, at: now() }).then(ok => { if (ok) { toast("Dispute recorded"); if (!cc.local) Push.event("contest", { code: cc.code, bets: [info.id] }); } }); return true;
     case "unflag": DB.del("flags", `${info.id}_${myId(cc)}`); return true;
   }
   return false;
@@ -3030,7 +3070,7 @@ function betsSubmit(f, fd) {
   }
   if (k === "newBet") {
     syncDraft();
-    const m = S.modal, d = m.draft, me = myId(cc);
+    const m = S.modal, d = m.draft, me = myId(cc), duo = !!cc.circle.duo;
     const closesAt = new Date(d.closesAt).getTime();
     if (!(closesAt > now() + 60000)) { toast("Pick a betting deadline in the future", "bad"); return true; }
     const id = rid(14);
@@ -3051,10 +3091,10 @@ function betsSubmit(f, fd) {
       const an = analysis(cc), bal = an.players[me] ? an.players[me].bal : 0;
       if (!(stake >= 1)) { toast("Stake at least 1 token", "bad"); return true; }
       if (stake > bal) { toast(`You only have ${nf(bal)} tokens`, "bad"); return true; }
-      const foe = memberOf(cc, d.to);
+      const foe = memberOf(cc, d.to || (duo ? cc.circle.guest : ""));
       bet.title = d.title.trim();
       bet.seed = 0;
-      bet.duel = { to: d.to, stake };
+      bet.duel = { to: d.to || (duo ? cc.circle.guest || "" : ""), stake };
       bet.options = [{ id: "y", label: memberOf(cc, me).name + " is right" }, { id: "n", label: foe.name + " is right" }];
     }
     if (!bet.title) { toast("Give your bet a title", "bad"); return true; }
@@ -3247,7 +3287,7 @@ function playerCard(cc, a, uid, self) {
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
         <p class="muted">${s.rank ? `Rank ${s.rank} / ${a.standings.length}` : ""}</p>
         ${m.solo && m.solo.level ? `<p class="solo-line">${esc(TITLES[m.solo.level - 1] || "")}, level ${m.solo.level} in solo${m.solo.best ? `, best ${m.solo.best} ${pl(m.solo.best, "stage", "stages")}` : ""}</p>` : ""}</div>
-      ${self ? `<button class="btn small ghost" data-a="editProfile">Edit</button>` : ""}
+      ${self ? `<button class="btn small ghost" data-a="editProfile">Edit</button>` : (cc.local ? "" : friendButton(uid, m.name, m.avatar))}
     </div>
     <div class="balance-card"><span>Balance</span><b>${nf(s.bal || 0)}</b><small>${p.locked ? `incl. ${nf(p.locked)} at stake` : "tokens"}</small></div>
     <div class="stats">
@@ -3419,7 +3459,7 @@ function pickCircleModal() {
   const m = S.modal, e = m.e;
   return `<h2>Which circle?</h2>
     <p class="muted">${esc(e.home)} – ${esc(e.away)}, ${fmtDate(e.date)}</p>
-    <div class="circle-list compact">${MyCircles.list().map(c => `
+    <div class="circle-list compact">${MyCircles.list().filter(c => !c.duo).map(c => `
       <button class="circle-card" data-a="pickCircle" data-code="${esc(c.code)}">
         <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>
         <span class="cc-body"><b>${esc(c.name)}</b><small>${c.local ? "On this device" : "Code " + esc(c.code)}</small></span>
@@ -3436,7 +3476,7 @@ function updateSnap(cc, a) {
     bal: s.bal, rank: s.rank, n: a.standings.length,
     open: bets.filter(x => x.state === "open").length,
     todo: bets.filter(x => (x.state === "closed" || x.state === "contested") && canManage(cc, x.b, me)).length,
-    faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "" })),
+    faces: a.standings.slice(0, 5).map(x => ({ uid: x.uid, name: x.name, avatar: x.avatar || "", bal: x.bal })),
   };
   const meta = MyCircles.list().find(c => c.code === cc.code);
   if (meta && JSON.stringify(meta.snap) !== JSON.stringify(snap)) MyCircles.update(cc.code, { snap });
@@ -3446,8 +3486,8 @@ function updateSnap(cc, a) {
 function homeView() {
   const p = Profile.get();
   if (!p.name) return welcomeView();
-  const list = MyCircles.list();
-  const snaps = list.map(c => c.snap).filter(Boolean);
+  const all = MyCircles.list(), list = all.filter(c => !c.duo);
+  const snaps = all.map(c => c.snap).filter(Boolean);
   const open = snaps.reduce((t, s) => t + s.open, 0);
   const todo = snaps.reduce((t, s) => t + s.todo, 0);
   let headline;
@@ -3503,6 +3543,7 @@ function homeView() {
           ${list.length ? "" : `<button class="btn primary big" data-a="newCircle">${ICON.plus} Create a circle</button>`}
           <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Join with a code</button>
         </div>
+        ${friendsSection()}
         ${FB.ok ? "" : `<p class="note">Online circles aren't enabled on this installation yet: create an “on this device” circle and pass the phone around.</p>`}
       </div>
       <div class="home-side">
@@ -4662,6 +4703,439 @@ function soloSubmit(f, fd) {
   return true;
 }
 
+/* ===== friends.js ===== */
+/* Pronohub — amis (hors cercle), liens d'invitation, invitations dans un cercle et duels face-à-face.
+
+   Un ami = une fiche friends/{uidA_uidB} visible des deux seulement.
+   Un face-à-face = un petit cercle privé à deux (circle.duo), avec 1 000 jetons chacun au départ :
+   chaque rivalité a son propre compteur, sans toucher aux soldes des cercles ni du solo. */
+
+const Friends = {
+  all: {},        // id de la paire -> fiche
+  inbox: {},      // invitations reçues dans un cercle
+  loaded: false,
+  _u: [],
+  _joining: {},
+
+  pair(a, b) { return a < b ? a + "_" + b : b + "_" + a; },
+  other(f) { return f.users[0] === FB.uid ? f.users[1] : f.users[0]; },
+  nameOf(f, uid = this.other(f)) { return (f.names || {})[uid] || "Friend"; },
+  avOf(f, uid = this.other(f)) { return (f.avatars || {})[uid] || ""; },
+  person(f) { const uid = this.other(f); return { uid, name: this.nameOf(f, uid), avatar: this.avOf(f, uid) }; },
+  list() { return Object.entries(this.all).map(([id, f]) => Object.assign({ id }, f)); },
+  ok() { return this.list().filter(f => f.status === "ok").sort((a, b) => this.nameOf(a).localeCompare(this.nameOf(b))); },
+  incoming() { return this.list().filter(f => f.status === "pending" && f.from !== FB.uid); },
+  outgoing() { return this.list().filter(f => f.status === "pending" && f.from === FB.uid); },
+  byUid(uid) { return FB.uid && uid ? this.all[this.pair(FB.uid, uid)] : null; },
+  stateOf(uid) {
+    const f = this.byUid(uid);
+    if (!f) return "none";
+    if (f.status === "ok") return "friend";
+    return f.from === FB.uid ? "sent" : "received";
+  },
+  me() { const p = Profile.get(); return { name: p.name || "Player", avatar: p.avatar || "" }; },
+
+  /* ---------- Écoute ---------- */
+  listen() {
+    this._u.forEach(u => { try { u(); } catch (e) { } });
+    this._u = [];
+    this.all = {}; this.inbox = {}; this.loaded = false;
+    if (!FB.ok || !FB.uid) return;
+    this._u.push(FB.db.collection("friends").where("users", "array-contains", FB.uid).onSnapshot(s => {
+      s.docChanges().forEach(ch => { if (ch.type === "removed") delete this.all[ch.doc.id]; else this.all[ch.doc.id] = ch.doc.data(); });
+      this.loaded = true;
+      this.refreshNames();
+      this.ensureDuos();
+      queueRender();
+    }, e => { this.loaded = true; console.warn("amis", e); }));
+    this._u.push(FB.userDoc().collection("inbox").onSnapshot(s => {
+      s.docChanges().forEach(ch => { if (ch.type === "removed") delete this.inbox[ch.doc.id]; else this.inbox[ch.doc.id] = ch.doc.data(); });
+      queueRender();
+    }, e => console.warn("invitations", e)));
+  },
+
+  /* Mon nom et mon avatar à jour sur les fiches d'amis */
+  refreshNames() {
+    const me = this.me();
+    for (const f of this.list()) {
+      if ((f.names || {})[FB.uid] === me.name && (f.avatars || {})[FB.uid] === me.avatar) continue;
+      FB.db.collection("friends").doc(f.id).set({ names: { [FB.uid]: me.name }, avatars: { [FB.uid]: me.avatar } }, { merge: true }).catch(() => { });
+    }
+  },
+
+  /* Les face-à-face ouverts par un ami apparaissent automatiquement chez moi */
+  async ensureDuos() {
+    for (const f of this.ok()) {
+      const p = this.person(f);
+      if (!f.duo) continue;
+      if (MyCircles.has(f.duo)) {
+        const meta = MyCircles.list().find(c => c.code === f.duo);
+        if (meta.friendName !== p.name || meta.friendAvatar !== p.avatar || !meta.duo) MyCircles.update(f.duo, { duo: true, friend: p.uid, friendName: p.name, friendAvatar: p.avatar });
+        continue;
+      }
+      if (this._joining[f.duo]) continue;
+      this._joining[f.duo] = 1;
+      try {
+        await DB.join(f.duo, { silent: true });
+        MyCircles.update(f.duo, { duo: true, friend: p.uid, friendName: p.name, friendAvatar: p.avatar });
+        Account.syncCircles();
+        queueRender();
+      } catch (e) { console.warn("duel", e); }
+    }
+  },
+
+  /* ---------- Lien personnel (WhatsApp, e-mail…) ---------- */
+  base() { return location.origin + location.pathname; },
+  async myLink() {
+    let key = Store.get("fkey");
+    if (!key) { key = rid(10); Store.set("fkey", key); }
+    const me = this.me();
+    await FB.db.collection("invites").doc(key).set({ uid: FB.uid, name: me.name, avatar: me.avatar, at: now() });
+    return this.base() + "?ami=" + key;
+  },
+
+  /* ---------- Demandes ---------- */
+  async request(p) {
+    if (!FB.uid || !p.uid || p.uid === FB.uid) return;
+    const cur = this.byUid(p.uid);
+    if (cur && cur.status === "pending" && cur.from !== FB.uid) return this.accept(Object.assign({ id: this.pair(FB.uid, p.uid) }, cur));
+    if (cur) return;
+    const me = this.me(), users = [FB.uid, p.uid].sort();
+    try {
+      await FB.db.collection("friends").doc(users.join("_")).set({
+        users, from: FB.uid, status: "pending", at: now(),
+        names: { [FB.uid]: me.name, [p.uid]: p.name || "" }, avatars: { [FB.uid]: me.avatar, [p.uid]: p.avatar || "" },
+      });
+      Push.event("friend", { to: p.uid });
+      toast(`Request sent to ${p.name}`, "good");
+    } catch (e) { toast(fbErr(e), "bad"); }
+  },
+  async accept(f) {
+    const me = this.me();
+    try {
+      await FB.db.collection("friends").doc(f.id).set({ status: "ok", at: now(), names: { [FB.uid]: me.name }, avatars: { [FB.uid]: me.avatar } }, { merge: true });
+      Push.event("friend", { to: this.other(f) });
+      toast(`${this.nameOf(f)} is now your friend`, "good");
+    } catch (e) { toast(fbErr(e), "bad"); }
+  },
+  async remove(f, msg) {
+    try { await FB.db.collection("friends").doc(f.id).delete(); if (msg) toast(msg); }
+    catch (e) { toast(fbErr(e), "bad"); }
+  },
+
+  /* ---------- Ouverture d'un lien ?ami=… ---------- */
+  async openLink(key) {
+    try {
+      const s = await FB.db.collection("invites").doc(key).get();
+      if (!s.exists) { toast("This invitation link is no longer valid", "bad"); return; }
+      const inv = s.data();
+      if (inv.uid === FB.uid) {
+        if (inv.duo && MyCircles.has(inv.duo)) { openCircle(inv.duo); if (inv.bet) go("bet", { betId: inv.bet }); }
+        else toast("That's your own link: send it to your friends");
+        return;
+      }
+      S.modal = { k: "friendLink", key, inv };
+      render();
+    } catch (e) { toast(fbErr(e), "bad"); }
+  },
+  async acceptLink(key, inv, takeDuel) {
+    const me = this.me(), users = [FB.uid, inv.uid].sort(), id = users.join("_");
+    const cur = this.all[id];
+    try {
+      if (!cur || cur.status !== "ok") {
+        const base = { status: "ok", via: key, at: now(), names: { [FB.uid]: me.name, [inv.uid]: inv.name || "" }, avatars: { [FB.uid]: me.avatar, [inv.uid]: inv.avatar || "" } };
+        await FB.db.collection("friends").doc(id).set(cur ? base : Object.assign({ users, from: FB.uid }, base), cur ? { merge: true } : undefined);
+        this.all[id] = Object.assign({ users, from: cur ? cur.from : FB.uid }, cur || {}, base);
+        Push.event("friend", { to: inv.uid });
+      }
+      if (takeDuel && inv.duo) {
+        await DB.join(inv.duo, { silent: true });
+        MyCircles.update(inv.duo, { duo: true, friend: inv.uid, friendName: inv.name || "", friendAvatar: inv.avatar || "" });
+        await FB.db.collection("friends").doc(id).set({ duo: inv.duo }, { merge: true }).catch(() => { });
+        Account.syncCircles();
+        S.modal = null;
+        openCircle(inv.duo);
+        if (inv.bet) go("bet", { betId: inv.bet });
+        return;
+      }
+      S.modal = null;
+      toast(`${inv.name} is now your friend`, "good");
+      go("home");
+    } catch (e) { toast(fbErr(e), "bad"); }
+  },
+
+  /* ---------- Face-à-face ---------- */
+  duoMeta(uid) { return MyCircles.list().find(c => c.duo && c.friend === uid); },
+  async duoFor(f) {
+    const p = this.person(f);
+    const known = f.duo || (this.duoMeta(p.uid) || {}).code;
+    if (known) {
+      if (!MyCircles.has(known)) { await DB.join(known, { silent: true }); }
+      MyCircles.update(known, { duo: true, friend: p.uid, friendName: p.name, friendAvatar: p.avatar });
+      if (!f.duo) FB.db.collection("friends").doc(f.id).set({ duo: known }, { merge: true }).catch(() => { });
+      return known;
+    }
+    const code = await this.createDuo(p.uid, `${this.me().name} vs ${p.name}`);
+    MyCircles.update(code, { friend: p.uid, friendName: p.name, friendAvatar: p.avatar });
+    await FB.db.collection("friends").doc(f.id).set({ duo: code }, { merge: true });
+    return code;
+  },
+  async createDuo(guest, name) {
+    let code;
+    for (let i = 0; i < 6; i++) { code = newCode(); if (!(await FB.circle(code).get()).exists) break; }
+    const me = this.me();
+    const circle = Object.assign({}, CIRCLE_DEFAULTS, { name: name.slice(0, 32), emoji: "🤝", owner: FB.uid, createdAt: now(), season: 1, duo: true, guest, daily: 0 });
+    await FB.circle(code).set(circle);
+    await FB.sub(code, "members").doc(FB.uid).set({ uid: FB.uid, name: me.name, avatar: me.avatar, joinedAt: now() });
+    await FB.sub(code, "private").doc("owner").set({ key: rid(10).toUpperCase() });
+    MyCircles.add({ code, name: circle.name, emoji: "🤝", local: false, duo: true, friend: guest });
+    Account.syncCircles();
+    return code;
+  },
+  async challenge(f) {
+    try {
+      const code = await this.duoFor(f);
+      openCircle(code);
+      // La fenêtre de défi a besoin du cercle chargé
+      for (let i = 0; i < 60 && !(DB.cur() && DB.cur().code === code && DB.cur().status === "ok"); i++) await new Promise(r => setTimeout(r, 100));
+      if (S.code !== code) return;
+      S.modal = { k: "newBet", kind: "duel", draft: { closesAt: defaultClose(), cat: "potes", opts: ["", ""], stake: 100 } };
+      render();
+    } catch (e) { toast(fbErr(e), "bad"); }
+  },
+  /* Défi envoyé par lien à quelqu'un qui n'a pas encore l'app */
+  async challengeByLink(title, stake, closesAt) {
+    const code = await this.createDuo("", `Challenge from ${this.me().name}`);
+    const id = rid(14);
+    const bet = { kind: "duel", cat: "potes", closesAt, createdBy: FB.uid, createdAt: now(), season: 1, status: "open", seed: 0, bonus: 0, title, desc: "",
+      duel: { to: "", stake }, options: [{ id: "y", label: this.me().name + " is right" }, { id: "n", label: "The opponent was right" }] };
+    await FB.sub(code, "bets").doc(id).set(bet);
+    await FB.sub(code, "wagers").doc(`${id}_${FB.uid}`).set({ bet: id, uid: FB.uid, opt: "y", amt: stake, season: 1, at: now() });
+    Deadlines.sync(code, id, bet, false);
+    const key = rid(10), me = this.me();
+    await FB.db.collection("invites").doc(key).set({ uid: FB.uid, name: me.name, avatar: me.avatar, at: now(), duo: code, bet: id, title, stake, closesAt });
+    MyCircles.update(code, { linkTitle: title });
+    return { url: this.base() + "?ami=" + key, code, id };
+  },
+  /* Chez le créateur d'un défi par lien : dès que l'adversaire arrive, on fixe le duel à deux */
+  _fixed: {},
+  fixDuo(cc) {
+    if (!cc || cc.local || !cc.circle || !cc.circle.duo || cc.circle.owner !== FB.uid) return;
+    const foe = Object.values(cc.members).find(m => m.uid !== FB.uid);
+    if (!foe) return;
+    if (!cc.circle.guest && !this._fixed[cc.code]) {
+      this._fixed[cc.code] = 1;
+      DB.setCircle({ guest: foe.uid, name: `${this.me().name} vs ${foe.name}`.slice(0, 32) });
+      MyCircles.update(cc.code, { friend: foe.uid, friendName: foe.name, friendAvatar: foe.avatar || "", linkTitle: null });
+    }
+    // Les défis lancés par lien désignent maintenant l'adversaire
+    for (const [id, b] of Object.entries(cc.bets)) {
+      if (b.kind !== "duel" || !b.duel || b.duel.to !== "" || b.createdBy !== FB.uid || this._fixed[id]) continue;
+      this._fixed[id] = 1;
+      DB.put("bets", id, { duel: { to: foe.uid, stake: b.duel.stake }, options: [b.options[0], { id: "n", label: foe.name + " is right" }] }, true);
+    }
+  },
+
+  /* ---------- Invitations dans un cercle ---------- */
+  async invite(cc, uids) {
+    const me = this.me(), c = cc.circle;
+    let n = 0;
+    for (const uid of uids) {
+      try {
+        await FB.userDoc(uid).collection("inbox").doc(`${cc.code}_${FB.uid}`).set({ type: "circle", code: cc.code, name: c.name, emoji: c.emoji || "🎯", from: FB.uid, fromName: me.name, fromAvatar: me.avatar, at: now() });
+        n++;
+      } catch (e) { toast(fbErr(e), "bad"); }
+    }
+    if (n) { Push.event("invite", { code: cc.code, to: uids }); toast(n > 1 ? `${n} invitations sent` : "Invitation sent", "good"); }
+  },
+  async dropInvite(id) { try { await FB.userDoc().collection("inbox").doc(id).delete(); } catch (e) { } delete this.inbox[id]; },
+};
+
+/* Échéances des paris, pour les rappels envoyés par le relais */
+const Deadlines = {
+  ref(code, id) { return FB.db.collection("deadlines").doc(`${code}_${id}`); },
+  sync(code, id, data, merge) {
+    if (!FB.ok || !FB.uid || !data) return;
+    let p;
+    if (!merge && data.status === "open" && data.closesAt) p = this.ref(code, id).set({ code, bet: id, closesAt: data.closesAt, createdBy: data.createdBy || FB.uid, at: now(), src: !!data.src });
+    else if (merge && (data.status === "settled" || data.status === "void")) p = this.ref(code, id).delete();
+    else if (merge && data.closesAt) p = this.ref(code, id).set({ closesAt: data.closesAt }, { merge: true });
+    if (p) p.catch(() => { });
+  },
+  drop(code, id) { if (FB.ok && FB.uid) this.ref(code, id).delete().catch(() => { }); },
+};
+
+/* ---------- Partage d'un lien ---------- */
+function shareButtons(text, url, subject) {
+  const wa = "https://wa.me/?text=" + encodeURIComponent(text + " " + url);
+  const mail = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text + "\n\n" + url);
+  return `<div class="share-row">
+    <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">${WA_ICON} WhatsApp</a>
+    <a class="btn" href="${esc(mail)}">${MAIL_ICON} Email</a>
+    ${navigator.share ? `<button class="btn" data-a="share" data-url="${esc(url)}" data-text="${esc(text)}">${SHARE_ICON} Other</button>` : ""}
+    <button class="btn ghost" data-a="copy" data-text="${esc(url)}">Copy the link</button>
+  </div>`;
+}
+
+/* ---------- Accueil : section « Mes amis » ---------- */
+function friendsSection() {
+  if (!FB.ok) return "";
+  const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code));
+  const inc = Friends.incoming(), out = Friends.outgoing(), ok = Friends.ok();
+  const links = MyCircles.list().filter(c => c.duo && !c.friend);
+  const row = (p, right, sub = "") => `<li class="friend-row">${avatar(p)}<span class="grow"><b>${esc(p.name)}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="fr-acts">${right}</span></li>`;
+  const score = f => {
+    const meta = Friends.duoMeta(Friends.other(f)) || (f.duo && MyCircles.list().find(c => c.code === f.duo));
+    const s = meta && meta.snap;
+    if (!s || !s.faces) return "";
+    const foe = s.faces.find(x => x.uid !== FB.uid);
+    return foe && foe.bal != null ? `Head-to-head: you ${nf(s.bal)}, ${esc(Friends.nameOf(f))} ${nf(foe.bal)}` : "";
+  };
+  const items = [
+    ...inv.map(([id, x]) => row({ uid: x.from, name: x.fromName, avatar: x.fromAvatar }, `<button class="btn small primary" data-a="inboxJoin" data-id="${esc(id)}">Join</button><button class="icon-btn tiny" data-a="inboxDrop" data-id="${esc(id)}" aria-label="Ignore">${ICON.x}</button>`, `invites you to ${esc(x.emoji || "🎯")} ${esc(x.name)}`)),
+    ...inc.map(f => row(Friends.person(f), `<button class="btn small primary" data-a="friendAccept" data-id="${esc(f.id)}">Accept</button><button class="icon-btn tiny" data-a="friendDecline" data-id="${esc(f.id)}" aria-label="Decline">${ICON.x}</button>`, "wants to add you as a friend")),
+    ...ok.map(f => row(Friends.person(f), `<button class="btn small" data-a="challenge" data-id="${esc(f.id)}">🤝 Challenge</button>`, score(f))),
+    ...links.map(c => row({ uid: c.code, name: c.linkTitle || c.name, avatar: "🤝" }, `<button class="btn small ghost" data-a="openCircle" data-code="${esc(c.code)}">View</button>`, "Challenge sent by link, waiting")),
+    ...out.map(f => row(Friends.person(f), `<button class="btn small ghost" data-a="friendCancel" data-id="${esc(f.id)}">Cancel</button>`, "request sent")),
+  ];
+  return `<div class="sec-head"><h2>My friends</h2><button class="btn small ghost" data-a="addFriend">${ICON.plus} Add</button></div>
+    ${items.length ? `<ul class="friend-list">${items.join("")}</ul>` : `<div class="empty-friends"><p class="muted">Add your friends to challenge them to duels, even without a shared circle. Each head-to-head starts at 1,000 tokens each.</p></div>`}
+    <div class="row wrap"><button class="btn" data-a="linkDuel">🤝 Challenge someone by link</button></div>`;
+}
+
+/* ---------- Fenêtres ---------- */
+function friendsModal(cc) {
+  const m = S.modal;
+  if (m.k === "addFriend") {
+    const sugg = friendSuggestions(cc);
+    return `<h2>Add a friend</h2>
+      <p class="muted">Send your link: your friend adds you in one tap, even if they don't have Pronohub yet.</p>
+      ${m.url ? shareButtons(`${Friends.me().name} invites you to Pronohub to challenge each other (play tokens):`, m.url, "Join me on Pronohub") : `<p class="muted">Preparing the link…</p>`}
+      ${sugg.length ? `<h3>In your circles</h3><ul class="friend-list">${sugg.map(p => `<li class="friend-row">${avatar(p)}<span class="grow"><b>${esc(p.name)}</b><small>${esc(p.circle)}</small></span><span class="fr-acts"><button class="btn small" data-a="friendAdd" data-uid="${esc(p.uid)}" data-name="${esc(p.name)}" data-avatar="${esc(p.avatar || "")}">Add</button></span></li>`).join("")}</ul>` : ""}
+      <div class="row end"><button class="btn ghost" data-a="close">Close</button></div>`;
+  }
+  if (m.k === "friendLink") {
+    const inv = m.inv;
+    const st = Friends.stateOf(inv.uid);
+    if (inv.duo) return `<h2>🤝 ${esc(inv.name)} challenges you</h2>
+      <div class="panel duel"><p class="big-q">${esc(quote(inv.title || ""))}</p>
+      <p>${nf(inv.stake || 0)} tokens each, the winner takes ${nf((inv.stake || 0) * 2)}. Reply before ${esc(fmtDate(inv.closesAt || now()))}.</p></div>
+      <p class="muted">You play head-to-head, with 1,000 tokens each to start. ${esc(inv.name)} will be added to your friends.</p>
+      <div class="row end"><button class="btn ghost" data-a="close">Later</button><button class="btn primary" data-a="linkAccept" data-duel="1">See the challenge</button></div>`;
+    return `<h2>${avatar({ uid: inv.uid, name: inv.name, avatar: inv.avatar }, "")} ${esc(inv.name)}</h2>
+      <p class="muted">${st === "friend" ? `${esc(inv.name)} is already your friend.` : `${esc(inv.name)} wants to be friends on Pronohub: you'll be able to challenge each other head-to-head and invite each other to your circles.`}</p>
+      <div class="row end"><button class="btn ghost" data-a="close">${st === "friend" ? "Close" : "Later"}</button>${st === "friend" ? "" : `<button class="btn primary" data-a="linkAccept">Add ${esc(inv.name)}</button>`}</div>`;
+  }
+  if (m.k === "linkDuel") {
+    if (m.url) return `<h2>🤝 Challenge ready</h2>
+      <p class="muted">Send it: your opponent opens the link, picks a nickname and takes up the challenge. You play head-to-head with 1,000 tokens each.</p>
+      ${shareButtons(`${Friends.me().name} challenges you on Pronohub: ${quote(m.title)}, ${nf(m.stake)} tokens each. Are you in?`, m.url, `${Friends.me().name} challenges you on Pronohub`)}
+      <div class="row end"><button class="btn ghost" data-a="close">Close</button></div>`;
+    const ok = Friends.ok();
+    return `<h2>🤝 Start a challenge</h2>
+      ${ok.length ? `<p class="muted">To a friend:</p><div class="chips">${ok.map(f => `<button class="chip" data-a="challenge" data-id="${esc(f.id)}">${avatar(Friends.person(f), "sm")} ${esc(Friends.nameOf(f))}</button>`).join("")}</div>
+      <h3>Or by link, to someone who doesn't have the app yet</h3>` : `<p class="muted">Your opponent doesn't have Pronohub yet? Set up the challenge, then send it by WhatsApp or email.</p>`}
+      <form data-f="linkDuel" class="stack">
+        <label class="fld"><span>I bet that…</span><input name="title" maxlength="120" required placeholder="E.g. I run 10 km in under 50 minutes"></label>
+        <div class="grid2">
+          <label class="fld"><span>Each player's stake</span><input name="stake" type="number" inputmode="numeric" min="1" max="1000" required value="100"></label>
+          <label class="fld"><span>Reply before</span><input type="datetime-local" name="closesAt" required value="${esc(defaultClose())}"></label>
+        </div>
+        <div class="row end"><button type="button" class="btn ghost" data-a="close">Cancel</button><button class="btn primary" ${m.busy ? "disabled" : ""}>Create the link</button></div>
+      </form>`;
+  }
+  return "";
+}
+
+/* Joueurs croisés dans mes cercles qui ne sont pas encore mes amis */
+function friendSuggestions(cc) {
+  const seen = {}, out = [];
+  const addP = (p, circle) => {
+    if (!p || !p.uid || p.uid === FB.uid || seen[p.uid] || Friends.byUid(p.uid) || /^p_|^me_/.test(p.uid)) return;
+    seen[p.uid] = 1; out.push({ uid: p.uid, name: p.name, avatar: p.avatar || "", circle });
+  };
+  if (cc && !cc.local && cc.circle && !cc.circle.duo) for (const m of visibleMembers(cc)) addP(m, cc.circle.name);
+  for (const c of MyCircles.list()) if (!c.local && !c.duo && c.snap && c.snap.faces) for (const f of c.snap.faces) addP(f, c.name);
+  return out.slice(0, 12);
+}
+
+/* Liste « Inviter des amis » dans un cercle */
+function inviteFriendsBlock(cc) {
+  if (!FB.ok || cc.local) return "";
+  const list = Friends.ok().filter(f => !cc.members[Friends.other(f)]);
+  if (!list.length) return "";
+  return `<h3>Your friends</h3>
+    <form data-f="inviteFriends" class="stack">
+      <div class="pick-list">${list.map(f => { const p = Friends.person(f); return `<label class="pick">${avatar(p, "sm")}<span class="grow">${esc(p.name)}</span><input type="checkbox" name="uid" value="${esc(p.uid)}"></label>`; }).join("")}</div>
+      <button class="btn primary">Send the invitation</button>
+    </form>`;
+}
+
+/* Bouton « ajouter en ami » sur la fiche d'un joueur */
+function friendButton(uid, name, av) {
+  if (!FB.ok || !FB.uid || !uid || uid === FB.uid || /^p_|^me_/.test(uid)) return "";
+  const st = Friends.stateOf(uid);
+  if (st === "friend") return `<button class="btn small" data-a="challenge" data-id="${esc(Friends.pair(FB.uid, uid))}">🤝 Challenge</button>`;
+  if (st === "sent") return `<span class="tag">Request sent</span>`;
+  if (st === "received") return `<button class="btn small primary" data-a="friendAccept" data-id="${esc(Friends.pair(FB.uid, uid))}">Accept as friend</button>`;
+  return `<button class="btn small" data-a="friendAdd" data-uid="${esc(uid)}" data-name="${esc(name)}" data-avatar="${esc(av || "")}">${ICON.plus} Add as friend</button>`;
+}
+
+function friendsAct(a, d) {
+  const f = d.id && Friends.all[d.id] ? Object.assign({ id: d.id }, Friends.all[d.id]) : null;
+  switch (a) {
+    case "addFriend":
+      S.modal = { k: "addFriend", url: null };
+      Friends.myLink().then(url => { if (S.modal && S.modal.k === "addFriend") { S.modal.url = url; render(); } }).catch(e => { toast(fbErr(e), "bad"); });
+      return true;
+    case "friendAdd": Friends.request({ uid: d.uid, name: d.name, avatar: d.avatar }).then(() => render()); return true;
+    case "friendAccept": if (f) Friends.accept(f); return true;
+    case "friendDecline": if (f) ask(`Decline the request from ${Friends.nameOf(f)} ?`, "Decline").then(ok => ok && Friends.remove(f)); return true;
+    case "friendCancel": if (f) Friends.remove(f, "Request cancelled"); return true;
+    case "friendRemove": if (f) ask(`Remove ${Friends.nameOf(f)} from your friends?`, "Remove", true).then(ok => ok && Friends.remove(f, "Removed from your friends")); return true;
+    case "challenge": if (f) { S.modal = null; Friends.challenge(f); } return true;
+    case "linkDuel": S.modal = { k: "linkDuel" }; return true;
+    case "linkAccept": if (S.modal && S.modal.inv) Friends.acceptLink(S.modal.key, S.modal.inv, !!d.duel); return true;
+    case "inboxJoin": {
+      const x = Friends.inbox[d.id];
+      if (!x) return true;
+      DB.join(x.code).then(() => { Friends.dropInvite(d.id); toast("Welcome to the circle!", "good"); openCircle(x.code); })
+        .catch(e => toast(e.code === "not-found" ? "This circle no longer exists" : fbErr(e), "bad"));
+      return true;
+    }
+    case "inboxDrop": Friends.dropInvite(d.id); return true;
+  }
+  return false;
+}
+
+function friendsSubmit(f, fd) {
+  const k = f.dataset.f;
+  if (k === "inviteFriends") {
+    const uids = fd.getAll("uid");
+    const cc = DB.cur();
+    if (!uids.length) { toast("Tick at least one friend", "bad"); return true; }
+    if (cc) Friends.invite(cc, uids).then(() => { S.modal = null; render(); });
+    return true;
+  }
+  if (k === "linkDuel") {
+    const title = String(fd.get("title") || "").trim().slice(0, 120);
+    const stake = parseInt(fd.get("stake"), 10);
+    const closesAt = new Date(String(fd.get("closesAt"))).getTime();
+    if (!title) return true;
+    if (!(stake >= 1 && stake <= CIRCLE_DEFAULTS.start)) { toast(`Stake between 1 and ${nf(CIRCLE_DEFAULTS.start)} tokens`, "bad"); return true; }
+    if (!(closesAt > now() + 60000)) { toast("Pick a date in the future", "bad"); return true; }
+    S.modal.busy = true; render();
+    Friends.challengeByLink(title, stake, closesAt)
+      .then(r => { S.modal = { k: "linkDuel", url: r.url, title, stake }; render(); })
+      .catch(e => { S.modal.busy = false; toast(fbErr(e), "bad"); render(); });
+    return true;
+  }
+  return false;
+}
+
+const WA_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.7-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>`;
+const MAIL_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
+
 /* ===== push.js ===== */
 /* Pronohub — notifications : nouveaux paris dans tes cercles, résultats de tes paris.
    L'appareil s'abonne via Firebase Cloud Messaging ; l'envoi passe par un petit relais
@@ -4786,6 +5260,18 @@ const Push = {
     clearTimeout(this._t);
     this._t = setTimeout(() => this.flush(), 1500);
   },
+  /* Événement ponctuel (défi relevé, contestation, invitation, ami, nouveau membre) */
+  async event(type, payload) {
+    if (!this.configured() || !FB.user) return;
+    try {
+      const tok = await FB.user.getIdToken();
+      await fetch(PUSH_CFG.worker, {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+        body: JSON.stringify(Object.assign({ type }, payload)),
+      });
+    } catch (e) { }
+  },
   async flush() {
     const q = this._q; this._q = {};
     for (const [k, ids] of Object.entries(q)) {
@@ -4802,7 +5288,9 @@ const Push = {
   },
 
   /* Ouverture depuis une notification */
-  open(code, bet) {
+  open(code, bet, kind) {
+    if (kind === "friends") { if (S.code) circlesAct("home", {}); else go("home"); return; }
+    if (kind === "join" && code && !MyCircles.has(code)) { S.modal = { k: "join", code }; render(); return; }
     if (!code || !MyCircles.has(code)) { if (S.view !== "home") go("home"); return; }
     if (S.code !== code) openCircle(code);
     if (bet) go("bet", { betId: bet });
@@ -4813,7 +5301,7 @@ Push.load();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => {
   const d = e.data || {};
-  if (d.type === "pronohub-open") Push.open(d.code, d.bet);
+  if (d.type === "pronohub-open") Push.open(d.code, d.bet, d.open);
 });
 
 /* ---------- Écrans ---------- */
@@ -4827,6 +5315,11 @@ function pushPanel() {
   if (st === "on") body = `<p class="muted">On for this device.</p>
       ${sw("bet", "New bets", "When someone starts a bet in one of your circles.")}
       ${sw("settle", "Results of my bets", "When a bet you staked on is settled or cancelled.")}
+      ${sw("social", "Challenges, invitations and friends", "A friend challenges you, invites you to a circle or adds you as a friend.")}
+      ${sw("remind", "Reminders before betting closes", "A bet closes within the hour and you haven't bet yet.")}
+      ${sw("tosettle", "Results to enter", "A bet you created ended a day ago without a result.")}
+      ${sw("contest", "Disputes", "Someone disputes the result of a bet that involves you.")}
+      ${sw("member", "New members", "Someone joins a circle you created.")}
       <p class="hint">You can also mute a single circle in “Manage this circle”.</p>
       <button class="btn ghost" data-a="pushOff" ${Push.busy ? "disabled" : ""}>Turn off on this device</button>`;
   else if (st === "off") body = `<p class="muted">Get notified when your friends start a bet or when one of your bets has a result.</p>
@@ -4993,7 +5486,7 @@ function asideCol(cc, a) {
     <div class="panel">
       <div class="row between"><h3>Standings</h3><button class="link" data-a="tab" data-v="rank">See all</button></div>
       <ol class="mini-rank">${top.map(s => `<li class="${s.uid === me ? "me" : ""}"><span class="rk">${s.rank}</span>${avatar(s, "sm")}<span class="grow">${esc(s.name)}</span><b>${nf(s.bal)}</b></li>`).join("")}</ol>
-      ${cc.local ? "" : `<button class="btn small ghost wide" data-a="invite">${ICON.users} Invite friends</button>`}
+      ${cc.local || cc.circle.duo ? "" : `<button class="btn small ghost wide" data-a="invite">${ICON.users} Invite friends</button>`}
     </div>
     <div class="panel">
       <div class="row between"><h3>Latest news</h3><button class="link" data-a="tab" data-v="feed">The feed</button></div>
@@ -5016,6 +5509,7 @@ function render() {
   else {
     const a = analysis(cc);
     updateSnap(cc, a);
+    Friends.fixDuo(cc);
     if (S.pendingMatch) setTimeout(processPendingMatch, 0);
     header = topBar(cc, a);
     tabbar = tabBar();
@@ -5025,7 +5519,7 @@ function render() {
     else {
       view = "circle";
       main = S.tab === "rank" ? rankTab(cc, a) : S.tab === "feed" ? feedTab(cc, a) : S.tab === "me" ? meTab(cc, a) : betsTab(cc, a);
-      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>New bet</span></button>`;
+      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>${cc.circle.duo ? "New challenge" : "New bet"}</span></button>`;
     }
   }
   document.body.dataset.view = view;
@@ -5066,6 +5560,7 @@ function renderModal() {
     case "ask": html = askModal(); break;
     case "install": html = installModal(); break;
     case "pickCircle": html = pickCircleModal(); break;
+    default: html = friendsModal(cc);
   }
   if (!html) { S.modal = null; return renderModal(); }
   ov.hidden = false;
@@ -5147,7 +5642,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || friendsAct(a, d);
 }
 
 document.addEventListener("click", e => {
@@ -5165,7 +5660,7 @@ document.addEventListener("submit", e => {
   if (!f) return;
   e.preventDefault();
   const fd = new FormData(f);
-  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
+  const r = circlesSubmit(f, fd) || soloSubmit(f, fd) || betsSubmit(f, fd) || feedSubmit(f, fd) || profileSubmit(f, fd) || accountSubmit(f, fd) || friendsSubmit(f, fd) || (f.dataset.f === "feedback" && (sendFeedback(fd), true));
   if (r === true) render();
 });
 
@@ -5196,11 +5691,20 @@ document.addEventListener("keydown", e => {
 });
 
 /* ---------- Démarrage ---------- */
+/* Liens en attente (invitation d'ami ou défi) : traités une fois connecté et le pseudo choisi */
+function processPending() {
+  if (S.pendingAmi && FB.ok && FB.uid && Profile.get().name && !S.modal) {
+    const k = S.pendingAmi; S.pendingAmi = null;
+    Friends.openLink(k);
+  }
+}
+
 function boot() {
   Solo.load();
   applyTheme();
   FB.onAuth(() => Account.onAuth());
   FB.onAuth(() => { Push.onAuth(); });
+  FB.onAuth(() => { Friends.listen(); processPending(); });
   FB.onAuth(() => {
     const cc = DB.cur();
     if (S.code && (!cc || !cc.local) && (!cc || cc.status !== "ok")) { const c = S.code; DB.close(); DB.open(c); }
@@ -5215,6 +5719,10 @@ function boot() {
     if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
     else S.pendingJoin = join;
   }
+  // Lien d'ami ou de défi : ?ami=CLÉ ; notification « amis » : ?amis=1
+  const ami = q.get("ami");
+  if (ami && /^[A-Za-z0-9]{6,20}$/.test(ami)) { history.replaceState(null, "", location.pathname); S.pendingAmi = ami; }
+  if (q.get("amis")) { history.replaceState(null, "", location.pathname); S.view = "home"; S.code = null; Store.del("last"); }
   // Ouverture depuis une notification : ?c=CODE&b=PARI
   const nc = normCode(q.get("c")), nb = q.get("b");
   if (nc) {
@@ -5222,7 +5730,7 @@ function boot() {
     if (MyCircles.has(nc)) { S.code = nc; S.view = nb ? "bet" : "circle"; S.betId = nb || null; S.tab = "bets"; Store.set("last", nc); }
   }
   const last = Store.get("last");
-  if (!S.code && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
+  if (!S.code && !q.get("amis") && last && MyCircles.has(last)) { S.code = last; S.view = "circle"; }
   if (S.code) { DB.open(S.code); Seen.mark(S.code); }
   if (S.pendingJoin && FB.ready && FB.ok && Profile.get().name) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
   if (!Store.get("tourDone") && Profile.get().name) { S.modal = S.modal || { k: "tour", step: 0 }; Store.set("tourDone", 1); }

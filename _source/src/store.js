@@ -53,7 +53,9 @@ const MyCircles = {
   save(l) { Store.set("circles", l); },
   add(c) {
     const l = this.list().filter(x => x.code !== c.code);
-    l.unshift({ code: c.code, name: c.name, emoji: c.emoji || "🎯", local: !!c.local });
+    const x = { code: c.code, name: c.name, emoji: c.emoji || "🎯", local: !!c.local };
+    for (const k of ["duo", "friend", "friendName", "friendAvatar"]) if (c[k]) x[k] = c[k];
+    l.unshift(x);
     this.save(l);
   },
   update(code, patch) {

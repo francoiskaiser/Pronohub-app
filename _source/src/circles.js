@@ -92,16 +92,14 @@ function inviteModal() {
   return `<h2>Inviter des amis</h2>
     <p class="muted">Envoie ce code ou ce lien : tes amis rejoindront « ${esc(meta.name)} » en un clic.</p>
     <div class="code-big" aria-label="Code du cercle">${esc(code)}</div>
-    <div class="row center wrap">
-      ${navigator.share ? `<button class="btn primary" data-a="share" data-url="${esc(url)}">Partager le lien</button>` : ""}
-      <button class="btn" data-a="copy" data-text="${esc(url)}">Copier le lien</button>
-      <button class="btn ghost" data-a="copy" data-text="${esc(code)}">Copier le code</button>
-    </div>
+    ${shareButtons(`Rejoins mon cercle ${quote(meta.name)} sur Pronohub pour parier entre amis (jetons fictifs) :`, url, `Rejoins ${quote(meta.name)} sur Pronohub`)}
+    <div class="row center"><button class="btn small ghost" data-a="copy" data-text="${esc(code)}">Copier le code</button></div>
+    ${DB.cur() ? inviteFriendsBlock(DB.cur()) : ""}
     <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
 }
 
 function switcherModal() {
-  const list = MyCircles.list();
+  const list = MyCircles.list().filter(c => !c.duo || c.code === S.code);
   const cur = S.code && list.find(c => c.code === S.code);
   return `<h2>Mes cercles</h2>
     ${cur ? `<button class="btn block circle-manage" data-a="circleInfo">${ICON.gear} Gérer ce cercle</button>` : ""}
@@ -261,7 +259,7 @@ function circlesAct(a, d) {
     case "retry": { const c = S.code; DB.close(); DB.open(c); return true; }
     case "forgetCircle": MyCircles.remove(d.code); Account.syncCircles(); circlesAct("home", {}); return true;
     case "rejoin": S.modal = { k: "join", code: d.code }; return true;
-    case "share": navigator.share({ title: "Pronohub", text: "Rejoins mon cercle de paris sur Pronohub", url: d.url }).catch(() => { }); return true;
+    case "share": navigator.share({ title: "Pronohub", text: d.text || "Rejoins mon cercle de paris sur Pronohub", url: d.url }).catch(() => { }); return true;
     case "copy": copyText(d.text); return true;
     case "showKey":
       FB.sub(cc.code, "private").doc("owner").get().then(s => { S.modal.key = s.exists ? s.data().key : "?"; render(); }).catch(e => toast(fbErr(e), "bad"));
@@ -303,6 +301,7 @@ function circlesSubmit(f, fd) {
     Profile.set({ name, avatar: fd.get("avatar") || "" });
     Account.pushProfile();
     if (S.pendingJoin && FB.ok) { S.modal = { k: "join", code: S.pendingJoin }; S.pendingJoin = null; }
+    else if (S.pendingAmi && FB.ok) { S.modal = null; Store.set("tourDone", 1); render(); processPending(); return true; }
     else if (!Store.get("tourDone")) { S.modal = { k: "tour", step: 0 }; Store.set("tourDone", 1); }
     render();
     return true;
