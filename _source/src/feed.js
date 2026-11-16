@@ -55,8 +55,12 @@ function feedEvents(cc, a, limit = 80) {
     } else if (info.state === "void" && b.settledAt) {
       ev.push({ at: b.settledAt, kind: "void", bet: id, html: `${betLink(id, b)} est annulé, mises remboursées.` });
     }
-    for (const w of info.ws) {
-      ev.push({ at: w.at, uid: w.u, kind: "wager", bet: id, html: `<b>${name(w.u)}</b> a misé ${nf(w.amt)} sur ${betLink(id, b)}` });
+    // Une seule ligne par pari pour les mises, à l'heure de la plus récente : le fil reste lisible
+    if (info.ws.length) {
+      const ws = info.ws.slice().sort((x, y) => y.at - x.at);
+      const who = [...new Set(ws.map(w => w.u))].map(u => `<b>${name(u)}</b>`);
+      const total = ws.reduce((t, w) => t + w.amt, 0);
+      ev.push({ at: ws[0].at, uid: ws[0].u, kind: "wager", bet: id, html: `${nameList(who)} ${who.length > 1 ? "ont misé sur" : "a misé sur"} ${betLink(id, b)} <small class="ev-sum">${nf(total)} jetons</small>` });
     }
   }
   for (const l of Object.values(cc.ledger)) {
@@ -68,6 +72,14 @@ function feedEvents(cc, a, limit = 80) {
     ev.push({ at: s.endedAt, kind: "season", html: `Fin de la saison ${s.n}${ch ? ` : <b>${esc(ch.name)}</b> est sacré champion avec ${nf(ch.bal)} jetons 🏆` : ""}` });
   }
   return ev.filter(e => e.at).sort((x, y) => y.at - x.at).slice(0, limit);
+}
+
+/* « A », « A et B », « A, B et C », « A, B et 3 autres » */
+function nameList(names) {
+  const and = LANG === "en" ? " and " : " et ", others = LANG === "en" ? " others" : " autres";
+  if (names.length <= 1) return names.join("");
+  if (names.length <= 3) return names.slice(0, -1).join(", ") + and + names[names.length - 1];
+  return names.slice(0, 2).join(", ") + and + (names.length - 2) + others;
 }
 
 const FEED_ICON = { comment: "💬", bet: "🎟️", result: "🏁", void: "↩️", wager: "🪙", rescue: "💸", join: "👋", season: "🏆" };

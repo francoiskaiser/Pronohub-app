@@ -433,7 +433,6 @@
  "Vérification auprès de la source…": "Checking with the source…",
  "Vérifier le résultat": "Check the result",
  "a lancé un pari :": "started a bet:",
- "a misé": "placed a bet",
  "a raison": "is right",
  "a rejoint le cercle": "joined the circle",
  "autre choix": "other choice",
@@ -919,5 +918,10 @@
  "Lancer un défi": "Start a challenge",
  "Installe Pronohub": "Install Pronohub",
  "Une icône sur ton ordinateur, l'app en plein écran.": "An icon on your computer, the app full screen.",
- "Une icône sur ton téléphone, l'app en plein écran.": "An icon on your phone, the app full screen."
+ "Une icône sur ton téléphone, l'app en plein écran.": "An icon on your phone, the app full screen.",
+ "Gérer ce pari": "Manage this bet",
+ "a misé sur": "bet on",
+ "ont misé sur": "bet on",
+ "autre badge à débloquer": "more badge to unlock",
+ "autres badges à débloquer": "more badges to unlock"
 }

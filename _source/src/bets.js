@@ -159,7 +159,7 @@ function betView(cc, a) {
     const m = memberOf(cc, w.u);
     const pay = info.payouts[w.id];
     const g = pay != null ? pay - w.amt : null;
-    return `<li>${avatar(m)}<span class="grow">${esc(m.name)}${reveal ? `<small>${esc(optLabel(b, w.opt))}${w.score && !open ? ", " + w.score.h + "–" + w.score.a : ""}</small>` : `<small>a misé</small>`}</span>
+    return `<li>${avatar(m)}<span class="grow">${esc(m.name)}${reveal ? `<small>${esc(optLabel(b, w.opt))}${w.score && !open ? ", " + w.score.h + "–" + w.score.a : ""}</small>` : ""}</span>
       <span class="amt">${nf(w.amt)}${g != null && g !== 0 ? `<small class="${g > 0 ? "pos" : "neg"}">${g > 0 ? "+" : ""}${nf(g)}</small>` : ""}</span></li>`;
   }).join("")}</ul>${open && b.kind !== "duel" ? `<p class="hint">Les choix de chacun seront révélés à la clôture.</p>` : ""}` : "";
 
@@ -169,7 +169,7 @@ function betView(cc, a) {
   if (manage && (info.state === "closed" || info.state === "contested" || (open && !b.src && b.kind !== "duel"))) acts.push(`<button class="btn primary" data-a="settle">${info.state === "contested" ? "Corriger le résultat" : "Saisir le résultat"}</button>`);
   if (manage && b.kind === "duel" && (info.state === "closed" || (open && info.ws.length === 2))) acts.push(`<button class="btn primary" data-a="settle">Désigner le gagnant</button>`);
   if (manage && info.state === "settled") acts.push(`<button class="btn ghost" data-a="settle">Corriger le résultat</button>`);
-  if (manage && open) acts.push(`<button class="btn ghost" data-a="closeNow">Clôturer les mises</button>`);
+  if (manage && open) acts.push(`<button class="btn" data-a="closeNow">Clôturer les mises</button>`);
   if (manage && info.state !== "void" && info.state !== "settled") acts.push(`<button class="btn ghost danger" data-a="voidBet">Annuler le pari</button>`);
   if (manage && !info.ws.some(w => w.u !== me)) acts.push(`<button class="btn ghost danger" data-a="deleteBet">Supprimer</button>`);
 
@@ -196,7 +196,7 @@ function betView(cc, a) {
     <p class="pool-line">${ICON.coin} <span><b>${nf(info.pool)}</b> jetons dans la cagnotte${info.seed ? `, + ${nf(info.seed * b.options.length)} de la banque` : ""}</span></p>
     ${minePanel}
     ${contest}
-    ${acts.length ? `<div class="row wrap acts">${acts.join("")}</div>` : ""}
+    ${acts.length ? `<div class="manage-box">${manage ? `<span class="manage-label">Gérer ce pari</span>` : ""}<div class="row wrap acts">${acts.join("")}</div></div>` : ""}
     ${reactionsBar(cc, info.id)}
     ${people}
     ${commentsBlock(cc, info.id)}
@@ -216,7 +216,7 @@ function wagerModal(cc, a) {
   const scoreOk = b.kind === "match" && b.bonus > 0;
   return `<h2>${mine ? "Ajouter des jetons" : "Ta mise"}</h2>
     <p class="wager-on">Sur <b>${esc(optLabel(b, opt))}</b>, cote actuelle ${info.odds[opt] ? oddsFmt(info.odds[opt]) : "—"}</p>
-    <form data-f="wager" class="stack">
+    <form data-f="wager" class="stack" novalidate data-bal="${bal}">
       <div class="amount">
         <button type="button" class="icon-btn" data-a="amt" data-d="-10" aria-label="Moins 10">−</button>
         <input name="amt" type="number" inputmode="numeric" min="1" max="${bal}" step="1" value="${amt}" aria-label="Montant en jetons" required>
@@ -227,7 +227,7 @@ function wagerModal(cc, a) {
       ${scoreOk && !mine ? `<fieldset class="fld score-fld"><legend>Score exact (facultatif, +${nf(b.bonus)} si trouvé)</legend>
         <div class="score"><span>${esc(b.home)}</span><input name="sh" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.home)}"><span class="dash">–</span><input name="sa" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.away)}"><span>${esc(b.away)}</span></div>
       </fieldset>` : ""}
-      <p class="muted small">Ton solde : ${nf(bal)} jetons</p>
+      <p class="muted small" id="wager-bal">Ton solde : ${nf(bal)} jetons</p>
       <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary big" ${bal < 1 ? "disabled" : ""}>Miser</button></div>
     </form>`;
 }
@@ -444,7 +444,11 @@ function updatePotential() {
   const inp = $('form[data-f="wager"] input[name="amt"]'), out = $("#potential");
   if (!inp || !out || !S.modal) return;
   const info = an.bets[S.modal.bet];
-  const amt = Math.max(0, parseInt(inp.value, 10) || 0);
+  let amt = Math.max(0, parseInt(inp.value, 10) || 0);
+  // Jamais plus que le solde : on ramène le montant au maximum et on le signale
+  const bal = +inp.max || 0, note = $("#wager-bal");
+  if (amt > bal) { amt = bal; inp.value = bal; }
+  if (note) note.classList.toggle("warn", amt >= bal && bal > 0);
   S.modal.amt = amt;
   out.textContent = nf(potential(info, S.modal.opt, amt, myWager(info, myId(cc))));
 }

@@ -154,6 +154,7 @@ p { margin: 0 0 .75em; }
 }
 .seg.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(38, 32, 27, .12); }
 :root[data-theme="dark"] .seg.on, :root[data-theme="dark"] .seg.radio:has(input:checked) { background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--line); }
+.segs:has([data-a="filter"]) .seg { padding: .3em .35em; font-size: .94rem; min-width: 0; }
 .seg .count { font-size: .75rem; background: var(--line); color: var(--ink-2); border-radius: 99px; padding: 0 .5em; min-width: 1.6em; }
 .seg.on .count { background: var(--brand); color: var(--brand-ink); }
 .seg.radio input { position: absolute; opacity: 0; pointer-events: none; }
@@ -473,7 +474,7 @@ body[data-view="home"] .page, body[data-view="settings"] .page { padding-bottom:
 .pod-bal { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 .pod-step { width: 100%; display: grid; place-items: start center; padding-top: .4rem; border-radius: 14px 14px 4px 4px; font-weight: 800; font-size: 1.6rem; color: var(--gold-ink); }
 .p1 .pod-step { height: 96px; background: linear-gradient(var(--gold), color-mix(in srgb, var(--gold) 55%, var(--paper))); }
-.p2 .pod-step { height: 70px; background: linear-gradient(#d9deea, color-mix(in srgb, #d9deea 50%, var(--paper))); color: var(--ink-2); }
+.p2 .pod-step { height: 70px; background: linear-gradient(#d9deea, color-mix(in srgb, #d9deea 50%, var(--paper))); color: #4a5068; }
 .p3 .pod-step { height: 54px; background: linear-gradient(#f0b98a, color-mix(in srgb, #f0b98a 50%, var(--paper))); color: #6b3a12; }
 .ranking li button {
   width: 100%; display: flex; align-items: center; gap: .7rem; padding: .65rem .8rem; border: 0; background: var(--paper);
@@ -922,6 +923,16 @@ body[data-view="solo"] { padding-bottom: var(--safe-b); }
 .pick input { width: 20px; height: 20px; accent-color: var(--brand); }
 .big-q { font-size: 1.15rem; font-weight: 700; margin: 0 0 6px; }
 .duel-vs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; }
+
+/* ---------- 1.9.0 : fil regroupé, gestion d'un pari, badges repliés ---------- */
+.ev-sum { color: var(--ink-3); white-space: nowrap; margin-left: .2em; }
+.manage-box { margin: 1rem 0; padding: .7rem .8rem .8rem; border: 1.5px dashed var(--line); border-radius: 16px; }
+.manage-label { display: block; font-size: .82rem; font-weight: 700; color: var(--ink-3); margin-bottom: .5rem; }
+.manage-box .acts { margin: 0; gap: .5rem; }
+#wager-bal.warn { color: var(--brand-fg); font-weight: 700; }
+.more-badges { margin-top: .6rem; }
+.more-badges summary { cursor: pointer; font-weight: 600; color: var(--ink-2); padding: .5rem 0; min-height: 40px; }
+.more-badges[open] summary { margin-bottom: .3rem; }
 
 </style>
 </head>
@@ -2092,7 +2103,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.8.0";
+const APP_VERSION = "1.9.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2765,7 +2776,7 @@ function betView(cc, a) {
     const m = memberOf(cc, w.u);
     const pay = info.payouts[w.id];
     const g = pay != null ? pay - w.amt : null;
-    return `<li>${avatar(m)}<span class="grow">${esc(m.name)}${reveal ? `<small>${esc(optLabel(b, w.opt))}${w.score && !open ? ", " + w.score.h + "–" + w.score.a : ""}</small>` : `<small>a misé</small>`}</span>
+    return `<li>${avatar(m)}<span class="grow">${esc(m.name)}${reveal ? `<small>${esc(optLabel(b, w.opt))}${w.score && !open ? ", " + w.score.h + "–" + w.score.a : ""}</small>` : ""}</span>
       <span class="amt">${nf(w.amt)}${g != null && g !== 0 ? `<small class="${g > 0 ? "pos" : "neg"}">${g > 0 ? "+" : ""}${nf(g)}</small>` : ""}</span></li>`;
   }).join("")}</ul>${open && b.kind !== "duel" ? `<p class="hint">Les choix de chacun seront révélés à la clôture.</p>` : ""}` : "";
 
@@ -2775,7 +2786,7 @@ function betView(cc, a) {
   if (manage && (info.state === "closed" || info.state === "contested" || (open && !b.src && b.kind !== "duel"))) acts.push(`<button class="btn primary" data-a="settle">${info.state === "contested" ? "Corriger le résultat" : "Saisir le résultat"}</button>`);
   if (manage && b.kind === "duel" && (info.state === "closed" || (open && info.ws.length === 2))) acts.push(`<button class="btn primary" data-a="settle">Désigner le gagnant</button>`);
   if (manage && info.state === "settled") acts.push(`<button class="btn ghost" data-a="settle">Corriger le résultat</button>`);
-  if (manage && open) acts.push(`<button class="btn ghost" data-a="closeNow">Clôturer les mises</button>`);
+  if (manage && open) acts.push(`<button class="btn" data-a="closeNow">Clôturer les mises</button>`);
   if (manage && info.state !== "void" && info.state !== "settled") acts.push(`<button class="btn ghost danger" data-a="voidBet">Annuler le pari</button>`);
   if (manage && !info.ws.some(w => w.u !== me)) acts.push(`<button class="btn ghost danger" data-a="deleteBet">Supprimer</button>`);
 
@@ -2802,7 +2813,7 @@ function betView(cc, a) {
     <p class="pool-line">${ICON.coin} <span><b>${nf(info.pool)}</b> jetons dans la cagnotte${info.seed ? `, + ${nf(info.seed * b.options.length)} de la banque` : ""}</span></p>
     ${minePanel}
     ${contest}
-    ${acts.length ? `<div class="row wrap acts">${acts.join("")}</div>` : ""}
+    ${acts.length ? `<div class="manage-box">${manage ? `<span class="manage-label">Gérer ce pari</span>` : ""}<div class="row wrap acts">${acts.join("")}</div></div>` : ""}
     ${reactionsBar(cc, info.id)}
     ${people}
     ${commentsBlock(cc, info.id)}
@@ -2822,7 +2833,7 @@ function wagerModal(cc, a) {
   const scoreOk = b.kind === "match" && b.bonus > 0;
   return `<h2>${mine ? "Ajouter des jetons" : "Ta mise"}</h2>
     <p class="wager-on">Sur <b>${esc(optLabel(b, opt))}</b>, cote actuelle ${info.odds[opt] ? oddsFmt(info.odds[opt]) : "—"}</p>
-    <form data-f="wager" class="stack">
+    <form data-f="wager" class="stack" novalidate data-bal="${bal}">
       <div class="amount">
         <button type="button" class="icon-btn" data-a="amt" data-d="-10" aria-label="Moins 10">−</button>
         <input name="amt" type="number" inputmode="numeric" min="1" max="${bal}" step="1" value="${amt}" aria-label="Montant en jetons" required>
@@ -2833,7 +2844,7 @@ function wagerModal(cc, a) {
       ${scoreOk && !mine ? `<fieldset class="fld score-fld"><legend>Score exact (facultatif, +${nf(b.bonus)} si trouvé)</legend>
         <div class="score"><span>${esc(b.home)}</span><input name="sh" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.home)}"><span class="dash">–</span><input name="sa" type="number" inputmode="numeric" min="0" max="30" aria-label="Buts ${esc(b.away)}"><span>${esc(b.away)}</span></div>
       </fieldset>` : ""}
-      <p class="muted small">Ton solde : ${nf(bal)} jetons</p>
+      <p class="muted small" id="wager-bal">Ton solde : ${nf(bal)} jetons</p>
       <div class="row end"><button type="button" class="btn ghost" data-a="close">Annuler</button><button class="btn primary big" ${bal < 1 ? "disabled" : ""}>Miser</button></div>
     </form>`;
 }
@@ -3050,7 +3061,11 @@ function updatePotential() {
   const inp = $('form[data-f="wager"] input[name="amt"]'), out = $("#potential");
   if (!inp || !out || !S.modal) return;
   const info = an.bets[S.modal.bet];
-  const amt = Math.max(0, parseInt(inp.value, 10) || 0);
+  let amt = Math.max(0, parseInt(inp.value, 10) || 0);
+  // Jamais plus que le solde : on ramène le montant au maximum et on le signale
+  const bal = +inp.max || 0, note = $("#wager-bal");
+  if (amt > bal) { amt = bal; inp.value = bal; }
+  if (note) note.classList.toggle("warn", amt >= bal && bal > 0);
   S.modal.amt = amt;
   out.textContent = nf(potential(info, S.modal.opt, amt, myWager(info, myId(cc))));
 }
@@ -3206,8 +3221,12 @@ function feedEvents(cc, a, limit = 80) {
     } else if (info.state === "void" && b.settledAt) {
       ev.push({ at: b.settledAt, kind: "void", bet: id, html: `${betLink(id, b)} est annulé, mises remboursées.` });
     }
-    for (const w of info.ws) {
-      ev.push({ at: w.at, uid: w.u, kind: "wager", bet: id, html: `<b>${name(w.u)}</b> a misé ${nf(w.amt)} sur ${betLink(id, b)}` });
+    // Une seule ligne par pari pour les mises, à l'heure de la plus récente : le fil reste lisible
+    if (info.ws.length) {
+      const ws = info.ws.slice().sort((x, y) => y.at - x.at);
+      const who = [...new Set(ws.map(w => w.u))].map(u => `<b>${name(u)}</b>`);
+      const total = ws.reduce((t, w) => t + w.amt, 0);
+      ev.push({ at: ws[0].at, uid: ws[0].u, kind: "wager", bet: id, html: `${nameList(who)} ${who.length > 1 ? "ont misé sur" : "a misé sur"} ${betLink(id, b)} <small class="ev-sum">${nf(total)} jetons</small>` });
     }
   }
   for (const l of Object.values(cc.ledger)) {
@@ -3219,6 +3238,14 @@ function feedEvents(cc, a, limit = 80) {
     ev.push({ at: s.endedAt, kind: "season", html: `Fin de la saison ${s.n}${ch ? ` : <b>${esc(ch.name)}</b> est sacré champion avec ${nf(ch.bal)} jetons 🏆` : ""}` });
   }
   return ev.filter(e => e.at).sort((x, y) => y.at - x.at).slice(0, limit);
+}
+
+/* « A », « A et B », « A, B et C », « A, B et 3 autres » */
+function nameList(names) {
+  const and = LANG === "en" ? " and " : " et ", others = LANG === "en" ? " others" : " autres";
+  if (names.length <= 1) return names.join("");
+  if (names.length <= 3) return names.slice(0, -1).join(", ") + and + names[names.length - 1];
+  return names.slice(0, 2).join(", ") + and + (names.length - 2) + others;
 }
 
 const FEED_ICON = { comment: "💬", bet: "🎟️", result: "🏁", void: "↩️", wager: "🪙", rescue: "💸", join: "👋", season: "🏆" };
@@ -3301,6 +3328,11 @@ function playerCard(cc, a, uid, self) {
   const rate = p.bets ? Math.round(100 * p.wins / p.bets) : 0;
   const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
   const hist = (p.history || []).slice().reverse().slice(0, 15);
+  // Badges obtenus d'abord, puis les deux prochains ; le reste se déplie
+  const badgeTile = bd => `<div class="badge ${badges.includes(bd.id) ? "got" : ""}"><span class="b-emo" aria-hidden="true">${bd.e}</span><b>${bd.name}</b><small>${bd.desc}</small></div>`;
+  const got = BADGES.filter(bd => badges.includes(bd.id)), locked = BADGES.filter(bd => !badges.includes(bd.id));
+  const nextN = got.length % 2 ? 1 : 2;
+  const shown = got.concat(locked.slice(0, nextN)), rest = locked.slice(nextN);
   return `<div class="profile-head">
       ${avatar(m, "xl")}
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
@@ -3318,17 +3350,15 @@ function playerCard(cc, a, uid, self) {
       ${stat(p.rescues || 0, pl(p.rescues || 0, "faillite", "faillites"))}
     </div>
     ${trophies.length ? `<h3>Trophées</h3><div class="trophies">${trophies.map(t => `<span class="trophy">${["🥇", "🥈", "🥉"][t.place - 1]} Saison ${t.season}</span>`).join("")}</div>` : ""}
-    <h3>Badges <small>${badges.length}/${BADGES.length}</small></h3>
-    <div class="badges">${BADGES.map(bd => {
-      const got = badges.includes(bd.id);
-      return `<div class="badge ${got ? "got" : ""}"><span class="b-emo" aria-hidden="true">${bd.e}</span><b>${bd.name}</b><small>${bd.desc}</small></div>`;
-    }).join("")}</div>
     ${hist.length ? `<h3>Derniers résultats</h3><ul class="history">${hist.map(h => {
       const info = a.bets[h.bet];
       if (!info) return "";
       const b = info.b;
       return `<li><button class="link" data-a="openBet" data-id="${esc(h.bet)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button><span class="${h.gain > 0 ? "pos" : h.gain < 0 ? "neg" : ""}">${h.gain > 0 ? "+" : ""}${nf(h.gain)}</span></li>`;
-    }).join("")}</ul>` : ""}`;
+    }).join("")}</ul>` : ""}
+    <h3>Badges <small>${badges.length}/${BADGES.length}</small></h3>
+    <div class="badges">${shown.map(badgeTile).join("")}</div>
+    ${rest.length ? `<details class="more-badges"><summary>${rest.length} ${pl(rest.length, "autre badge à débloquer", "autres badges à débloquer")}</summary><div class="badges">${rest.map(badgeTile).join("")}</div></details>` : ""}`;
 }
 
 function meTab(cc, a) {
@@ -3337,7 +3367,7 @@ function meTab(cc, a) {
     ${bonusCard(cc, a)}
     ${playerCard(cc, a, me, !cc.local || me === Profile.get().id)}
     <div class="row wrap me-actions">
-      <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
+      <button class="btn tonal" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
       <button class="btn ghost" data-a="soloHub">Mode solo</button>
       <button class="btn ghost" data-a="circleInfo">Réglages du cercle</button>
       <button class="btn ghost" data-a="settings">Réglages</button>

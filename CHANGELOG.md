@@ -1,5 +1,14 @@
 # Journal des versions de Pronohub
 
+## 1.9.0 — 16 novembre 2026
+
+- Le fil du cercle est bien plus lisible : les mises d'un même pari tiennent sur une seule ligne (« Sarah, Nico et Léa ont misé sur… »), les résultats et les commentaires ressortent.
+- Sur la page d'un pari, les actions du créateur (saisir le résultat, clôturer, annuler) sont regroupées dans un encadré « Gérer ce pari ».
+- Mise : impossible de saisir plus que ton solde, le montant se cale tout seul sur ton maximum.
+- Onglet Moi : tes derniers résultats passent avant les badges. Les badges à débloquer se déplient à la demande.
+- Les onglets « En cours / À régler / Terminés » tiennent en entier sur les petits écrans.
+- Podium plus lisible en thème sombre.
+
 ## 1.8.0 — 16 novembre 2026
 
 - Pronohub se prépare pour le Play Store : politique de confidentialité et page de suppression de compte publiées sur le site, en français et en anglais.

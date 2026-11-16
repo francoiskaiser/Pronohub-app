@@ -34,6 +34,11 @@ function playerCard(cc, a, uid, self) {
   const rate = p.bets ? Math.round(100 * p.wins / p.bets) : 0;
   const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
   const hist = (p.history || []).slice().reverse().slice(0, 15);
+  // Badges obtenus d'abord, puis les deux prochains ; le reste se déplie
+  const badgeTile = bd => `<div class="badge ${badges.includes(bd.id) ? "got" : ""}"><span class="b-emo" aria-hidden="true">${bd.e}</span><b>${bd.name}</b><small>${bd.desc}</small></div>`;
+  const got = BADGES.filter(bd => badges.includes(bd.id)), locked = BADGES.filter(bd => !badges.includes(bd.id));
+  const nextN = got.length % 2 ? 1 : 2;
+  const shown = got.concat(locked.slice(0, nextN)), rest = locked.slice(nextN);
   return `<div class="profile-head">
       ${avatar(m, "xl")}
       <div class="grow"><h1 class="display small">${esc(m.name)}</h1>
@@ -51,17 +56,15 @@ function playerCard(cc, a, uid, self) {
       ${stat(p.rescues || 0, pl(p.rescues || 0, "faillite", "faillites"))}
     </div>
     ${trophies.length ? `<h3>Trophées</h3><div class="trophies">${trophies.map(t => `<span class="trophy">${["🥇", "🥈", "🥉"][t.place - 1]} Saison ${t.season}</span>`).join("")}</div>` : ""}
-    <h3>Badges <small>${badges.length}/${BADGES.length}</small></h3>
-    <div class="badges">${BADGES.map(bd => {
-      const got = badges.includes(bd.id);
-      return `<div class="badge ${got ? "got" : ""}"><span class="b-emo" aria-hidden="true">${bd.e}</span><b>${bd.name}</b><small>${bd.desc}</small></div>`;
-    }).join("")}</div>
     ${hist.length ? `<h3>Derniers résultats</h3><ul class="history">${hist.map(h => {
       const info = a.bets[h.bet];
       if (!info) return "";
       const b = info.b;
       return `<li><button class="link" data-a="openBet" data-id="${esc(h.bet)}">${esc(b.kind === "match" && b.home ? b.home + " – " + b.away : b.title)}</button><span class="${h.gain > 0 ? "pos" : h.gain < 0 ? "neg" : ""}">${h.gain > 0 ? "+" : ""}${nf(h.gain)}</span></li>`;
-    }).join("")}</ul>` : ""}`;
+    }).join("")}</ul>` : ""}
+    <h3>Badges <small>${badges.length}/${BADGES.length}</small></h3>
+    <div class="badges">${shown.map(badgeTile).join("")}</div>
+    ${rest.length ? `<details class="more-badges"><summary>${rest.length} ${pl(rest.length, "autre badge à débloquer", "autres badges à débloquer")}</summary><div class="badges">${rest.map(badgeTile).join("")}</div></details>` : ""}`;
 }
 
 function meTab(cc, a) {
@@ -70,7 +73,7 @@ function meTab(cc, a) {
     ${bonusCard(cc, a)}
     ${playerCard(cc, a, me, !cc.local || me === Profile.get().id)}
     <div class="row wrap me-actions">
-      <button class="btn" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
+      <button class="btn tonal" data-a="invite" ${cc.local ? "hidden" : ""}>Inviter des amis</button>
       <button class="btn ghost" data-a="soloHub">Mode solo</button>
       <button class="btn ghost" data-a="circleInfo">Réglages du cercle</button>
       <button class="btn ghost" data-a="settings">Réglages</button>
