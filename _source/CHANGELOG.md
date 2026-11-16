@@ -1,5 +1,10 @@
 # Journal des versions de Pronohub
 
+## 1.6.0 — 16 novembre 2026
+
+- Nouveau logo : le ticket anthracite sur fond orange, sur l'icône de l'app, l'écran d'accueil et la petite icône des notifications.
+- Nouvelles couleurs, tirées du logo : orange et anthracite, en mode clair comme en mode sombre. Les boutons orange gardent un texte foncé, bien lisible.
+
 ## 1.5.0 — 16 novembre 2026
 
 - Amis : ajoute tes amis depuis la fiche d'un joueur, ou envoie ton lien d'ami par WhatsApp ou e-mail, même à quelqu'un qui n'a pas encore l'app. Ils apparaissent dans « Mes amis » sur l'accueil.

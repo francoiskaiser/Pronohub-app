@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.6.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -13,7 +13,7 @@ function applyTheme() {
   const dark = t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   const m = $('meta[name="theme-color"]');
-  if (m) m.content = dark ? "#121a33" : "#f3f5fb";
+  if (m) m.content = dark ? "#1b1916" : "#f6f2ed";
 }
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
 
