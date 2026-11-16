@@ -1,5 +1,11 @@
 # Journal des versions de Pronohub
 
+## 1.12.0 — 16 novembre 2026
+
+- Nouvelle section « Paris en cours » en haut de l'accueil : tous tes paris ouverts au même endroit, cercles et face-à-face réunis. Une étiquette « Duel avec… » repère les paris en face-à-face.
+- Trois filtres : Tous, À jouer (tu n'as pas encore misé, un duel attend ta réponse ou un résultat est à saisir) et Duels.
+- Toucher une ligne ouvre directement le pari.
+
 ## 1.11.0 — 16 novembre 2026
 
 - Signaler et bloquer : un petit drapeau à côté des commentaires permet de signaler un contenu. Tu peux aussi signaler un pari ou un joueur, et bloquer un joueur pour ne plus voir ses commentaires ni recevoir ses demandes. La liste des joueurs bloqués est dans les Réglages.

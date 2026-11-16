@@ -638,6 +638,7 @@ body[data-view="home"] .toast, body[data-view="settings"] .toast { bottom: calc(
 .sec-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: 1.2rem 0 .6rem; }
 .sec-head h2 { font-size: 1.15rem; margin: 0; }
 .home-main > .sec-head:first-child, .home-side > .sec-head:first-child { margin-top: 0; }
+.home-main > .ov-list + .sec-head, .home-main > .ov-list + .btn + .sec-head { margin-top: 1.6rem; }
 .circle-card.rich { align-items: flex-start; padding: .95rem 1rem; }
 .circle-card.rich .cc-body { gap: .35rem; }
 .faces { display: flex; }
@@ -932,3 +933,17 @@ button.fr-main { cursor: pointer; }
 .safety-row { margin-top: 1.4rem; justify-content: center; }
 .blocked-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .blocked-list li { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- 1.12.0 : « Paris en cours » sur l'accueil ---------- */
+.ov-segs { margin-bottom: .6rem; }
+.ov-segs .seg { padding: .3em .5em; font-size: .94rem; min-width: 0; }
+.ov-list { list-style: none; margin: 0 0 .6rem; padding: 0; display: grid; gap: 8px; }
+.ov-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: var(--paper); border: 1px solid var(--line); text-align: left; color: inherit; min-height: 64px; }
+.ov-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ov-main b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-tag { font-size: .78rem; font-weight: 600; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-tag.duel { align-self: flex-start; max-width: 100%; background: var(--night); color: var(--night-ink); border-radius: 99px; padding: .1em .65em; }
+.ov-st { font-size: .84rem; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-st.hot { color: var(--brand-fg); font-weight: 700; }
+.ov-time { flex: none; display: inline-flex; align-items: center; gap: .3em; font-size: .84rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ov-time svg { width: 15px; height: 15px; }

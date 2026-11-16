@@ -152,11 +152,13 @@ const DB = {
       cc[coll] = cc[coll] || {};
       cc[coll][id] = merge ? Object.assign({}, cc[coll][id], data) : data;
       this.saveLocal(cc);
+      Overview.stale();
       queueRender();
       return true;
     }
     try {
       await FB.sub(cc.code, coll).doc(id).set(data, { merge });
+      if (coll === "bets" || coll === "wagers") Overview.stale();
       if (coll === "bets") { Push.onBetWrite(cc.code, id, data, merge); Deadlines.sync(cc.code, id, data, merge); }
       return true;
     }

@@ -970,5 +970,12 @@
  "Tu peux signaler un commentaire, un pari ou un joueur, et bloquer un joueur. Un signalement transmet le contenu concerné au développeur de l'app, qui peut supprimer un contenu ou un compte abusif.": "You can report a comment, a bet or a player, and block a player. A report sends the content concerned to the app's developer, who can remove abusive content or accounts.",
  "est bloqué": "is blocked",
  "est bloqué : tu ne verras plus ses commentaires.": "is blocked: you will no longer see their comments.",
- "Protéger": "Protect"
+ "Protéger": "Protect",
+ "Duels": "Duels",
+ "Filtrer les paris en cours": "Filter open bets",
+ "Paris en cours": "Open bets",
+ "Résultat à saisir": "Result to enter",
+ "Tous": "All",
+ "À toi de répondre": "Your turn to answer",
+ "🤝 Duel": "🤝 Duel"
 }

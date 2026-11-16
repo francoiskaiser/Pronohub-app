@@ -276,7 +276,7 @@ function act(a, d) {
       return true;
     case "tourNext": S.modal.step = (S.modal.step || 0) + 1; return true;
   }
-  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || safetyAct(a, d) || friendsAct(a, d);
+  return circlesAct(a, d) || homeAct(a, d) || soloAct(a, d) || betsAct(a, d) || feedAct(a, d) || profileAct(a, d) || accountAct(a, d) || settingsAct(a, d) || pushAct(a, d) || overviewAct(a, d) || safetyAct(a, d) || friendsAct(a, d);
 }
 
 document.addEventListener("click", e => {

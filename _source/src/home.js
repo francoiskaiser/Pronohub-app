@@ -156,6 +156,7 @@ function homeView() {
     ${pushHomeCard() || secureCard() || installCard()}
     <div class="home-grid">
       <div class="home-main">
+        ${openBetsSection()}
         <div class="sec-head"><h2>Mes cercles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Créer</button>` : ""}</div>
         ${list.length ? `<div class="circle-list">${list.map(card).join("")}</div>` : `<ol class="how">
           <li><b>Crée ton cercle</b><span>Les collègues, la famille, les potes du foot.</span></li>
