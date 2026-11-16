@@ -1,5 +1,11 @@
 # Journal des versions de Pronohub
 
+## 1.8.0 — 16 novembre 2026
+
+- Pronohub se prépare pour le Play Store : politique de confidentialité et page de suppression de compte publiées sur le site, en français et en anglais.
+- Dans l'app Android, les logos des clubs sont remplacés par leurs initiales.
+- Sur la page d'un match, les noms des équipes ne se coupent plus en deux sur les petits écrans.
+
 ## 1.7.0 — 16 novembre 2026
 
 - Accueil plus direct : tes cercles et tes amis apparaissent tout de suite. Une seule suggestion à la fois (notifications ou installation), le mode solo juste en dessous.

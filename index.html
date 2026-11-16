@@ -395,7 +395,9 @@ body[data-view="home"] .page, body[data-view="settings"] .page { padding-bottom:
 /* ---------- Détail d'un pari ---------- */
 .bet-hero { margin-bottom: 1rem; }
 .bet-title { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; letter-spacing: -.03em; margin: .2rem 0 .4rem; }
-.bet-title .match { flex-wrap: wrap; }
+.bet-title .match { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .6rem; }
+.bet-title:has(.match) { font-size: clamp(1.3rem, 5.4vw, 2.2rem); }
+.bet-title .team { overflow-wrap: break-word; line-height: 1.1; }
 .bet-title .team img, .bet-title .crest { width: 34px; height: 34px; }
 .bet-desc { font-size: 1.05rem; }
 .bet-meta { color: var(--ink-2); font-size: .92rem; margin: 0 0 .15rem; }
@@ -1180,6 +1182,9 @@ const Store = {
     this._pending = {};
   },
 };
+
+/* App installée depuis le Play Store (emballage Android) : on y masque les logos des clubs, qui sont des marques */
+function isNative() { return !!Store.get("native"); }
 window.addEventListener("pagehide", () => Store.flush());
 
 /* Profil de l'utilisateur sur cet appareil */
@@ -2087,7 +2092,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.7.0";
+const APP_VERSION = "1.8.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -2663,7 +2668,7 @@ function ticket(cc, a, info) {
 }
 
 function matchTitle(b) {
-  const logo = (u, n) => u ? `<img src="${esc(u)}" alt="" loading="lazy" width="22" height="22" onerror="this.remove()">` : `<span class="crest" aria-hidden="true">${esc(n.charAt(0))}</span>`;
+  const logo = (u, n) => u && !isNative() ? `<img src="${esc(u)}" alt="" loading="lazy" width="22" height="22" onerror="this.remove()">` : `<span class="crest" aria-hidden="true">${esc(n.charAt(0))}</span>`;
   return `<span class="match"><span class="team">${logo(b.homeLogo, b.home)}${esc(b.home)}</span><span class="vs">${b.score ? `${b.score.h}–${b.score.a}` : "–"}</span><span class="team away">${esc(b.away)}${logo(b.awayLogo, b.away)}</span></span>`;
 }
 
@@ -3405,7 +3410,7 @@ async function loadStrip(lg, force = false) {
 }
 
 function teamLogo(url, name) {
-  return url ? `<img src="${esc(url)}" alt="" loading="lazy" width="28" height="28" onerror="this.style.visibility='hidden'">`
+  return url && !isNative() ? `<img src="${esc(url)}" alt="" loading="lazy" width="28" height="28" onerror="this.style.visibility='hidden'">`
     : `<span class="crest" aria-hidden="true">${esc(name.charAt(0))}</span>`;
 }
 
@@ -5733,6 +5738,12 @@ function boot() {
     if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
     else S.pendingJoin = join;
   }
+  // Lancement depuis l'app Android du Play Store : ?store=android (adresse de départ de l'emballage)
+  if (q.get("store") === "android" || /^android-app:/.test(document.referrer || "")) Store.set("native", "android");
+  // Liens des pages publiques : ?compte=1 ouvre le compte (suppression), ?retour=1 le formulaire de contact
+  if (q.get("compte")) S.modal = { k: "account" };
+  else if (q.get("retour")) S.modal = { k: "feedback" };
+  if (q.get("store") || q.get("compte") || q.get("retour")) history.replaceState(null, "", location.pathname);
   // Lien d'ami ou de défi : ?ami=CLÉ ; notification « amis » : ?amis=1
   const ami = q.get("ami");
   if (ami && /^[A-Za-z0-9]{6,20}$/.test(ami)) { history.replaceState(null, "", location.pathname); S.pendingAmi = ami; }

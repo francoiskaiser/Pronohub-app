@@ -375,7 +375,9 @@ body[data-view="home"] .page, body[data-view="settings"] .page { padding-bottom:
 /* ---------- Détail d'un pari ---------- */
 .bet-hero { margin-bottom: 1rem; }
 .bet-title { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; letter-spacing: -.03em; margin: .2rem 0 .4rem; }
-.bet-title .match { flex-wrap: wrap; }
+.bet-title .match { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .6rem; }
+.bet-title:has(.match) { font-size: clamp(1.3rem, 5.4vw, 2.2rem); }
+.bet-title .team { overflow-wrap: break-word; line-height: 1.1; }
 .bet-title .team img, .bet-title .crest { width: 34px; height: 34px; }
 .bet-desc { font-size: 1.05rem; }
 .bet-meta { color: var(--ink-2); font-size: .92rem; margin: 0 0 .15rem; }

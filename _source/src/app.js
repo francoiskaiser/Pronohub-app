@@ -351,6 +351,12 @@ function boot() {
     if (MyCircles.has(join)) { S.code = join; S.view = "circle"; }
     else S.pendingJoin = join;
   }
+  // Lancement depuis l'app Android du Play Store : ?store=android (adresse de départ de l'emballage)
+  if (q.get("store") === "android" || /^android-app:/.test(document.referrer || "")) Store.set("native", "android");
+  // Liens des pages publiques : ?compte=1 ouvre le compte (suppression), ?retour=1 le formulaire de contact
+  if (q.get("compte")) S.modal = { k: "account" };
+  else if (q.get("retour")) S.modal = { k: "feedback" };
+  if (q.get("store") || q.get("compte") || q.get("retour")) history.replaceState(null, "", location.pathname);
   // Lien d'ami ou de défi : ?ami=CLÉ ; notification « amis » : ?amis=1
   const ami = q.get("ami");
   if (ami && /^[A-Za-z0-9]{6,20}$/.test(ami)) { history.replaceState(null, "", location.pathname); S.pendingAmi = ami; }

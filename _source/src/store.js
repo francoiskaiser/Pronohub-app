@@ -31,6 +31,9 @@ const Store = {
     this._pending = {};
   },
 };
+
+/* App installée depuis le Play Store (emballage Android) : on y masque les logos des clubs, qui sont des marques */
+function isNative() { return !!Store.get("native"); }
 window.addEventListener("pagehide", () => Store.flush());
 
 /* Profil de l'utilisateur sur cet appareil */

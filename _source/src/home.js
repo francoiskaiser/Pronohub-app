@@ -16,7 +16,7 @@ async function loadStrip(lg, force = false) {
 }
 
 function teamLogo(url, name) {
-  return url ? `<img src="${esc(url)}" alt="" loading="lazy" width="28" height="28" onerror="this.style.visibility='hidden'">`
+  return url && !isNative() ? `<img src="${esc(url)}" alt="" loading="lazy" width="28" height="28" onerror="this.style.visibility='hidden'">`
     : `<span class="crest" aria-hidden="true">${esc(name.charAt(0))}</span>`;
 }
 

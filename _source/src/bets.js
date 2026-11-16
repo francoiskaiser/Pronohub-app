@@ -62,7 +62,7 @@ function ticket(cc, a, info) {
 }
 
 function matchTitle(b) {
-  const logo = (u, n) => u ? `<img src="${esc(u)}" alt="" loading="lazy" width="22" height="22" onerror="this.remove()">` : `<span class="crest" aria-hidden="true">${esc(n.charAt(0))}</span>`;
+  const logo = (u, n) => u && !isNative() ? `<img src="${esc(u)}" alt="" loading="lazy" width="22" height="22" onerror="this.remove()">` : `<span class="crest" aria-hidden="true">${esc(n.charAt(0))}</span>`;
   return `<span class="match"><span class="team">${logo(b.homeLogo, b.home)}${esc(b.home)}</span><span class="vs">${b.score ? `${b.score.h}–${b.score.a}` : "–"}</span><span class="team away">${esc(b.away)}${logo(b.awayLogo, b.away)}</span></span>`;
 }
 
