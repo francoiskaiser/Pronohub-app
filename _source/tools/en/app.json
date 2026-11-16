@@ -541,8 +541,6 @@
  "En tête": "Leading",
  "Fais défiler et choisis « Sur l'écran d'accueil ».": "Scroll and choose “Add to Home Screen”.",
  "Installation annulée": "Installation cancelled",
- "Installe Pronohub sur ton ordinateur": "Install Pronohub on your computer",
- "Installe Pronohub sur ton téléphone": "Install Pronohub on your phone",
  "Installer": "Install",
  "Installer Pronohub": "Install Pronohub",
  "Installer l'app": "Install the app",
@@ -562,7 +560,6 @@
  "et choisis « Ouvrir dans le navigateur » (Safari ou Chrome).": "menu and choose “Open in browser” (Safari or Chrome).",
  "Pari créé, à toi de miser !": "Bet created, place your stake!",
  "Pariez des jetons": "Bet tokens",
- "Paris ouverts": "Open bets",
  "Pronohub est installée": "Pronohub is installed",
  "Sur Mac avec Safari : menu Fichier, puis « Ajouter au Dock ».": "On a Mac with Safari: File menu, then “Add to Dock”.",
  "Touche le bouton Partager": "Tap the Share button",
@@ -575,7 +572,6 @@
  "Un pari en cours": "One open bet",
  "Un résultat à saisir": "One result to enter",
  "Une fois dans le navigateur, reviens sur cette fenêtre avec le bouton « Installer ».": "Once in the browser, come back to this window with the “Install” button.",
- "Une icône sur l'écran d'accueil, en plein écran, sans passer par le navigateur.": "An icon on your home screen, full screen, without going through the browser.",
  "Voir le pari": "See the bet",
  "pari ouvert": "open bet",
  "paris en cours": "open bets",
@@ -920,5 +916,8 @@
  "te défie sur Pronohub :": "challenges you on Pronohub:",
  "Aucun défi en cours.": "No challenge in progress.",
  "Lance un défi : même mise des deux côtés, le gagnant rafle tout.": "Start a challenge: same stake on both sides, the winner takes it all.",
- "Lancer un défi": "Start a challenge"
+ "Lancer un défi": "Start a challenge",
+ "Installe Pronohub": "Install Pronohub",
+ "Une icône sur ton ordinateur, l'app en plein écran.": "An icon on your computer, the app full screen.",
+ "Une icône sur ton téléphone, l'app en plein écran.": "An icon on your phone, the app full screen."
 }

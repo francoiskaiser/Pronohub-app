@@ -328,7 +328,7 @@ function friendsModal(cc) {
       <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
     const ok = Friends.ok();
     return `<h2>🤝 Lancer un défi</h2>
-      ${ok.length ? `<p class="muted">À un ami :</p><div class="chips">${ok.map(f => `<button class="chip" data-a="challenge" data-id="${esc(f.id)}">${avatar(Friends.person(f), "sm")} ${esc(Friends.nameOf(f))}</button>`).join("")}</div>
+      ${ok.length ? `<p class="muted">À un ami :</p><div class="friend-chips">${ok.map(f => `<button class="chip" data-a="challenge" data-id="${esc(f.id)}">${avatar(Friends.person(f), "sm")} ${esc(Friends.nameOf(f))}</button>`).join("")}</div>
       <h3>Ou par lien, à quelqu'un qui n'a pas encore l'app</h3>` : `<p class="muted">Ton adversaire n'a pas encore Pronohub ? Prépare le défi, puis envoie-le par WhatsApp ou e-mail.</p>`}
       <form data-f="linkDuel" class="stack">
         <label class="fld"><span>Je parie que…</span><input name="title" maxlength="120" required placeholder="Ex. je cours 10 km en moins de 50 minutes"></label>

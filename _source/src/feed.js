@@ -31,7 +31,7 @@ function commentItem(cc, id, c) {
 function composer(betId) {
   return `<form data-f="comment" data-bet="${esc(betId || "")}" class="composer">
     <input name="text" maxlength="280" autocomplete="off" placeholder="${betId ? "Ton pronostic, ta vanne…" : "Écris au cercle…"}" aria-label="Message" required>
-    <button class="btn primary icon" aria-label="Envoyer">${ICON.send}</button>
+    <button class="icon-btn primary" aria-label="Envoyer">${ICON.send}</button>
   </form>`;
 }
 

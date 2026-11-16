@@ -102,7 +102,7 @@ function switcherModal() {
   const list = MyCircles.list().filter(c => !c.duo || c.code === S.code);
   const cur = S.code && list.find(c => c.code === S.code);
   return `<h2>Mes cercles</h2>
-    ${cur ? `<button class="btn block circle-manage" data-a="circleInfo">${ICON.gear} Gérer ce cercle</button>` : ""}
+    ${cur ? `<button class="btn wide circle-manage" data-a="circleInfo">${ICON.gear} Gérer ce cercle</button>` : ""}
     <div class="circle-list compact">${list.map(c => `
       <button class="circle-card ${c.code === S.code ? "on" : ""}" data-a="openCircle" data-code="${esc(c.code)}">
         <span class="cc-emoji" aria-hidden="true">${esc(c.emoji || "🎯")}</span>

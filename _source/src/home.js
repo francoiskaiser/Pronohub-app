@@ -41,7 +41,7 @@ function matchStrip(cc) {
       <span class="m-team">${teamLogo(e.homeLogo, e.home)}<b>${esc(e.home)}</b></span>
       <span class="m-team">${teamLogo(e.awayLogo, e.away)}<b>${esc(e.away)}</b></span>
       ${bet ? `<button class="btn small" data-a="openBet" data-id="${esc(bet)}">Voir le pari</button>`
-        : `<button class="btn small primary" data-a="matchBet" data-lg="${lg}" data-id="${esc(e.id)}">Parier</button>`}
+        : `<button class="btn small tonal" data-a="matchBet" data-lg="${lg}" data-id="${esc(e.id)}">Parier</button>`}
     </article>`;
   }).join("")}</div>`;
   return `<div class="strip">
@@ -153,9 +153,7 @@ function homeView() {
         <h1 class="display">${headline}</h1>
       </div>
     </div>
-    ${installCard()}
-    ${pushHomeCard()}
-    ${soloHomeCard()}
+    ${pushHomeCard() || installCard()}
     <div class="home-grid">
       <div class="home-main">
         <div class="sec-head"><h2>Mes cercles</h2>${list.length ? `<button class="btn small ghost" data-a="newCircle">${ICON.plus} Créer</button>` : ""}</div>
@@ -169,6 +167,7 @@ function homeView() {
           <button class="btn big" data-a="joinCircle" ${FB.ok ? "" : "disabled"}>Rejoindre avec un code</button>
         </div>
         ${friendsSection()}
+        <div class="home-solo">${soloHomeCard()}</div>
         ${FB.ok ? "" : `<p class="note">Les cercles en ligne ne sont pas encore activés sur cette installation : crée un cercle « sur cet appareil » et passez-vous le téléphone.</p>`}
       </div>
       <div class="home-side">
@@ -203,8 +202,8 @@ function installCard() {
   const desk = Install.platform() === "desktop";
   return `<div class="install">
     <span class="install-icon" aria-hidden="true">${TICKET_SVG}</span>
-    <span class="grow"><b>${desk ? "Installe Pronohub sur ton ordinateur" : "Installe Pronohub sur ton téléphone"}</b>
-      <small>Une icône sur l'écran d'accueil, en plein écran, sans passer par le navigateur.</small></span>
+    <span class="grow"><b>Installe Pronohub</b>
+      <small>${desk ? "Une icône sur ton ordinateur, l'app en plein écran." : "Une icône sur ton téléphone, l'app en plein écran."}</small></span>
     <span class="install-acts">
       <button class="btn primary small" data-a="install">Installer</button>
       <button class="icon-btn tiny" data-a="installHide" aria-label="Masquer pendant deux semaines">${ICON.x}</button>

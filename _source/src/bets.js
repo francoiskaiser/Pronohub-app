@@ -86,8 +86,8 @@ function betsTab(cc, a) {
   return `<section class="page">
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filtrer les paris">${seg("open", "En cours")}${seg("todo", "À régler")}${seg("done", "Terminés")}</div>
-    ${f === "open" && !cc.circle.duo ? `<div class="sec-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}<div class="sec-head"><h2>Paris ouverts</h2></div>` : ""}
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
+    ${f === "open" && !cc.circle.duo ? `<div class="sec-head strip-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}` : ""}
   </section>`;
 }
 

@@ -1,5 +1,14 @@
 # Journal des versions de Pronohub
 
+## 1.7.0 — 16 novembre 2026
+
+- Accueil plus direct : tes cercles et tes amis apparaissent tout de suite. Une seule suggestion à la fois (notifications ou installation), le mode solo juste en dessous.
+- Dans un cercle, tes paris ouverts passent en premier ; les matchs à venir suivent, avec les compétitions sur une seule ligne qui défile.
+- Un seul bouton orange par écran pour l'action principale : les boutons « Parier » des matchs à venir sont plus discrets.
+- « Nouveau pari » se lit d'un coup d'œil : une ligne par type de pari.
+- Le bouton « Nouveau pari » et les messages de confirmation ne cachent plus le bas de la liste.
+- Croix de fermeture et petits boutons plus faciles à toucher.
+
 ## 1.6.0 — 16 novembre 2026
 
 - Nouveau logo : le ticket anthracite sur fond orange, sur l'icône de l'app, l'écran d'accueil et la petite icône des notifications.
