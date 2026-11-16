@@ -2,7 +2,7 @@
 "use strict";
 
 /* ---------- Matchs à venir (bandeau) ---------- */
-const STRIP_LEAGUES = ["bel.1", "uefa.champions", "fra.1", "eng.1", "esp.1", "nba"];
+const STRIP_LEAGUES = ["bel.1", "uefa.nations", "uefa.champions", "fra.1", "eng.1", "esp.1", "nba"];
 const Strip = { lg: Store.get("stripLeague") || "bel.1", data: {}, loading: {}, err: {} };
 
 async function loadStrip(lg, force = false) {

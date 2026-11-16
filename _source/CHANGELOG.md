@@ -1,5 +1,11 @@
 # Journal des versions de Pronohub
 
+## 1.13.0 — 16 novembre 2026
+
+- Les sélections nationales arrivent : Ligue des nations, qualifications et phases finales de l'Euro et de la Coupe du monde, Coupe d'Afrique des nations et matchs amicaux.
+- La Ligue des nations s'ajoute aux « Matchs à venir » de l'accueil et des cercles.
+- Les noms des pays s'affichent en français (Belgique, Pays-Bas, Allemagne…).
+
 ## 1.12.0 — 16 novembre 2026
 
 - Nouvelle section « Paris en cours » en haut de l'accueil : tous tes paris ouverts au même endroit, cercles et face-à-face réunis. Une étiquette « Duel avec… » repère les paris en face-à-face.

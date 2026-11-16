@@ -1156,10 +1156,21 @@ const LEAGUES = [
   { id: "uefa.champions", sport: "soccer", cat: "foot", name: "Champions League", country: "Europe", draw: true },
   { id: "uefa.europa", sport: "soccer", cat: "foot", name: "Europa League", country: "Europe", draw: true },
   { id: "uefa.europa.conf", sport: "soccer", cat: "foot", name: "Conference League", country: "Europe", draw: true },
+  { id: "uefa.nations", sport: "soccer", cat: "foot", name: "Nations League", country: "National teams", draw: true },
+  { id: "uefa.euroq", sport: "soccer", cat: "foot", name: "Euro Qualifying", country: "National teams", draw: true },
+  { id: "uefa.euro", sport: "soccer", cat: "foot", name: "Euro", country: "National teams", draw: true },
+  { id: "fifa.worldq.uefa", sport: "soccer", cat: "foot", name: "World Cup Qualifying", country: "National teams", draw: true },
+  { id: "fifa.world", sport: "soccer", cat: "foot", name: "World Cup", country: "National teams", draw: true },
+  { id: "caf.nations", sport: "soccer", cat: "foot", name: "Africa Cup of Nations", country: "National teams", draw: true },
+  { id: "fifa.friendly", sport: "soccer", cat: "foot", name: "Friendlies", country: "National teams", draw: true },
   { id: "nba", sport: "basketball", cat: "basket", name: "NBA", country: "United States", draw: false },
   { id: "nhl", sport: "hockey", cat: "hockey", name: "NHL", country: "United States", draw: false },
   { id: "nfl", sport: "football", cat: "usfoot", name: "NFL", country: "United States", draw: false },
 ];
+/* Noms des sélections nationales : ESPN les donne en anglais, on les affiche en français */
+const NATIONS_FR = Object.fromEntries("Belgium=Belgique|Netherlands=Pays-Bas|Germany=Allemagne|Spain=Espagne|Italy=Italie|England=Angleterre|Scotland=Écosse|Wales=Pays de Galles|Northern Ireland=Irlande du Nord|Republic of Ireland=Irlande|Ireland=Irlande|Switzerland=Suisse|Austria=Autriche|Denmark=Danemark|Sweden=Suède|Norway=Norvège|Finland=Finlande|Iceland=Islande|Poland=Pologne|Czechia=Tchéquie|Czech Republic=Tchéquie|Slovakia=Slovaquie|Hungary=Hongrie|Romania=Roumanie|Bulgaria=Bulgarie|Greece=Grèce|Türkiye=Turquie|Turkey=Turquie|Croatia=Croatie|Serbia=Serbie|Slovenia=Slovénie|Bosnia and Herzegovina=Bosnie-Herzégovine|Bosnia-Herzegovina=Bosnie-Herzégovine|Montenegro=Monténégro|North Macedonia=Macédoine du Nord|Albania=Albanie|Ukraine=Ukraine|Georgia=Géorgie|Armenia=Arménie|Azerbaijan=Azerbaïdjan|Kazakhstan=Kazakhstan|Israel=Israël|Cyprus=Chypre|Malta=Malte|Luxembourg=Luxembourg|Estonia=Estonie|Latvia=Lettonie|Lithuania=Lituanie|Belarus=Biélorussie|Moldova=Moldavie|Faroe Islands=Îles Féroé|Gibraltar=Gibraltar|Andorra=Andorre|San Marino=Saint-Marin|Liechtenstein=Liechtenstein|Russia=Russie|Brazil=Brésil|Argentina=Argentine|Uruguay=Uruguay|Colombia=Colombie|Chile=Chili|Peru=Pérou|Ecuador=Équateur|Paraguay=Paraguay|Mexico=Mexique|United States=États-Unis|USA=États-Unis|Canada=Canada|Japan=Japon|South Korea=Corée du Sud|Australia=Australie|Saudi Arabia=Arabie saoudite|Iran=Iran|Qatar=Qatar|Morocco=Maroc|Algeria=Algérie|Tunisia=Tunisie|Egypt=Égypte|Senegal=Sénégal|Ivory Coast=Côte d'Ivoire|Cameroon=Cameroun|Nigeria=Nigeria|Ghana=Ghana|Mali=Mali|DR Congo=RD Congo|Congo DR=RD Congo|South Africa=Afrique du Sud|Cape Verde=Cap-Vert|Burkina Faso=Burkina Faso|Guinea=Guinée|New Zealand=Nouvelle-Zélande|Kosovo=Kosovo".split("|").map(x => x.split("=")));
+const teamName = n => (LANG === "fr" && NATIONS_FR[n]) || n;
+
 const LEAGUE = Object.fromEntries(LEAGUES.map(l => [l.id, l]));
 
 const AVATARS = ["🦊", "🐻", "🐼", "🐯", "🦁", "🐸", "🐙", "🦄", "🐧", "🦉", "🐺", "🐲", "🦖", "🐝", "🦈", "🐨", "🤠", "🥷", "🧙", "🤖", "👽", "🎩", "🍀", "🔥"];
@@ -1847,7 +1858,7 @@ const Sports = {
     const home = cs.find(x => x.homeAway === "home") || cs[0] || {};
     const away = cs.find(x => x.homeAway === "away") || cs[1] || {};
     const st = (ev.status || c.status || {}).type || {};
-    const team = x => (x.team && (x.team.shortDisplayName || x.team.displayName)) || "?";
+    const team = x => teamName((x.team && (x.team.shortDisplayName || x.team.displayName)) || "?");
     return {
       id: String(ev.id),
       date: Date.parse(ev.date),
@@ -2143,7 +2154,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.12.0";
+const APP_VERSION = "1.13.0";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },
@@ -3486,7 +3497,7 @@ function profileSubmit(f, fd) {
 /* Pronohub — accueil, matchs à venir, installation de l'app */
 
 /* ---------- Matchs à venir (bandeau) ---------- */
-const STRIP_LEAGUES = ["bel.1", "uefa.champions", "fra.1", "eng.1", "esp.1", "nba"];
+const STRIP_LEAGUES = ["bel.1", "uefa.nations", "uefa.champions", "fra.1", "eng.1", "esp.1", "nba"];
 const Strip = { lg: Store.get("stripLeague") || "bel.1", data: {}, loading: {}, err: {} };
 
 async function loadStrip(lg, force = false) {

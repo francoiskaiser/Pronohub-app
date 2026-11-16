@@ -28,7 +28,7 @@ const Sports = {
     const home = cs.find(x => x.homeAway === "home") || cs[0] || {};
     const away = cs.find(x => x.homeAway === "away") || cs[1] || {};
     const st = (ev.status || c.status || {}).type || {};
-    const team = x => (x.team && (x.team.shortDisplayName || x.team.displayName)) || "?";
+    const team = x => teamName((x.team && (x.team.shortDisplayName || x.team.displayName)) || "?");
     return {
       id: String(ev.id),
       date: Date.parse(ev.date),
