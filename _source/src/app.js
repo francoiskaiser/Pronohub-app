@@ -151,7 +151,7 @@ function render() {
     else {
       view = "circle";
       main = S.tab === "rank" ? rankTab(cc, a) : S.tab === "feed" ? feedTab(cc, a) : S.tab === "me" ? meTab(cc, a) : betsTab(cc, a);
-      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>${cc.circle.duo ? "Nouveau défi" : "Nouveau pari"}</span></button>`;
+      if (S.tab === "bets") fab = `<button class="fab" data-a="newBet">${ICON.plus}<span>Nouveau pari</span></button>`;
     }
   }
   document.body.dataset.view = view;

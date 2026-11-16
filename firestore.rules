@@ -63,6 +63,17 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.uid == me();
     }
 
+    // ----- Noms d'utilisateur : fiche publique minimale, pour être trouvé par ses amis -----
+    match /handles/{h} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() && h.matches('^[a-z0-9_]{3,20}$') && d().uid == me()
+        && str(d().name, 24) && d().keys().hasOnly(['uid', 'name', 'avatar', 'at']);
+      allow update: if signedIn() && resource.data.uid == me() && d().uid == me()
+        && str(d().name, 24) && d().keys().hasOnly(['uid', 'name', 'avatar', 'at']);
+      allow delete: if signedIn() && resource.data.uid == me();
+    }
+
     // ----- Amis : une fiche par paire, visible des deux seulement -----
     match /friends/{f} {
       function other() { return d().users[0] == me() ? d().users[1] : d().users[0]; }

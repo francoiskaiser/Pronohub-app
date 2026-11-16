@@ -1,5 +1,13 @@
 # Journal des versions de Pronohub
 
+## 1.10.0 — 16 novembre 2026
+
+- Face-à-face : tu peux maintenant y lancer tous les types de paris, comme dans un cercle. Match à venir, oui ou non, plusieurs choix, élection ou duel : ton adversaire choisit librement son camp.
+- Tes face-à-face se retrouvent sur l'accueil : touche la ligne d'un ami pour rouvrir vos paris en cours.
+- Nom d'utilisateur (facultatif) : choisis-en un dans ton profil, et tes amis te trouvent en le cherchant dans « Ajouter un ami ».
+- « Ajouter un ami » est plus clair : chercher un joueur, inviter quelqu'un qui n'a pas encore l'app, ou piocher dans tes cercles.
+- Duel : le message précise que celui qui relève le défi parie le contraire.
+
 ## 1.9.0 — 16 novembre 2026
 
 - Le fil du cercle est bien plus lisible : les mises d'un même pari tiennent sur une seule ligne (« Sarah, Nico et Léa ont misé sur… »), les résultats et les commentaires ressortent.

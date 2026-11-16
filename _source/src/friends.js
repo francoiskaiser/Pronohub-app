@@ -194,9 +194,14 @@ const Friends = {
       // La fenêtre de défi a besoin du cercle chargé
       for (let i = 0; i < 60 && !(DB.cur() && DB.cur().code === code && DB.cur().status === "ok"); i++) await new Promise(r => setTimeout(r, 100));
       if (S.code !== code) return;
-      S.modal = { k: "newBet", kind: "duel", draft: { closesAt: defaultClose(), cat: "potes", opts: ["", ""], stake: 100 } };
+      S.modal = { k: "newBet" };
       render();
     } catch (e) { toast(fbErr(e), "bad"); }
+  },
+  /* Ouvre le face-à-face avec un ami (le crée au premier passage) */
+  async openFace(f) {
+    try { openCircle(await this.duoFor(f)); }
+    catch (e) { toast(fbErr(e), "bad"); }
   },
   /* Défi envoyé par lien à quelqu'un qui n'a pas encore l'app */
   async challengeByLink(title, stake, closesAt) {
@@ -246,6 +251,40 @@ const Friends = {
   async dropInvite(id) { try { await FB.userDoc().collection("inbox").doc(id).delete(); } catch (e) { } delete this.inbox[id]; },
 };
 
+/* Nom d'utilisateur (facultatif) : un identifiant unique pour être trouvé par ses amis.
+   Fiche publique handles/{nom} = { uid, name, avatar } ; le nom choisi est aussi rangé dans le profil. */
+const Handle = {
+  get() { return Store.get("handle") || ""; },
+  norm(s) { return String(s || "").trim().toLowerCase().replace(/^@/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9_]/g, ""); },
+  valid(h) { return /^[a-z0-9_]{3,20}$/.test(h); },
+  ref(h) { return FB.db.collection("handles").doc(h); },
+  /* Réserve (ou libère, si h est vide) mon nom. Renvoie "" si tout va bien, sinon le message d'erreur. */
+  async claim(h) {
+    const cur = this.get(), me = Friends.me();
+    try {
+      if (h) {
+        const s = await this.ref(h).get();
+        if (s.exists && s.data().uid !== FB.uid) return "Ce nom d'utilisateur est déjà pris";
+        await this.ref(h).set({ uid: FB.uid, name: me.name, avatar: me.avatar, at: now() });
+      }
+      if (cur && cur !== h) await this.ref(cur).delete().catch(() => { });
+      if (h) Store.set("handle", h); else Store.del("handle");
+      await FB.userDoc().set({ handle: h }, { merge: true });
+      return "";
+    } catch (e) { return e.code === "permission-denied" ? "Ce nom d'utilisateur est déjà pris" : fbErr(e); }
+  },
+  async find(h) {
+    const s = await this.ref(h).get();
+    return s.exists ? Object.assign({ handle: h }, s.data()) : null;
+  },
+  /* Mon pseudo ou mon avatar a changé : la fiche publique suit */
+  refresh() {
+    const h = this.get(), me = Friends.me();
+    if (h && FB.ok && FB.uid) this.ref(h).set({ uid: FB.uid, name: me.name, avatar: me.avatar, at: now() }).catch(() => { });
+  },
+  async drop() { const h = this.get(); if (h) { try { await this.ref(h).delete(); } catch (e) { } Store.del("handle"); } },
+};
+
 /* Échéances des paris, pour les rappels envoyés par le relais */
 const Deadlines = {
   ref(code, id) { return FB.db.collection("deadlines").doc(`${code}_${id}`); },
@@ -278,23 +317,26 @@ function friendsSection() {
   const inv = Object.entries(Friends.inbox).filter(([, x]) => !MyCircles.has(x.code));
   const inc = Friends.incoming(), out = Friends.outgoing(), ok = Friends.ok();
   const links = MyCircles.list().filter(c => c.duo && !c.friend);
-  const row = (p, right, sub = "") => `<li class="friend-row">${avatar(p)}<span class="grow"><b>${esc(p.name)}</b>${sub ? `<small>${sub}</small>` : ""}</span><span class="fr-acts">${right}</span></li>`;
+  // open = [action, attribut, valeur, libellé] : la ligne entière ouvre alors le face-à-face
+  const row = (p, right, sub = "", open = null) => `<li class="friend-row">${open ? `<button class="fr-main" data-a="${open[0]}" data-${open[1]}="${esc(open[2])}" aria-label="${esc(open[3])}">` : `<span class="fr-main">`}${avatar(p)}<span class="grow"><b>${esc(p.name)}</b>${sub ? `<small>${sub}</small>` : ""}</span>${open ? `<span class="fr-chev" aria-hidden="true">${ICON.chev}</span></button>` : `</span>`}<span class="fr-acts">${right}</span></li>`;
+  const metaOf = f => Friends.duoMeta(Friends.other(f)) || (f.duo && MyCircles.list().find(c => c.code === f.duo));
   const score = f => {
-    const meta = Friends.duoMeta(Friends.other(f)) || (f.duo && MyCircles.list().find(c => c.code === f.duo));
+    const meta = metaOf(f);
     const s = meta && meta.snap;
-    if (!s || !s.faces) return "";
+    if (!s || !s.faces) return meta ? "Face-à-face ouvert" : "Aucun pari pour l'instant";
     const foe = s.faces.find(x => x.uid !== FB.uid);
-    return foe && foe.bal != null ? `Face-à-face : toi ${nf(s.bal)}, ${esc(Friends.nameOf(f))} ${nf(foe.bal)}` : "";
+    const sc = foe && foe.bal != null ? `Toi ${nf(s.bal)}, ${esc(Friends.nameOf(f))} ${nf(foe.bal)}` : "Face-à-face ouvert";
+    return sc + (s.open ? `, ${s.open} ${pl(s.open, "pari en cours", "paris en cours")}` : "");
   };
   const items = [
     ...inv.map(([id, x]) => row({ uid: x.from, name: x.fromName, avatar: x.fromAvatar }, `<button class="btn small primary" data-a="inboxJoin" data-id="${esc(id)}">Rejoindre</button><button class="icon-btn tiny" data-a="inboxDrop" data-id="${esc(id)}" aria-label="Ignorer">${ICON.x}</button>`, `t'invite dans ${esc(x.emoji || "🎯")} ${esc(x.name)}`)),
     ...inc.map(f => row(Friends.person(f), `<button class="btn small primary" data-a="friendAccept" data-id="${esc(f.id)}">Accepter</button><button class="icon-btn tiny" data-a="friendDecline" data-id="${esc(f.id)}" aria-label="Refuser">${ICON.x}</button>`, "veut t'ajouter en ami")),
-    ...ok.map(f => row(Friends.person(f), `<button class="btn small" data-a="challenge" data-id="${esc(f.id)}">🤝 Défier</button>`, score(f))),
-    ...links.map(c => row({ uid: c.code, name: c.linkTitle || c.name, avatar: "🤝" }, `<button class="btn small ghost" data-a="openCircle" data-code="${esc(c.code)}">Voir</button>`, "Défi envoyé par lien, en attente")),
+    ...ok.map(f => row(Friends.person(f), `<button class="btn small" data-a="challenge" data-id="${esc(f.id)}">🤝 Défier</button>`, score(f), ["openFace", "id", f.id, `Ouvrir le face-à-face avec ${Friends.nameOf(f)}`])),
+    ...links.map(c => row({ uid: c.code, name: c.linkTitle || c.name, avatar: "🤝" }, "", "Défi envoyé par lien, en attente", ["openCircle", "code", c.code, c.linkTitle || c.name])),
     ...out.map(f => row(Friends.person(f), `<button class="btn small ghost" data-a="friendCancel" data-id="${esc(f.id)}">Annuler</button>`, "demande envoyée")),
   ];
   return `<div class="sec-head"><h2>Mes amis</h2><button class="btn small ghost" data-a="addFriend">${ICON.plus} Ajouter</button></div>
-    ${items.length ? `<ul class="friend-list">${items.join("")}</ul>` : `<div class="empty-friends"><p class="muted">Ajoute tes amis pour les défier en duel, même sans cercle commun. Chaque face-à-face démarre à 1 000 jetons chacun.</p></div>`}
+    ${items.length ? `<ul class="friend-list">${items.join("")}</ul>` : `<div class="empty-friends"><p class="muted">Ajoute tes amis pour parier en face-à-face, même sans cercle commun. Chaque face-à-face démarre à 1 000 jetons chacun.</p></div>`}
     <div class="row wrap"><button class="btn" data-a="linkDuel">🤝 Défier quelqu'un par lien</button></div>`;
 }
 
@@ -303,9 +345,20 @@ function friendsModal(cc) {
   const m = S.modal;
   if (m.k === "addFriend") {
     const sugg = friendSuggestions(cc);
+    const h = Handle.get();
+    const found = m.found;
+    const st = found ? Friends.stateOf(found.uid) : "";
     return `<h2>Ajouter un ami</h2>
-      <p class="muted">Envoie ton lien : ton ami t'ajoute en un toucher, même s'il n'a pas encore Pronohub.</p>
-      ${m.url ? shareButtons(`${Friends.me().name} t'invite sur Pronohub, pour se lancer des défis entre amis (jetons fictifs) :`, m.url, "Rejoins-moi sur Pronohub") : `<p class="muted">Préparation du lien…</p>`}
+      <h3>Chercher un joueur</h3>
+      <form data-f="findUser" class="find-user">
+        <input name="q" maxlength="21" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Nom d'utilisateur" aria-label="Nom d'utilisateur" value="${esc(m.q || "")}">
+        <button class="btn" ${m.searching ? "disabled" : ""}>Chercher</button>
+      </form>
+      ${m.searching ? `<p class="muted">Recherche…</p>` : found ? `<ul class="friend-list"><li class="friend-row">${avatar(found)}<span class="grow"><b>${esc(found.name)}</b><small>@${esc(found.handle)}</small></span><span class="fr-acts">${found.uid === FB.uid ? `<span class="tag">C'est toi</span>` : st === "friend" ? `<span class="tag">Déjà ami</span>` : st === "sent" ? `<span class="tag">Demande envoyée</span>` : `<button class="btn small primary" data-a="friendAdd" data-uid="${esc(found.uid)}" data-name="${esc(found.name)}" data-avatar="${esc(found.avatar || "")}">Ajouter</button>`}</span></li></ul>` : m.q ? `<p class="muted">Aucun joueur ne porte ce nom d'utilisateur. Vérifie l'orthographe : il faut le nom exact.</p>` : ""}
+      <p class="hint">${h ? `Ton nom d'utilisateur : <b>@${esc(h)}</b>` : `Tu n'as pas encore de nom d'utilisateur.`} <button class="link" data-a="editProfile">${h ? "Modifier" : "En choisir un"}</button></p>
+      <h3>Inviter quelqu'un qui n'a pas encore l'app</h3>
+      <p class="muted">Envoie ton lien : ton ami installe Pronohub, choisit son pseudo et t'ajoute en un toucher.</p>
+      ${m.url ? shareButtons(`${Friends.me().name} t'invite sur Pronohub, pour se lancer des défis entre amis (jetons fictifs) :`, m.url, "Rejoins-moi sur Pronohub") : m.err ? `<p class="err">Le lien n'a pas pu être préparé (${esc(m.err)}).</p><button class="btn" data-a="addFriend">Réessayer</button>` : `<p class="muted">Préparation du lien…</p>`}
       ${sugg.length ? `<h3>Dans tes cercles</h3><ul class="friend-list">${sugg.map(p => `<li class="friend-row">${avatar(p)}<span class="grow"><b>${esc(p.name)}</b><small>${esc(p.circle)}</small></span><span class="fr-acts"><button class="btn small" data-a="friendAdd" data-uid="${esc(p.uid)}" data-name="${esc(p.name)}" data-avatar="${esc(p.avatar || "")}">Ajouter</button></span></li>`).join("")}</ul>` : ""}
       <div class="row end"><button class="btn ghost" data-a="close">Fermer</button></div>`;
   }
@@ -314,7 +367,8 @@ function friendsModal(cc) {
     const st = Friends.stateOf(inv.uid);
     if (inv.duo) return `<h2>🤝 ${esc(inv.name)} te défie</h2>
       <div class="panel duel"><p class="big-q">${esc(quote(inv.title || ""))}</p>
-      <p>${nf(inv.stake || 0)} jetons chacun, le gagnant rafle ${nf((inv.stake || 0) * 2)}. Réponse avant le ${esc(fmtDate(inv.closesAt || now()))}.</p></div>
+      <p>${nf(inv.stake || 0)} jetons chacun, le gagnant rafle ${nf((inv.stake || 0) * 2)}. Réponse avant le ${esc(fmtDate(inv.closesAt || now()))}.</p>
+      <p class="muted">En relevant le défi, tu paries le contraire.</p></div>
       <p class="muted">Vous jouez en face-à-face, avec 1 000 jetons chacun au départ. ${esc(inv.name)} sera ajouté à tes amis.</p>
       <div class="row end"><button class="btn ghost" data-a="close">Plus tard</button><button class="btn primary" data-a="linkAccept" data-duel="1">Voir le défi</button></div>`;
     return `<h2>${avatar({ uid: inv.uid, name: inv.name, avatar: inv.avatar }, "")} ${esc(inv.name)}</h2>
@@ -381,7 +435,7 @@ function friendsAct(a, d) {
   switch (a) {
     case "addFriend":
       S.modal = { k: "addFriend", url: null };
-      Friends.myLink().then(url => { if (S.modal && S.modal.k === "addFriend") { S.modal.url = url; render(); } }).catch(e => { toast(fbErr(e), "bad"); });
+      Friends.myLink().then(url => { if (S.modal && S.modal.k === "addFriend") { S.modal.url = url; render(); } }).catch(e => { if (S.modal && S.modal.k === "addFriend") { S.modal.err = fbErr(e); render(); } });
       return true;
     case "friendAdd": Friends.request({ uid: d.uid, name: d.name, avatar: d.avatar }).then(() => render()); return true;
     case "friendAccept": if (f) Friends.accept(f); return true;
@@ -389,6 +443,7 @@ function friendsAct(a, d) {
     case "friendCancel": if (f) Friends.remove(f, "Demande annulée"); return true;
     case "friendRemove": if (f) ask(`Retirer ${Friends.nameOf(f)} de tes amis ?`, "Retirer", true).then(ok => ok && Friends.remove(f, "Retiré de tes amis")); return true;
     case "challenge": if (f) { S.modal = null; Friends.challenge(f); } return true;
+    case "openFace": if (f) Friends.openFace(f); return true;
     case "linkDuel": S.modal = { k: "linkDuel" }; return true;
     case "linkAccept": if (S.modal && S.modal.inv) Friends.acceptLink(S.modal.key, S.modal.inv, !!d.duel); return true;
     case "inboxJoin": {
@@ -410,6 +465,14 @@ function friendsSubmit(f, fd) {
     const cc = DB.cur();
     if (!uids.length) { toast("Coche au moins un ami", "bad"); return true; }
     if (cc) Friends.invite(cc, uids).then(() => { S.modal = null; render(); });
+    return true;
+  }
+  if (k === "findUser") {
+    const q = Handle.norm(fd.get("q"));
+    if (!Handle.valid(q)) { toast("Un nom d'utilisateur fait 3 à 20 caractères : lettres, chiffres ou _", "bad"); return true; }
+    Object.assign(S.modal, { q, found: null, searching: true }); render();
+    Handle.find(q).then(r => { if (S.modal && S.modal.k === "addFriend") { Object.assign(S.modal, { found: r, searching: false }); render(); } })
+      .catch(e => { if (S.modal) S.modal.searching = false; toast(fbErr(e), "bad"); render(); });
     return true;
   }
   if (k === "linkDuel") {

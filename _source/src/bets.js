@@ -78,7 +78,7 @@ function betsTab(cc, a) {
   const list = groups[f];
   const seg = (k, l) => `<button class="seg ${f === k ? "on" : ""}" data-a="filter" data-v="${k}" aria-pressed="${f === k}">${l}<span class="count">${groups[k].length}</span></button>`;
   const empty = {
-    open: cc.circle.duo ? `<div class="empty"><p class="empty-big">Aucun défi en cours.</p><p>Lance un défi : même mise des deux côtés, le gagnant rafle tout.</p><button class="btn primary" data-a="newBet">${ICON.plus} Lancer un défi</button></div>`
+    open: cc.circle.duo ? `<div class="empty"><p class="empty-big">Aucun pari en cours.</p><p>Lance le premier de ce face-à-face : un match à venir, une question, plusieurs choix ou un duel à mise égale.</p><button class="btn primary" data-a="newBet">${ICON.plus} Créer un pari</button></div>`
       : `<div class="empty"><p class="empty-big">Aucun pari en cours.</p><p>Lance le premier : un match, une élection ou une question qui fera débat à la pause café.</p><button class="btn primary" data-a="newBet">${ICON.plus} Créer un pari</button></div>`,
     todo: `<div class="empty"><p class="empty-big">Rien à régler.</p><p>Les paris clôturés attendant un résultat apparaîtront ici.</p></div>`,
     done: `<div class="empty"><p class="empty-big">Pas encore de résultat.</p><p>Les paris terminés et tes gains s'afficheront ici.</p></div>`,
@@ -87,7 +87,7 @@ function betsTab(cc, a) {
     ${bonusCard(cc, a)}
     <div class="segs tabs-filter" role="group" aria-label="Filtrer les paris">${seg("open", "En cours")}${seg("todo", "À régler")}${seg("done", "Terminés")}</div>
     <div class="tickets">${list.length ? list.map(x => ticket(cc, a, x)).join("") : empty}</div>
-    ${f === "open" && !cc.circle.duo ? `<div class="sec-head strip-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}` : ""}
+    ${f === "open" ? `<div class="sec-head strip-head"><h2>Matchs à venir</h2><button class="btn small ghost" data-a="newBet">${ICON.plus} Autre pari</button></div>${matchStrip(cc)}` : ""}
   </section>`;
 }
 
@@ -149,6 +149,7 @@ function betView(cc, a) {
   if (b.kind === "duel" && open && b.duel) {
     if (isDuelTarget && !mine) duelPanel = `<div class="panel duel">
       <p><b>${esc(memberOf(cc, b.createdBy).name)}</b> te défie : ${nf(b.duel.stake)} jetons chacun, le gagnant rafle ${nf(b.duel.stake * 2)}.</p>
+      <p class="muted">Dans un duel, les camps sont fixés : en relevant le défi, tu paries le contraire.</p>
       <div class="row wrap"><button class="btn primary" data-a="duelAccept">Relever le défi</button><button class="btn ghost" data-a="duelDecline">Refuser</button></div></div>`;
     else if (b.createdBy === me && info.ws.length < 2) duelPanel = `<div class="panel duel"><p>En attente de la réponse de <b>${esc(memberOf(cc, b.duel.to).name)}</b>. Sans réponse avant la clôture, le duel est annulé.</p></div>`;
   }
@@ -292,9 +293,9 @@ function newBetModal(cc) {
       </fieldset>`}
       ${catSel}${close}`;
   }
-  return `<h2>${kind.e} ${duo ? "Nouveau défi" : kind.label}</h2>
+  return `<h2>${kind.e} ${kind.label}</h2>
     <form data-f="newBet" class="stack">${body}
-      <div class="row between"><button type="button" class="btn ghost" data-a="${duo ? "close" : "betKind"}" data-kind="">${duo ? "Annuler" : "Retour"}</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Lancer le défi" : "Publier le pari"}</button>`}</div>
+      <div class="row between"><button type="button" class="btn ghost" data-a="betKind" data-kind="">Retour</button>${m.kind === "duel" && !others.length ? "" : `<button class="btn primary">${m.kind === "duel" ? "Lancer le défi" : "Publier le pari"}</button>`}</div>
     </form>`;
 }
 
@@ -375,11 +376,11 @@ function betsAct(a, d) {
     case "claimDaily": claim("daily"); return true;
     case "claimRescue": claim("rescue"); return true;
     case "newBet":
-      S.modal = cc.circle.duo ? { k: "newBet", kind: "duel", draft: { closesAt: defaultClose(), cat: "potes", opts: ["", ""], stake: 100 } } : { k: "newBet" };
+      S.modal = { k: "newBet" };
       return true;
     case "betKind": {
       syncDraft();
-      if (!d.kind) { S.modal = cc.circle.duo ? null : { k: "newBet" }; return true; }
+      if (!d.kind) { S.modal = { k: "newBet" }; return true; }
       const draft = { closesAt: defaultClose(), cat: d.kind === "vote" ? "vote" : d.kind === "match" ? "foot" : d.kind === "duel" ? "potes" : "potes", opts: ["", ""] };
       if (d.kind === "vote") draft.opts = ["", "", ""];
       S.modal = { k: "newBet", kind: d.kind, draft };
