@@ -1,5 +1,9 @@
 # Journal des versions de Pronohub
 
+## 1.13.1 — 17 novembre 2026
+
+- L'icône de l'app installée se met à jour avec le nouveau logo (Android la remplace au prochain lancement, parfois après confirmation).
+
 ## 1.13.0 — 16 novembre 2026
 
 - Les sélections nationales arrivent : Ligue des nations, qualifications et phases finales de l'Euro et de la Coupe du monde, Coupe d'Afrique des nations et matchs amicaux.

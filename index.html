@@ -12,8 +12,8 @@
 <meta name="apple-mobile-web-app-title" content="Pronohub">
 <script>(function(){try{var k=(window.__PH_NS||'ph')+'.lang',l=JSON.parse(localStorage.getItem(k)||'null');if(!l)l=/^fr/i.test(navigator.language||'fr')?'fr':'en';if(l==='en')location.replace('en/'+location.search);}catch(e){}})();</script>
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
@@ -2154,7 +2154,7 @@ function accountSubmit(f, fd) {
 /* ===== settings.js ===== */
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 
-const APP_VERSION = "1.13.0";
+const APP_VERSION = "1.13.1";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },

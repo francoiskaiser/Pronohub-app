@@ -1,7 +1,7 @@
 /* Pronohub — réglages, thème, langue, sauvegarde, retours, mentions légales */
 "use strict";
 
-const APP_VERSION = "1.13.0";
+const APP_VERSION = "1.13.1";
 
 const Prefs = {
   get() { return Object.assign({ theme: "auto" }, Store.get("prefs", {})); },

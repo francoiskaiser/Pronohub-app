@@ -1,9 +1,9 @@
 /* Pronohub — service worker : fonctionnement hors ligne et mises à jour.
    Incrémenter VERSION à chaque publication, sinon les joueurs gardent l'ancienne version. */
-const VERSION = "pronohub-v21";
+const VERSION = "pronohub-v22";
 const CORE = [
   "./", "index.html", "en/", "en/index.html", "manifest.webmanifest",
-  "icon-192.png", "icon-512.png", "icon-maskable.png", "apple-touch-icon.png", "firebase-config.js",
+  "icon-192.png?v=2", "icon-512.png?v=2", "icon-maskable.png?v=2", "apple-touch-icon.png?v=2", "firebase-config.js",
 ];
 
 self.addEventListener("install", e => {

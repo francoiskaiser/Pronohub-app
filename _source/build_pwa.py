@@ -74,8 +74,8 @@ def page(lang, js, base, demo=False):
     cfg = '<script>var FIREBASE_CONFIG = {apiKey:""};</script>' if demo else f'<script src="{base}firebase-config.js"></script>'
     redirect = "" if demo else f"<script>{redirect_script(lang)}</script>"
     links = "" if demo else f'''<link rel="manifest" href="{base}manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="{base}icon-192.png">
-<link rel="apple-touch-icon" href="{base}apple-touch-icon.png">'''
+<link rel="icon" type="image/png" sizes="192x192" href="{base}icon-192.png?v=2">
+<link rel="apple-touch-icon" href="{base}apple-touch-icon.png?v=2">'''
     js = js.replace("</script", "<\\/script")
     return f'''<!doctype html>
 <html lang="{lang}">
